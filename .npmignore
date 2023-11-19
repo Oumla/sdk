@@ -1,0 +1,10 @@
+src/
+.git/
+.github/
+node_modules/
+npm-shrinkwrap.json
+src/playground.ts
+# misc
+.gitignore
+tslint.json
+npm-debug.log

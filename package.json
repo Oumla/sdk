@@ -1,0 +1,30 @@
+{
+  "name": "@oumla/sdk",
+  "version": "0.0.1",
+  "description": "simple SDK",
+  "private": false,
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "lint": "tsc",
+    "test": "vitest run",
+    "dev": "vitest",
+    "ci": "pnpm run lint && pnpm run test && pnpm run build",
+    "release": "pnpm run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.26.1",
+    "@types/node": "^18.14.0",
+    "@types/superagent": "^4.1.18",
+    "superagent": "^8.0.9",
+    "tsup": "^6.7.0",
+    "typescript": "5.0.4",
+    "vitest": "^0.31.0",
+    "zod": "^3.21.4"
+  },
+  "keywords": [],
+  "author": "Mohammed aljasser",
+  "license": "MIT"
+}
