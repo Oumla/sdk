@@ -12,3 +12,5 @@ const wallet = client.generateWallet({
     network: 'BTC',
 });
 ```
+
+### for more information please visit our [docs](https://docs.oumla.com)
