@@ -354,7 +354,7 @@ export class Oumla extends Base {
     ): Promise<Types.TTransferResponse> {
         return await this.httpRequest({
             method: 'POST',
-            path: '/api/v1/withdraw',
+            path: '/api/v1/withdraw/address',
             body: args,
             schema: CreateTransactionSchema,
         });
