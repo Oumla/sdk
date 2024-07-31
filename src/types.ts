@@ -116,34 +116,16 @@ export type VolumeByDay = {
 };
 
 export type TGetWalletsResponse = {
-    wallets: {
-        type: z.infer<typeof schemas.ProfileTypeSchema>;
-        date: Date;
-        reference: string;
-        organizationId: string;
-        WalletCoinType: z.infer<typeof schemas.NetworkSchema>;
-        currentDeepIndex: number;
-        index: number;
-        label: string | null;
-        profile: {
-            createdAt: Date;
-            updated_at: Date;
-            isActive: boolean;
-            reference: string;
-            userIndex: number;
-            currentIndex: number;
-            organizationId: string;
-            bitcoin_balance: {
-                id: string;
-                balance: number;
-                organizationId: string;
-                reference: string;
-                createdAt: Date;
-                updatedAt: Date;
-            };
-        };
-    }[];
-} & TPagination;
+    createdAt: Date;
+    updated_at: Date;
+    isActive: boolean;
+    isVerified: boolean;
+    reference: string;
+    currentIndex: number;
+    type: ProfileType;
+    label: string | null;
+    miniWallets: MiniWallet[];
+}[];
 
 export type Wallet = {
     id: string;
@@ -163,20 +145,21 @@ export type TGetProfileWalletsResponse = {
 };
 
 export type TGenerateAddressResponse = {
-    address?: string;
+    data: string;
     message: string;
+    success: boolean;
+    status: number;
 };
 
 export type TGetAddressesResponse = {
-    addresses: {
-        id: string;
-        date: Date;
-        address: string;
-        label: string | null;
-        network: z.infer<typeof schemas.NetworkSchema>;
-        balance: number;
-    }[];
-} & TPagination;
+    address: string;
+    date: Date;
+    label: string | null;
+    sub: string;
+    network: Network;
+    balance: number;
+    reference: string;
+}[];
 
 export type TGetOrganizationResponse = {
     id: string;
@@ -184,33 +167,30 @@ export type TGetOrganizationResponse = {
     email: string;
 };
 
+export type TGetOumlaResponse<T> = {
+    data: T;
+    success: boolean;
+    status: number;
+    pagination: TPagination;
+};
+
 export type TCreateProfileResponse = {
     message: string;
-    profile: { reference: string; type: string };
+    data: { reference: string; type: string };
+    success: boolean;
+    status: number;
 };
 
 export type TGetProfilesResponse = {
-    profiles: {
-        organizationId: string;
-        reference: string;
-        type: z.infer<typeof schemas.ProfileTypeSchema>;
-        createdAt: Date;
-        updated_at: Date;
-        label: string | null;
-        bitcoin_balance: {
-            balance: number;
-        } | null;
-        miniWallets: {
-            date: Date;
-            organizationId: string;
-            reference: string;
-            type: z.infer<typeof schemas.ProfileTypeSchema>;
-            WalletCoinType: z.infer<typeof schemas.NetworkSchema>;
-            currentDeepIndex: number;
-            index: number;
-        }[];
-    }[];
-} & TPagination;
+    createdAt: Date;
+    updated_at: Date;
+    organizationId: string;
+    type: ProfileType;
+    label: string | null;
+    reference: string;
+    miniWallets: MiniWallet[];
+    addressesCount: number;
+}[];
 
 export type TGetVolumeResponse = {
     createdAt: Date;
@@ -239,8 +219,7 @@ export type TGetTransactionsResponse = {
     addressFrom: string | null;
     isSpent: boolean;
     isMempool: boolean;
-}[] &
-    TPagination;
+}[];
 
 export type TTransferResponse = {
     id: string;
@@ -248,16 +227,10 @@ export type TTransferResponse = {
 };
 
 export type TGenerateWalletResponse = {
-    id: string;
-    date: Date;
-    organizationId: string;
     reference: string;
-    index: number;
-    currentDeepIndex: number;
-    type: z.infer<typeof schemas.ProfileTypeSchema>;
-    WalletCoinType: z.infer<typeof schemas.NetworkSchema>;
-    createdAt: Date;
-    updatedAt: Date;
+    network: Network;
+    type: ProfileType;
+    date: Date;
 };
 // Wallets
 export type TGenerateWalletArgs = z.infer<typeof schemas.GenerateWalletSchema>;

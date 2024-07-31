@@ -47,6 +47,7 @@ export const GetTransactionsSchema = z
 export const GenerateAddressSchema = z.object({
     network: NetworkSchema,
     reference: z.string(),
+    clientShare: z.string(),
 });
 
 export const GetAddressesSchema = z.object({
@@ -87,6 +88,7 @@ export const CreateTransactionSchema = z.object({
     amount: z.number(),
     from: z.array(z.string()),
     network: NetworkSchema,
+    clientShare: z.string(),
 });
 
 export const GetOrganizationSchema = z.object({
