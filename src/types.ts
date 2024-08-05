@@ -13,6 +13,7 @@ export type THttpRequestArgs = {
     body?: Record<string, unknown>;
     schema?: z.Schema<unknown>;
     pagination?: TPagination;
+    headers?: Record<string, string>;  // Add this line
 };
 
 export type TPagination = {

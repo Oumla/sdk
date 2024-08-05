@@ -34,10 +34,8 @@ export class Oumla extends Base {
         await this.checkForUpdates();
     }
 
-    protected getHeaders(): Record<string, string> {
+    protected getCustomHeaders(): Record<string, string> {
         return {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.apiKey}`,
             'X-SDK-Version': Oumla.CURRENT_VERSION,
         };
     }
@@ -65,15 +63,11 @@ export class Oumla extends Base {
         }
     }
 
-    public async manualUpdateCheck() {
-        await this.checkForUpdates();
-    }
-
     public wallets = {
         generate: async (
             args: Types.TGenerateWalletArgs
         ): Promise<Types.TGetOumlaResponse<Types.TGenerateWalletResponse>> => {
-            await this.checkForUpdates();
+            
             return this.httpRequest({
                 path: '/api/v1/wallets/generate',
                 method: 'POST',
@@ -100,7 +94,7 @@ export class Oumla extends Base {
         generate: async (
             args: Types.TGenerateAddressArgs
         ): Promise<Types.TGenerateAddressResponse> => {
-            await this.checkForUpdates();
+            
             return this.httpRequest({
                 path: '/api/v1/address/generate',
                 method: 'POST',
@@ -127,7 +121,7 @@ export class Oumla extends Base {
         create: async (
             args: Types.TCreateProfileArgs
         ): Promise<Types.TCreateProfileResponse> => {
-            await this.checkForUpdates();
+            
             return this.httpRequest({
                 path: '/api/v1/profiles',
                 method: 'POST',
@@ -177,7 +171,7 @@ export class Oumla extends Base {
         create: async (
             args: Types.TCreateTransactionArgs
         ): Promise<Types.TTransferResponse> => {
-            await this.checkForUpdates();
+            
             return this.httpRequest({
                 path: '/api/v1/withdraw/address',
                 method: 'POST',
