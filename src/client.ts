@@ -14,6 +14,10 @@ export type OumlaOptions = {
 };
 
 export class Oumla extends Base {
+    private static readonly CURRENT_VERSION = '1.0.0'; // Update this with each release
+    private lastUpdateCheck: number = 0;
+    private readonly UPDATE_CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour
+
     constructor(opts: OumlaOptions) {
         super({
             apiKey: opts.apiKey,
@@ -23,21 +27,54 @@ export class Oumla extends Base {
         this.apiKey = opts.apiKey;
         this.baseUrl = opts.baseUrl || 'https://api.oumla.com';
         this.env = opts.env || 'testnet';
+        this.initialize();
+    }
+
+    private async initialize() {
+        await this.checkForUpdates();
     }
 
     protected getHeaders(): Record<string, string> {
         return {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${this.apiKey}`,
+            'X-SDK-Version': Oumla.CURRENT_VERSION,
         };
+    }
+
+    private async checkForUpdates() {
+        const now = Date.now();
+        if (now - this.lastUpdateCheck < this.UPDATE_CHECK_INTERVAL) {
+            return; // Skip if checked recently
+        }
+
+        try {
+            const response = await this.httpRequest<{ latestVersion: string }>({
+                path: '/api/v1/sdk-version',
+                method: 'GET',
+            });
+
+            if (response.latestVersion !== Oumla.CURRENT_VERSION) {
+                console.log(
+                    `A new version (${response.latestVersion}) of the Oumla SDK is available. Please update.`
+                );
+            }
+            this.lastUpdateCheck = now;
+        } catch (error) {
+            console.error('Failed to check for updates:', error);
+        }
+    }
+
+    public async manualUpdateCheck() {
+        await this.checkForUpdates();
     }
 
     public wallets = {
         generate: async (
             args: Types.TGenerateWalletArgs
         ): Promise<Types.TGetOumlaResponse<Types.TGenerateWalletResponse>> => {
+            await this.checkForUpdates();
             return this.httpRequest({
-                // 'POST', '/api/v1/wallets/generate', args
                 path: '/api/v1/wallets/generate',
                 method: 'POST',
                 body: args,
@@ -63,6 +100,7 @@ export class Oumla extends Base {
         generate: async (
             args: Types.TGenerateAddressArgs
         ): Promise<Types.TGenerateAddressResponse> => {
+            await this.checkForUpdates();
             return this.httpRequest({
                 path: '/api/v1/address/generate',
                 method: 'POST',
@@ -89,6 +127,7 @@ export class Oumla extends Base {
         create: async (
             args: Types.TCreateProfileArgs
         ): Promise<Types.TCreateProfileResponse> => {
+            await this.checkForUpdates();
             return this.httpRequest({
                 path: '/api/v1/profiles',
                 method: 'POST',
@@ -108,19 +147,25 @@ export class Oumla extends Base {
     };
 
     public organization = {
-        get: async (): Promise<Types.TGetOumlaResponse<Types.TGetOrganizationResponse>> => {
+        get: async (): Promise<
+            Types.TGetOumlaResponse<Types.TGetOrganizationResponse>
+        > => {
             return this.httpRequest({
                 path: '/api/v1/organizations',
                 method: 'GET',
             });
         },
-        volume: async (): Promise<Types.TGetOumlaResponse<Types.TGetVolumeResponse>> => {
+        volume: async (): Promise<
+            Types.TGetOumlaResponse<Types.TGetVolumeResponse>
+        > => {
             return this.httpRequest({
                 path: '/api/v1/statistics/organization/volume',
                 method: 'GET',
             });
         },
-        insights: async (): Promise<Types.TGetOumlaResponse<Types.TGetInsightsResponse>> => {
+        insights: async (): Promise<
+            Types.TGetOumlaResponse<Types.TGetInsightsResponse>
+        > => {
             return this.httpRequest({
                 path: '/api/v1/statistics/organization/insights',
                 method: 'GET',
@@ -132,6 +177,7 @@ export class Oumla extends Base {
         create: async (
             args: Types.TCreateTransactionArgs
         ): Promise<Types.TTransferResponse> => {
+            await this.checkForUpdates();
             return this.httpRequest({
                 path: '/api/v1/withdraw/address',
                 method: 'POST',
