@@ -36,7 +36,7 @@ export class Oumla extends Base {
 
     protected getCustomHeaders(): Record<string, string> {
         return {
-            'X-SDK-Version': Oumla.CURRENT_VERSION,
+            'x-sdk-version': Oumla.CURRENT_VERSION,
         };
     }
 
