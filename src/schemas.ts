@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ProfileType } from './types';
 
-export const NetworkSchema = z.enum(['BTC', 'ETH']);
+export const NetworkSchema = z.enum(['BTC', 'ETH', 'tBTC', 'tETH']);
 
 export const ProfileTypeSchema = z.enum(['User', 'Department', 'Merchant']);
 
