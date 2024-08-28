@@ -1,6 +1,6 @@
 {
   "name": "@oumla/sdk",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Oumla SDK is the fastest way to integrate with blockchain networks",
   "private": false,
   "main": "dist/index.js",
@@ -17,8 +17,6 @@
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
     "@types/node": "^18.14.0",
-    "@types/superagent": "^4.1.18",
-    "superagent": "^8.1.2",
     "tsup": "^6.7.0",
     "typescript": "5.0.4",
     "vitest": "^1.1.3",

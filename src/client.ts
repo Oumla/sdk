@@ -6,357 +6,196 @@ import {
     CreateProfileSchema,
     CreateTransactionSchema,
 } from './schemas';
-import { TGetWallets } from './types';
 
-/**
- * Oumla SDK
- * @param apiKey - Your API key
- * @param baseUrl - The base URL of the API
- * @param env - The environment of the API
- * @example
- * ```ts
- *
- * const client = new Oumla({
- *  apiKey: 'YOUR_API_KEY',
- *  baseUrl: 'https://sandbox.oumla.com',
- *  env: 'testnet',
- * })
- * ```
- */
+export type OumlaOptions = {
+    apiKey: string;
+    baseUrl?: string;
+    env?: 'testnet' | 'mainnet';
+};
+
 export class Oumla extends Base {
-    constructor(configs: Types.TBaseConfigs) {
-        super(configs);
-    }
+    private static readonly CURRENT_VERSION = '1.0.0'; // Update this with each release
+    private lastUpdateCheck: number = 0;
+    private readonly UPDATE_CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour
 
-    /**
-     *
-     * Generate a wallet for a profile
-     *
-     * @param {string} args.reference - The reference of the profile
-     * @param {string} args.network - The network to generate a wallet for
-     *
-     * @example
-     * ``` ts
-     *
-     * const wallet = await client.generateWallet({
-     * reference: 'PROFILE_REFERENCE',
-     * network: 'BTC',
-     * });
-     *
-     * ```
-     *
-     * @returns {Types.TGenerateWalletResponse} - The generated wallet or an error
-     *
-     */
-    async generateWallet(
-        args: Types.TGenerateWalletArgs
-    ): Promise<Types.TGenerateWalletResponse> {
-        return await this.httpRequest({
-            method: 'POST',
-            path: '/api/v1/wallets/generate',
-            body: args,
-            schema: GenerateWalletSchema,
+    constructor(opts: OumlaOptions) {
+        super({
+            apiKey: opts.apiKey,
+            baseUrl: opts.baseUrl,
+            env: opts.env,
         });
+        this.apiKey = opts.apiKey;
+        this.baseUrl = opts.baseUrl || 'https://api.oumla.com';
+        this.env = opts.env || 'testnet';
+        this.initialize();
     }
 
-    /**
-     *
-     * Get wallets for an organization
-     *
-     * @param {string} args.reference - The reference of the profile
-     * @param {Types.TPagination} [pagination] - Pagination options
-     *
-     * @example
-     * ``` ts
-     *
-     * const wallets = await client.getWallets({
-     * skip: 0,
-     * take: 3,
-     * });
-     *
-     * ```
-     *
-     * @returns {Types.TGetWalletsResponse} - The wallets for the organization
-     *
-     */
-    async getWallets(
-        args?: Types.TGetWallets,
-        pagination?: Types.TPagination
-    ): Promise<Types.TGetWalletsResponse> {
-        if (args?.reference) {
-            return await this.httpRequest({
-                path: `/api/v1/wallets/profile/${args.reference}`,
-                pagination,
+    private async initialize() {
+        await this.checkForUpdates();
+    }
+
+    protected getCustomHeaders(): Record<string, string> {
+        return {
+            'x-sdk-version': Oumla.CURRENT_VERSION,
+        };
+    }
+
+    private async checkForUpdates() {
+        const now = Date.now();
+        if (now - this.lastUpdateCheck < this.UPDATE_CHECK_INTERVAL) {
+            return; // Skip if checked recently
+        }
+
+        try {
+            const response = await this.httpRequest<{ latestVersion: string }>({
+                path: '/api/v1/sdk-version',
+                method: 'GET',
             });
-        } else {
-            return await this.httpRequest({
-                path: '/api/v1/wallets/organization',
-                pagination,
-            });
+
+            if (response.latestVersion !== Oumla.CURRENT_VERSION) {
+                console.log(
+                    `A new version (${response.latestVersion}) of the Oumla SDK is available. Please update.`
+                );
+            }
+            this.lastUpdateCheck = now;
+        } catch (error) {
+            console.error('Failed to check for updates:', error);
         }
     }
 
-    /**
-     *
-     * Generate an address for a profile
-     *
-     * @param {string} args.reference - The reference of the profile
-     * @param {string} args.network - The network to generate an address for
-     *
-     * @example
-     * ``` ts
-     *
-     * const address = await client.generateAddress({
-     * reference: 'PROFILE_REFERENCE',
-     * network: 'BTC',
-     * });
-     *
-     * ```
-     *
-     * @returns {Types.TGenerateAddressResponse} - The generated address
-     */
-    async generateAddress(
-        args: Types.TGenerateAddressArgs
-    ): Promise<Types.TGenerateAddressResponse> {
-        return await this.httpRequest({
-            method: 'POST',
-            path: '/api/v1/address/generate',
-            body: args,
-            schema: GenerateAddressSchema,
-        });
-    }
-
-    /**
-     *
-     * Get addresses
-     *
-     * @param {string} args.reference - The reference of the profile, Optional
-     * @param {Types.TPagination} [pagination] - Pagination options
-     * @example
-     * ``` ts
-     *
-     * const addresses = await client.getAddresses({
-     * reference: 'PROFILE_REFERENCE',
-     * },
-     *  {
-     * skip: 0,
-     * take: 3,
-     * }
-     * );
-     *
-     * ```
-     *
-     * @returns {Types.TGetProfileAddressesResponse} - The addresses for the profile
-     */
-    async getAddresses(
-        args?: Types.TGetAddresses,
-        pagination?: Types.TPagination
-    ): Promise<Types.TGetAddressesResponse> {
-        if (args?.reference) {
-            return await this.httpRequest({
-                path: `/api/v1/addresses/${args.reference}`,
+    public wallets = {
+        generate: async (
+            args: Types.TGenerateWalletArgs
+        ): Promise<Types.TGetOumlaResponse<Types.TGenerateWalletResponse>> => {
+            
+            return this.httpRequest({
+                path: '/api/v1/wallets/generate',
+                method: 'POST',
+                body: args,
+                schema: GenerateWalletSchema,
+            });
+        },
+        get: async (
+            args?: Types.TGetWallets,
+            pagination?: Types.TPagination
+        ): Promise<Types.TGetOumlaResponse<Types.TGetWalletsResponse>> => {
+            const path = args?.reference
+                ? `/api/v1/wallets/profile/${args.reference}`
+                : '/api/v1/wallets/organization';
+            return this.httpRequest({
+                path,
+                method: 'GET',
                 pagination,
             });
-        } else {
-            return await this.httpRequest({
-                path: '/api/v1/addresses/organization',
+        },
+    };
+
+    public addresses = {
+        generate: async (
+            args: Types.TGenerateAddressArgs
+        ): Promise<Types.TGenerateAddressResponse> => {
+            
+            return this.httpRequest({
+                path: '/api/v1/address/generate',
+                method: 'POST',
+                body: args,
+                schema: GenerateAddressSchema,
+            });
+        },
+        get: async (
+            args?: Types.TGetAddresses,
+            pagination?: Types.TPagination
+        ): Promise<Types.TGetOumlaResponse<Types.TGetAddressesResponse>> => {
+            const path = args?.reference
+                ? `/api/v1/addresses/${args.reference}`
+                : '/api/v1/addresses/organization';
+            return this.httpRequest({
+                path,
+                method: 'GET',
                 pagination,
             });
-        }
-    }
+        },
+    };
 
-    /**
-     *
-     * Get the organization's information
-     *
-     * @example
-     * ``` ts
-     *
-     * const organization = await client.getOrganization();
-     *
-     * ```
-     *
-     * @returns {Types.TGetOrganizationResponse} - The organization's information
-     */
-    async getOrganization(): Promise<Types.TGetOrganizationResponse> {
-        return await this.httpRequest({
-            path: '/api/v1/organizations',
-        });
-    }
-
-    /**
-     *
-     * Create a profile
-     *
-     * @param {string} args.reference - The reference of the profile
-     * @param {Types.TCreateProfileArgs['type']} args.type - The type of the profile
-     *
-     * @example
-     * ``` ts
-     *
-     * const profile = await client.createProfile({
-     * reference: 'PROFILE_REFERENCE',
-     * type: 'User',
-     * });
-     *
-     * ```
-     *
-     * @returns {Types.TCreateProfileResponse} - The created profile
-     */
-    async createProfile(
-        args: Types.TCreateProfileArgs
-    ): Promise<Types.TCreateProfileResponse> {
-        return await this.httpRequest({
-            method: 'POST',
-            path: '/api/v1/profiles',
-            body: args,
-            schema: CreateProfileSchema,
-        });
-    }
-
-    /**
-     *
-     *  Get the profiles for an organization
-     *
-     * @param {Types.TPagination} [pagination] - Pagination options
-     *
-     * @example
-     * ``` ts
-     *
-     * const profiles = await client.getProfiles({
-     * skip: 0,
-     * take: 3,
-     * });
-     *
-     * ```
-     *
-     * @returns {Types.TGetProfilesResponse} - The profiles for the organization
-     */
-    async getProfiles(
-        pagination?: Types.TPagination
-    ): Promise<Types.TGetProfilesResponse> {
-        return await this.httpRequest({
-            path: '/api/v1/profiles',
-            pagination,
-        });
-    }
-
-    /**
-     *
-     * Get the volume for an organization
-     *
-     * @example
-     * ``` ts
-     *
-     * const volume = await client.getVolume();
-     *
-     * ```
-     *
-     * @returns {Types.TGetVolumeResponse} - The volume of the organization
-     */
-    async getVolume(): Promise<Types.TGetVolumeResponse> {
-        return await this.httpRequest({
-            path: '/api/v1/statistics/organization/volume',
-        });
-    }
-
-    /**
-     *
-     * Get the insights for an organization
-     *
-     * @example
-     * ``` ts
-     *
-     * const insights = await client.getInsights();
-     *
-     * ```
-     *
-     * @returns {Types.TGetInsightsResponse} - The insights of the organization
-     */
-    async getInsights(): Promise<Types.TGetInsightsResponse> {
-        return await this.httpRequest({
-            path: '/api/v1/statistics/organization/insights',
-        });
-    }
-
-    /**
-     *
-     * Get the all the transactions or transactions for an address, wallet or reference
-     *
-     * By providing more than one option, only one will be used.
-     *
-     * @param {string} [args.address] - The address to get transactions for
-     * @param {string} [args.wallet] - The wallet to get transactions for
-     * @param {string} [args.reference] - The reference to get transactions for
-     * @param {Types.TPagination} [pagination] - Pagination options
-     *
-     * @example
-     * ``` ts
-     *
-     * const transactionsByAddress = await client.getTransactions({
-     * address: 'ADDRESS',
-     * });
-     *
-     * ```
-     *
-     * @returns {Types.TGetTransactionsResponse} - The transactions
-     *
-     */
-    async getTransactions(
-        args?: Types.TGetTransactionsArgs,
-        pagination?: Types.TPagination
-    ): Promise<Types.TGetTransactionsResponse> {
-        if (args?.address) {
-            return await this.httpRequest({
-                path: `/api/v1/transactions/address/${args.address}`,
+    public profiles = {
+        create: async (
+            args: Types.TCreateProfileArgs
+        ): Promise<Types.TCreateProfileResponse> => {
+            
+            return this.httpRequest({
+                path: '/api/v1/profiles',
+                method: 'POST',
+                body: args,
+                schema: CreateProfileSchema,
+            });
+        },
+        get: async (
+            pagination?: Types.TPagination
+        ): Promise<Types.TGetOumlaResponse<Types.TGetProfilesResponse>> => {
+            return this.httpRequest({
+                path: '/api/v1/profiles',
+                method: 'GET',
                 pagination,
             });
-        } else if (args?.wallet) {
-            return await this.httpRequest({
-                path: `/api/v1/transactions/wallet/${args.wallet}`,
-                pagination,
-            });
-        } else if (args?.reference) {
-            return await this.httpRequest({
-                path: `/api/v1/transactions/profile/${args.reference}`,
-                pagination,
-            });
-        } else {
-            return await this.httpRequest({
-                path: '/api/v1/transactions/organization',
-                pagination,
-            });
-        }
-    }
+        },
+    };
 
-    /**
-     * create transaction
-     *
-     * @param  args.from - the address or addresses to transfer from
-     * @param  args.to - The desired address to transfer to
-     * @param  args.amount - The amount to transfer
-     *
-     * @example
-     *
-     * ``` ts
-     *
-     * const transfer = await client.transfer({
-     * from: '0x...',
-     * to: '0x...',
-     * reference: '0x...',
-     * amount: 100,
-     * });
-     *
-     * ```
-     */
-    async createTransaction(
-        args: Types.TCreateTransactionArgs
-    ): Promise<Types.TTransferResponse> {
-        return await this.httpRequest({
-            method: 'POST',
-            path: '/api/v1/withdraw/address',
-            body: args,
-            schema: CreateTransactionSchema,
-        });
-    }
+    public organization = {
+        get: async (): Promise<
+            Types.TGetOumlaResponse<Types.TGetOrganizationResponse>
+        > => {
+            return this.httpRequest({
+                path: '/api/v1/organizations',
+                method: 'GET',
+            });
+        },
+        volume: async (): Promise<
+            Types.TGetOumlaResponse<Types.TGetVolumeResponse>
+        > => {
+            return this.httpRequest({
+                path: '/api/v1/statistics/organization/volume',
+                method: 'GET',
+            });
+        },
+        insights: async (): Promise<
+            Types.TGetOumlaResponse<Types.TGetInsightsResponse>
+        > => {
+            return this.httpRequest({
+                path: '/api/v1/statistics/organization/insights',
+                method: 'GET',
+            });
+        },
+    };
+
+    public transactions = {
+        create: async (
+            args: Types.TCreateTransactionArgs
+        ): Promise<Types.TTransferResponse> => {
+            
+            return this.httpRequest({
+                path: '/api/v1/withdraw/address',
+                method: 'POST',
+                body: args,
+                schema: CreateTransactionSchema,
+            });
+        },
+        get: async (
+            args?: Types.TGetTransactionsArgs,
+            pagination?: Types.TPagination
+        ): Promise<Types.TGetOumlaResponse<Types.TGetTransactionsResponse>> => {
+            let path = '/api/v1/transactions/organization';
+            if (args?.address) {
+                path = `/api/v1/transactions/address/${args.address}`;
+            } else if (args?.wallet) {
+                path = `/api/v1/transactions/wallet/${args.wallet}`;
+            } else if (args?.reference) {
+                path = `/api/v1/transactions/profile/${args.reference}`;
+            }
+            return this.httpRequest({
+                path,
+                method: 'GET',
+                pagination,
+            });
+        },
+    };
 }

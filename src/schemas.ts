@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ProfileType } from './types';
 
-export const NetworkSchema = z.enum(['BTC', 'ETH']);
+export const NetworkSchema = z.enum(['BTC', 'ETH', 'tBTC', 'tETH']);
 
 export const ProfileTypeSchema = z.enum(['User', 'Department', 'Merchant']);
 
@@ -47,6 +47,7 @@ export const GetTransactionsSchema = z
 export const GenerateAddressSchema = z.object({
     network: NetworkSchema,
     reference: z.string(),
+    clientShare: z.string(),
 });
 
 export const GetAddressesSchema = z.object({
@@ -87,6 +88,7 @@ export const CreateTransactionSchema = z.object({
     amount: z.number(),
     from: z.array(z.string()),
     network: NetworkSchema,
+    clientShare: z.string(),
 });
 
 export const GetOrganizationSchema = z.object({

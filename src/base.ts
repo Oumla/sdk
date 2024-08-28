@@ -13,32 +13,35 @@ export abstract class Base {
         this.env = configs.env || 'testnet';
     }
 
-    /**
-     *
-     * A generic method to make requests to the Oumla API.
-     * Keep it simple for now, could be enhanced later.
-     *
-     */
+    // Add this method to get custom headers
+    protected getCustomHeaders(): Record<string, string> {
+        return {};
+    }
+
     protected async httpRequest<T>(args: THttpRequestArgs): Promise<T> {
         if (args.body && args.schema) {
             this.parseInput(args.body, args.schema);
         }
 
-        // Should be page/limit & Every pagination should also return totals
         const paginationOpts = args.pagination
-            ? `?skip=${args.pagination.skip || 0}&take=${
-                  args.pagination.take || 10
-              }`
+            ? `?skip=${args.pagination.skip || 0}&take=${args.pagination.take || 10}`
             : '';
         const URL = `${this.baseUrl}${args.path}${paginationOpts}`;
+
+        // Merge default headers with custom headers
+        const headers = {
+            'x-api-key': `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
+            ...this.getCustomHeaders(),  // Include custom headers
+            ...args.headers  // Allow overriding headers for specific requests if needed
+        };
+
         const config = {
-            headers: {
-                'x-api-key': `Bearer ${this.apiKey}`,
-                'Content-Type': 'application/json',
-            },
-            method: args.method || undefined, // GET is the default in fetch
+            headers,
+            method: args.method || 'GET',
             body: args.body ? JSON.stringify(args.body) : undefined,
         };
+
         const res = await fetch(URL, config);
 
         if (!res.ok) {
@@ -47,7 +50,6 @@ export abstract class Base {
                 throw new HttpError(errorResponse);
             }
 
-            // Either returned from the gateway of a 404 error (404 route does .send() instead of .json())
             const errorResponse: THttpError = {
                 message: await res.text(),
                 status: res.status,
