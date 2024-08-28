@@ -7,9 +7,9 @@ an example on how to create a wallet
 ```ts
 import { Oumla } from '@oumla/sdk';
 
-const wallet = client.generateWallet({
+const wallet = client.wallets.generate({
     reference: '0d2fcf49-36ce-4160-bbea-ead3887e1b26',
-    network: 'BTC',
+    network: 'ETH',
 });
 ```
 
