@@ -1,6 +1,6 @@
 {
   "name": "@oumla/sdk",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Oumla SDK is the fastest way to integrate with blockchain networks",
   "private": false,
   "main": "dist/index.js",
