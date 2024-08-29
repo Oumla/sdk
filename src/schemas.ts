@@ -85,7 +85,7 @@ export const GetInsightsSchema = z.object({
 
 export const CreateTransactionSchema = z.object({
     to: z.string(),
-    amount: z.number(),
+    amount: z.string(),
     from: z.array(z.string()),
     network: NetworkSchema,
     clientShare: z.string(),
