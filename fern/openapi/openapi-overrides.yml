@@ -1,0 +1,7 @@
+# fern/openapi/overrides.yml
+x-fern-overrides:
+  openapi:
+    paths:
+      /contract-templates/{templateId}/constructor:
+        get:
+          x-fern-ignore: true
