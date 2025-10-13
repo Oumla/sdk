@@ -1,0 +1,63 @@
+{
+  "name": "@oumla/sdk",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Official TypeScript SDK for Oumla - Blockchain integration made simple",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm run build",
+    "test": "echo \"No tests specified\" && exit 0",
+    "lint": "echo \"No linting specified\" && exit 0"
+  },
+  "keywords": [
+    "oumla",
+    "sdk",
+    "typescript",
+    "blockchain",
+    "api",
+    "client",
+    "crypto",
+    "web3",
+    "ethereum",
+    "smart-contracts",
+    "tokenization"
+  ],
+  "author": "Mohammed aljasser",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oumla/sdk.git",
+    "directory": "sdks/typescript"
+  },
+  "bugs": {
+    "url": "https://github.com/oumla/sdk/issues"
+  },
+  "homepage": "https://docs.oumla.com",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^6.7.0",
+    "typescript": "5.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
