@@ -91,6 +91,7 @@ async function createAddress(profileReference: string, network: 'tBTC' | 'tETH' 
     const address = await client.addresses.generateAddress({
       reference: profileReference,
       network,
+      clientShare: '1234567890'
     });
     console.log('Created address:', address);
     return address;
@@ -125,13 +126,18 @@ async function getCollections(): Promise<PaginatedResponse> {
 }
 
 // Example: Create a collection
-async function createCollection(addressId: string, clientShare: string, contractId: string, displayName?: string): Promise<SuccessResponse> {
+async function createCollection(addressId: string, clientShare: string, displayName?: string): Promise<SuccessResponse> {
   try {
     const collection = await client.tokenization.createCollection({
+      type: 'NON_FUNGIBLE_TOKEN',
       addressId,
       clientShare,
       createParams: {
-        contractId,
+        initializeParams: [{
+          name: 'name',
+          type: 'type',
+          value: 'value'
+        }]
       },
       displayName,
     });
@@ -150,8 +156,15 @@ async function readContractFunction(network: string, contractAddress: string, fu
       network,
       contractAddress,
       {
-        functionName,
-        parameters,
+        abiFunction: {
+          name: functionName,
+          inputs: parameters.map((param, index) => ({
+            name: `param${index}`,
+            type: 'string'
+          })),
+          outputs: [],
+          type: 'function'
+        }
       }
     );
     console.log('Contract read result:', result);
@@ -169,10 +182,18 @@ async function writeContractFunction(network: string, contractAddress: string, f
       network,
       contractAddress,
       {
-        functionName,
-        parameters,
         addressId,
-        value,
+        clientShare: 'your-client-share', // Required for write operations
+        abiFunction: {
+          name: functionName,
+          inputs: parameters.map((param, index) => ({
+            name: `param${index}`,
+            type: 'string'
+          })),
+          outputs: [],
+          type: 'function'
+        },
+        amount: value,
       }
     );
     console.log('Contract write result:', result);
@@ -190,10 +211,10 @@ async function completeSetup(): Promise<{ profile: SuccessResponse; wallet: Succ
     const profile = await createProfile('my-org-reference', 'User');
     
     // 2. Create a wallet for the profile
-    const wallet = await createWallet('my-org-reference', 'ETH');
+    const wallet = await createWallet('my-org-reference', 'tETH');
     
     // 3. Create an address for the profile
-    const address = await createAddress('my-org-reference', 'ETH');
+    const address = await createAddress('my-org-reference', 'tETH');
     
     // 4. Get all addresses for the profile
     const addresses = await getProfileAddresses('my-org-reference');

@@ -3,21 +3,30 @@
 /**
  * @example
  *     {
+ *         type: "NON_FUNGIBLE_TOKEN",
  *         addressId: "addressId",
  *         clientShare: "clientShare",
  *         createParams: {
- *             contractId: "contractId"
+ *             initializeParams: [{
+ *                     name: "name",
+ *                     type: "type",
+ *                     value: "value"
+ *                 }]
  *         }
  *     }
  */
 export interface CreateCollectionRequest {
     /** Blockchain network */
     network?: string;
+    /** Collection type */
+    type: CreateCollectionRequest.Type;
     /** Address ID for collection creation */
     addressId: string;
     /** Client share for signing */
     clientShare: string;
     createParams: CreateCollectionRequest.CreateParams;
+    /** Collection description */
+    description?: string;
     /** Collection display name */
     displayName?: string;
     /** Use gasless transaction */
@@ -29,32 +38,29 @@ export interface CreateCollectionRequest {
 }
 
 export namespace CreateCollectionRequest {
+    /** Collection type */
+    export const Type = {
+        NonFungibleToken: "NON_FUNGIBLE_TOKEN",
+        SemiFungibleToken: "SEMI_FUNGIBLE_TOKEN",
+    } as const;
+    export type Type = (typeof Type)[keyof typeof Type];
+
     export interface CreateParams {
-        /** Contract template ID */
-        contractId: string;
-        /** Constructor parameters */
-        constructorParams?: CreateParams.ConstructorParams.Item[];
+        /** Initialize parameters */
+        initializeParams: CreateParams.InitializeParams.Item[];
     }
 
     export namespace CreateParams {
-        export type ConstructorParams = ConstructorParams.Item[];
+        export type InitializeParams = InitializeParams.Item[];
 
-        export namespace ConstructorParams {
+        export namespace InitializeParams {
             export interface Item {
                 /** Parameter name */
                 name: string;
-                /** Parameter description */
-                description?: string;
-                /** Internal parameter type */
-                internalType?: string;
                 /** Parameter type */
                 type: string;
-                /** Parameter components */
-                components?: Record<string, unknown>[];
                 /** Parameter value */
-                value?: string;
-                /** Function value */
-                functionValue?: string;
+                value: string;
             }
         }
     }

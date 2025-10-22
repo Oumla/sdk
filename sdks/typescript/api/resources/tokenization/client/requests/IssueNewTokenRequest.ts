@@ -5,8 +5,13 @@
  *     {
  *         addressId: "addressId",
  *         clientShare: "clientShare",
+ *         deploymentId: "deploymentId",
  *         createParams: {
- *             contractId: "contractId"
+ *             initializeParams: [{
+ *                     name: "name",
+ *                     type: "type",
+ *                     value: "value"
+ *                 }]
  *         }
  *     }
  */
@@ -17,6 +22,8 @@ export interface IssueNewTokenRequest {
     addressId: string;
     /** Client share for signing */
     clientShare: string;
+    /** Deployed contract ID */
+    deploymentId: string;
     createParams: IssueNewTokenRequest.CreateParams;
     /** Token display name */
     displayName?: string;
@@ -30,31 +37,21 @@ export interface IssueNewTokenRequest {
 
 export namespace IssueNewTokenRequest {
     export interface CreateParams {
-        /** Contract template ID */
-        contractId: string;
-        /** Constructor parameters */
-        constructorParams?: CreateParams.ConstructorParams.Item[];
+        /** Initialize parameters */
+        initializeParams: CreateParams.InitializeParams.Item[];
     }
 
     export namespace CreateParams {
-        export type ConstructorParams = ConstructorParams.Item[];
+        export type InitializeParams = InitializeParams.Item[];
 
-        export namespace ConstructorParams {
+        export namespace InitializeParams {
             export interface Item {
                 /** Parameter name */
                 name: string;
-                /** Parameter description */
-                description?: string;
-                /** Internal parameter type */
-                internalType?: string;
                 /** Parameter type */
                 type: string;
-                /** Parameter components */
-                components?: Record<string, unknown>[];
                 /** Parameter value */
-                value?: string;
-                /** Function value */
-                functionValue?: string;
+                value: string;
             }
         }
     }

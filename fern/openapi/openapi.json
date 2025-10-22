@@ -1716,81 +1716,66 @@
           "network": { "type": "string", "description": "Blockchain network" },
           "addressId": { "type": "string", "minLength": 1, "description": "Address ID for token creation" },
           "clientShare": { "type": "string", "minLength": 1, "description": "Client share for signing" },
+          "deploymentId": { "type": "string", "minLength": 1, "description": "Deployed contract ID" },
           "createParams": {
             "type": "object",
             "properties": {
-              "contractId": { "type": "string", "minLength": 1, "description": "Contract template ID" },
-              "constructorParams": {
+              "initializeParams": {
                 "type": "array",
-                "description": "Constructor parameters",
+                "description": "Initialize parameters",
                 "items": {
                   "type": "object",
                   "properties": {
-                    "name": { "type": "string", "description": "Parameter name" },
-                    "description": { "type": "string", "description": "Parameter description" },
-                    "internalType": { "type": "string", "description": "Internal parameter type" },
-                    "type": { "type": "string", "description": "Parameter type" },
-                    "components": {
-                      "type": "array",
-                      "description": "Parameter components",
-                      "items": { "type": "object" }
-                    },
-                    "value": { "type": "string", "description": "Parameter value" },
-                    "functionValue": { "type": "string", "description": "Function value" }
+                    "name": { "type": "string", "minLength": 1, "description": "Parameter name" },
+                    "type": { "type": "string", "minLength": 1, "description": "Parameter type" },
+                    "value": { "type": "string", "description": "Parameter value" }
                   },
-                  "required": ["name", "type"]
+                  "required": ["name", "type", "value"]
                 }
               }
             },
-            "required": ["contractId"]
+            "required": ["initializeParams"]
           },
           "displayName": { "type": "string", "description": "Token display name" },
           "useGasless": { "type": "boolean", "description": "Use gasless transaction" },
           "fee": { "type": "string", "description": "Transaction fee" },
           "feeLevel": { "type": "string", "description": "Fee level" }
         },
-        "required": ["addressId", "clientShare", "createParams"]
+        "required": ["addressId", "clientShare", "deploymentId", "createParams"]
       },
       "CreateCollectionRequest": {
         "type": "object",
         "properties": {
           "network": { "type": "string", "description": "Blockchain network" },
+          "type": { "type": "string", "enum": ["NON_FUNGIBLE_TOKEN", "SEMI_FUNGIBLE_TOKEN"], "description": "Collection type" },
           "addressId": { "type": "string", "minLength": 1, "description": "Address ID for collection creation" },
           "clientShare": { "type": "string", "minLength": 1, "description": "Client share for signing" },
           "createParams": {
             "type": "object",
             "properties": {
-              "contractId": { "type": "string", "minLength": 1, "description": "Contract template ID" },
-              "constructorParams": {
+              "initializeParams": {
                 "type": "array",
-                "description": "Constructor parameters",
+                "description": "Initialize parameters",
                 "items": {
                   "type": "object",
                   "properties": {
-                    "name": { "type": "string", "description": "Parameter name" },
-                    "description": { "type": "string", "description": "Parameter description" },
-                    "internalType": { "type": "string", "description": "Internal parameter type" },
-                    "type": { "type": "string", "description": "Parameter type" },
-                    "components": {
-                      "type": "array",
-                      "description": "Parameter components",
-                      "items": { "type": "object" }
-                    },
-                    "value": { "type": "string", "description": "Parameter value" },
-                    "functionValue": { "type": "string", "description": "Function value" }
+                    "name": { "type": "string", "minLength": 1, "description": "Parameter name" },
+                    "type": { "type": "string", "minLength": 1, "description": "Parameter type" },
+                    "value": { "type": "string", "minLength": 1, "description": "Parameter value" }
                   },
-                  "required": ["name", "type"]
+                  "required": ["name", "type", "value"]
                 }
               }
             },
-            "required": ["contractId"]
+            "required": ["initializeParams"]
           },
+          "description": { "type": "string", "description": "Collection description" },
           "displayName": { "type": "string", "description": "Collection display name" },
           "useGasless": { "type": "boolean", "description": "Use gasless transaction" },
           "fee": { "type": "string", "description": "Transaction fee" },
           "feeLevel": { "type": "string", "description": "Fee level" }
         },
-        "required": ["addressId", "clientShare", "createParams"]
+        "required": ["type", "addressId", "clientShare", "createParams"]
       },
       "MintTokenRequest": {
         "type": "object",
@@ -1834,6 +1819,7 @@
           "addressId": { "type": "string", "minLength": 1, "description": "Address ID for burning" },
           "clientShare": { "type": "string", "minLength": 1, "description": "Client share for signing" },
           "tokenId": { "type": "string", "minLength": 1, "description": "Token ID" },
+          "from": { "type": "string", "description": "Address to burn from" },
           "amount": { "type": "string", "description": "Token amount to burn" }
         },
         "required": ["addressId", "clientShare", "tokenId"]
