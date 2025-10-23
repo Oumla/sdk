@@ -145,8 +145,13 @@ export class Tokenization {
      *     await client.tokenization.issueNewToken({
      *         addressId: "addressId",
      *         clientShare: "clientShare",
+     *         deploymentId: "deploymentId",
      *         createParams: {
-     *             contractId: "contractId"
+     *             initializeParams: [{
+     *                     name: "name",
+     *                     type: "type",
+     *                     value: "value"
+     *                 }]
      *         }
      *     })
      */
@@ -392,10 +397,15 @@ export class Tokenization {
      *
      * @example
      *     await client.tokenization.createCollection({
+     *         type: "NON_FUNGIBLE_TOKEN",
      *         addressId: "addressId",
      *         clientShare: "clientShare",
      *         createParams: {
-     *             contractId: "contractId"
+     *             initializeParams: [{
+     *                     name: "name",
+     *                     type: "type",
+     *                     value: "value"
+     *                 }]
      *         }
      *     })
      */

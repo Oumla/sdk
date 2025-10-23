@@ -15,6 +15,8 @@ export interface BurnTokenRequest {
     clientShare: string;
     /** Token ID */
     tokenId: string;
+    /** Address to burn from */
+    from?: string;
     /** Token amount to burn */
     amount?: string;
 }
