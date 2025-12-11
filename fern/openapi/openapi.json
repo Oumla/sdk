@@ -1,1840 +1,2508 @@
 {
-  "openapi": "3.0.3",
-  "info": {
-    "title": "Oumla API",
-    "description": "Oumla API for Cloud platform providing wallet management, tokenization, contract interactions, and blockchain services",
-    "version": "1.0.0",
-    "contact": {
-      "name": "Oumla API Support",
-      "email": "support@cloud.com"
-    },
-    "license": {
-      "name": "MIT",
-      "url": "https://opensource.org/licenses/MIT"
-    }
-  },
-  "servers": [
-    {
-      "url": "https://api.oumla.com",
-      "description": "Production"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ],
-  "tags": [
-    { "name": "Profiles", "description": "User profile management" },
-    { "name": "Wallets", "description": "Wallet creation and management" },
-    { "name": "Addresses", "description": "Address generation and management" },
-    { "name": "Transactions", "description": "Transaction history and tracking" },
-    { "name": "Assets", "description": "Asset management and tracking" },
-    { "name": "Withdrawals", "description": "Withdrawal operations" },
-    { "name": "Contract Templates", "description": "Smart contract template management" },
-    { "name": "Deployed Contracts", "description": "Deployed contract management" },
-    { "name": "Contract Interactions", "description": "Smart contract interaction operations" },
-    { "name": "Tokenization", "description": "Token creation, minting, and management" }
-  ],
-  "paths": {
-    "/api/v1/profiles": {
-      "post": {
-        "tags": ["Profiles"],
-        "summary": "Create Profile",
-        "description": "Create a new user profile",
-        "operationId": "createProfile",
-        "parameters": [
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateProfileRequest" }
-            }
-          }
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Oumla API",
+        "description": "Oumla API for Cloud platform providing wallet management, tokenization, contract interactions, and blockchain services",
+        "version": "1.0.0",
+        "contact": {
+            "name": "Oumla API Support",
+            "email": "support@cloud.com"
         },
-        "responses": {
-          "201": {
-            "description": "Profile created successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
-              }
-            }
-          }
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
         }
-      },
-      "get": {
-        "tags": ["Profiles"],
-        "summary": "List Profiles",
-        "description": "Retrieve a paginated list of profiles",
-        "operationId": "getProfiles",
-        "parameters": [
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Profiles retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
     },
-    "/api/v1/wallets/organization": {
-      "get": {
-        "tags": ["Wallets"],
-        "summary": "Get Organization Wallets",
-        "description": "Retrieve wallets for the organization",
-        "operationId": "getOrganizationWallets",
-        "parameters": [
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Organization wallets retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
+    "servers": [
+        {
+            "url": "https://api.oumla.com",
+            "description": "Production"
         }
-      }
-    },
-    "/api/v1/wallets/profile/{reference}": {
-      "get": {
-        "tags": ["Wallets"],
-        "summary": "Get Profile Wallets",
-        "description": "Retrieve wallets for a specific profile",
-        "operationId": "getProfileWallets",
-        "parameters": [
-          {
-            "name": "reference",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Profile reference"
-          },
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Profile wallets retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/wallets/generate": {
-      "post": {
-        "tags": ["Wallets"],
-        "summary": "Generate Wallet",
-        "description": "Generate a new wallet for a profile",
-        "operationId": "generateWallet",
-        "parameters": [
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateWalletRequest" }
-            }
-          }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
         },
-        "responses": {
-          "201": {
-            "description": "Wallet generated successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
+        {
+            "apiKeyAuth": []
         }
-      }
-    },
-    "/api/v1/addresses/organization": {
-      "get": {
-        "tags": ["Addresses"],
-        "summary": "Get Organization Addresses",
-        "description": "Retrieve addresses for the organization",
-        "operationId": "getOrganizationAddresses",
-        "parameters": [
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Organization addresses retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/addresses/{reference}": {
-      "get": {
-        "tags": ["Addresses"],
-        "summary": "Get Profile Addresses",
-        "description": "Retrieve addresses for a specific profile",
-        "operationId": "getProfileAddresses",
-        "parameters": [
-          {
-            "name": "reference",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Profile reference"
-          },
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Profile addresses retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/addresses/generate": {
-      "post": {
-        "tags": ["Addresses"],
-        "summary": "Generate Address",
-        "description": "Generate a new address for a profile",
-        "operationId": "generateAddress",
-        "parameters": [
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateAddressRequest" }
-            }
-          }
+    ],
+    "tags": [
+        { "name": "Profiles", "description": "User profile management" },
+        { "name": "Wallets", "description": "Wallet creation and management" },
+        { "name": "Temporal", "description": "Temporal workflow operations" },
+        {
+            "name": "Addresses",
+            "description": "Address generation and management"
         },
-        "responses": {
-          "201": {
-            "description": "Address generated successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/transactions/address/{address}": {
-      "get": {
-        "tags": ["Transactions"],
-        "summary": "Get Transactions by Address",
-        "description": "Retrieve transactions for a specific address",
-        "operationId": "getTransactionsByAddress",
-        "parameters": [
-          {
-            "name": "address",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Blockchain address"
-          },
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Transactions retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/transactions/wallet/{miniWalletId}": {
-      "get": {
-        "tags": ["Transactions"],
-        "summary": "Get Transactions by Wallet",
-        "description": "Retrieve transactions for a specific wallet",
-        "operationId": "getTransactionsByWallet",
-        "parameters": [
-          {
-            "name": "miniWalletId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Mini wallet ID"
-          },
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Transactions retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/transactions/organization": {
-      "get": {
-        "tags": ["Transactions"],
-        "summary": "Get Organization Transactions",
-        "description": "Retrieve transactions for the organization",
-        "operationId": "getOrganizationTransactions",
-        "parameters": [
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Organization transactions retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/transactions/profile/{reference}": {
-      "get": {
-        "tags": ["Transactions"],
-        "summary": "Get Profile Transactions",
-        "description": "Retrieve transactions for a specific profile",
-        "operationId": "getProfileTransactions",
-        "parameters": [
-          {
-            "name": "reference",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Profile reference"
-          },
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Profile transactions retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/assets/address/{address}": {
-      "get": {
-        "tags": ["Assets"],
-        "summary": "Get Assets by Address",
-        "description": "Retrieve assets for a specific address",
-        "operationId": "getAssetsByAddress",
-        "parameters": [
-          {
-            "name": "address",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Blockchain address"
-          },
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Assets retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/assets/wallet/{miniWalletId}": {
-      "get": {
-        "tags": ["Assets"],
-        "summary": "Get Assets by Wallet",
-        "description": "Retrieve assets for a specific wallet",
-        "operationId": "getAssetsByWallet",
-        "parameters": [
-          {
-            "name": "miniWalletId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Mini wallet ID"
-          },
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Assets retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/withdraw": {
-      "post": {
-        "tags": ["Withdrawals"],
-        "summary": "Create Withdrawal",
-        "description": "Create a new withdrawal request",
-        "operationId": "createWithdrawal",
-        "parameters": [
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateWithdrawalRequest" }
-            }
-          }
+        {
+            "name": "Transactions",
+            "description": "Transaction history and tracking"
         },
-        "responses": {
-          "201": {
-            "description": "Withdrawal created successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/contract-templates": {
-      "get": {
-        "tags": ["Contract Templates"],
-        "summary": "List Contract Templates",
-        "description": "Retrieve a paginated list of contract templates",
-        "operationId": "getContractTemplates",
-        "parameters": [
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Contract templates retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": ["Contract Templates"],
-        "summary": "Create Contract Template",
-        "description": "Create a new contract template",
-        "operationId": "createContractTemplate",
-        "parameters": [
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateContractTemplateRequest" }
-            }
-          }
+        { "name": "Assets", "description": "Asset management and tracking" },
+        { "name": "Withdrawals", "description": "Withdrawal operations" },
+        {
+            "name": "Contract Templates",
+            "description": "Smart contract template management"
         },
-        "responses": {
-          "201": {
-            "description": "Contract template created successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/contract-templates/{templateId}": {
-      "get": {
-        "tags": ["Contract Templates"],
-        "summary": "Get Contract Template",
-        "description": "Retrieve a specific contract template",
-        "operationId": "getContractTemplate",
-        "parameters": [
-          {
-            "name": "templateId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Contract template ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Contract template retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": ["Contract Templates"],
-        "summary": "Delete Contract Template",
-        "description": "Delete a contract template",
-        "operationId": "deleteContractTemplate",
-        "parameters": [
-          {
-            "name": "templateId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Contract template ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Contract template deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/contract-templates/{templateId}/constructorInfo": {
-      "get": {
-        "tags": ["Contract Templates"],
-        "summary": "Get Contract Constructor",
-        "description": "Retrieve constructor information for a contract template",
-        "operationId": "getContractConstructor",
-        "parameters": [
-          {
-            "name": "templateId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Contract template ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Contract constructor retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/contract-templates/{templateId}/function": {
-      "get": {
-        "tags": ["Contract Templates"],
-        "summary": "Get Contract Functions (Template)",
-        "description": "Retrieve function information for a contract template",
-        "operationId": "getTemplateFunctions",
-        "parameters": [
-          {
-            "name": "templateId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Contract template ID"
-          },
-          {
-            "name": "functionSignature",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "string" },
-            "description": "Function signature to filter by"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Contract functions retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/contract-templates/{templateId}/deploy": {
-      "post": {
-        "tags": ["Contract Templates"],
-        "summary": "Deploy Contract",
-        "description": "Deploy a contract from a template",
-        "operationId": "deployContract",
-        "parameters": [
-          {
-            "name": "templateId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Contract template ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/DeployContractRequest" }
-            }
-          }
+        {
+            "name": "Deployed Contracts",
+            "description": "Deployed contract management"
         },
-        "responses": {
-          "201": {
-            "description": "Contract deployment initiated successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/deployed-contracts": {
-      "get": {
-        "tags": ["Deployed Contracts"],
-        "summary": "List Deployed Contracts",
-        "description": "Retrieve a paginated list of deployed contracts",
-        "operationId": "getDeployedContracts",
-        "parameters": [
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          {
-            "name": "contractAddress",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "string" },
-            "description": "Filter by contract address"
-          },
-          {
-            "name": "network",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "string", "enum": ["BTC", "tBTC", "ETH", "tETH"] },
-            "description": "Filter by blockchain network"
-          },
-          {
-            "name": "contractTemplateId",
-            "in": "query",
-            "required": false,
-            "schema": { "type": "string" },
-            "description": "Filter by contract template ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Deployed contracts retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/deployed-contracts/{contractId}": {
-      "get": {
-        "tags": ["Deployed Contracts"],
-        "summary": "Get Deployed Contract",
-        "description": "Retrieve a specific deployed contract",
-        "operationId": "getDeployedContract",
-        "parameters": [
-          {
-            "name": "contractId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Deployed contract ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Deployed contract retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/deployed-contracts/{network}/{contractAddress}": {
-      "get": {
-        "tags": ["Deployed Contracts"],
-        "summary": "Get Deployed Contract by Address",
-        "description": "Retrieve a deployed contract by network and address",
-        "operationId": "getDeployedContractByAddress",
-        "parameters": [
-          {
-            "name": "network",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Blockchain network"
-          },
-          {
-            "name": "contractAddress",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Contract address"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Deployed contract retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/deployed-contracts/fetch-abi": {
-      "post": {
-        "tags": ["Deployed Contracts"],
-        "summary": "Fetch Contract ABI",
-        "description": "Fetch ABI for a deployed contract",
-        "operationId": "fetchContractABI",
-        "parameters": [
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/FetchContractABIRequest" }
-            }
-          }
+        {
+            "name": "Contract Interactions",
+            "description": "Smart contract interaction operations"
         },
-        "responses": {
-          "200": {
-            "description": "Contract ABI fetched successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
+        {
+            "name": "Tokenization",
+            "description": "Token creation, minting, and management"
         }
-      }
-    },
-    "/api/v1/deployed-contracts/add-abi": {
-      "post": {
-        "tags": ["Deployed Contracts"],
-        "summary": "Add Contract ABI",
-        "description": "Add ABI for a deployed contract",
-        "operationId": "addContractABI",
-        "parameters": [
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/AddContractABIRequest" }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Contract ABI added successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/contract-interactions/network/{network}/contract-address/{contractAddress}/functions": {
-      "get": {
-        "tags": ["Contract Interactions"],
-        "summary": "Get Contract Functions",
-        "description": "Retrieve available functions for a deployed contract",
-        "operationId": "getContractFunctions",
-        "parameters": [
-          {
-            "name": "network",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Blockchain network"
-          },
-          {
-            "name": "contractAddress",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Contract address"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Contract functions retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/contract-interactions/network/{network}/contract-address/{contractAddress}/functions/read": {
-      "post": {
-        "tags": ["Contract Interactions"],
-        "summary": "Call Read Function",
-        "description": "Call a read function on a deployed contract",
-        "operationId": "callReadFunction",
-        "parameters": [
-          {
-            "name": "network",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Blockchain network"
-          },
-          {
-            "name": "contractAddress",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Contract address"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/ReadFunctionRequest" }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Read function called successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/contract-interactions/network/{network}/contract-address/{contractAddress}/functions/write": {
-      "post": {
-        "tags": ["Contract Interactions"],
-        "summary": "Call Write Function",
-        "description": "Call a write function on a deployed contract",
-        "operationId": "callWriteFunction",
-        "parameters": [
-          {
-            "name": "network",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Blockchain network"
-          },
-          {
-            "name": "contractAddress",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Contract address"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/WriteFunctionRequest" }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Write function called successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/contract-interactions/network/{network}/tx/{txId}": {
-      "get": {
-        "tags": ["Contract Interactions"],
-        "summary": "Get Transaction Receipt",
-        "description": "Retrieve transaction receipt for a specific transaction",
-        "operationId": "getTransactionReceipt",
-        "parameters": [
-          {
-            "name": "network",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Blockchain network"
-          },
-          {
-            "name": "txId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Transaction ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Transaction receipt retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/tokenization/tokens": {
-      "post": {
-        "tags": ["Tokenization"],
-        "summary": "Issue New Token",
-        "description": "Issue a new token using a contract template",
-        "operationId": "issueNewToken",
-        "parameters": [
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/IssueNewTokenRequest" }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Token issued successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": ["Tokenization"],
-        "summary": "List Tokens",
-        "description": "Retrieve a paginated list of tokens",
-        "operationId": "getTokens",
-        "parameters": [
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Tokens retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/tokenization/tokens/link": {
-      "post": {
-        "tags": ["Tokenization"],
-        "summary": "Link Contract",
-        "description": "Link an existing contract to the platform",
-        "operationId": "linkContract",
-        "parameters": [
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/LinkContractRequest" }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Contract linked successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/tokenization/collections": {
-      "post": {
-        "tags": ["Tokenization"],
-        "summary": "Create Collection",
-        "description": "Create a new token collection",
-        "operationId": "createCollection",
-        "parameters": [
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/CreateCollectionRequest" }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Collection created successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": ["Tokenization"],
-        "summary": "List Collections",
-        "description": "Retrieve a paginated list of collections",
-        "operationId": "getCollections",
-        "parameters": [
-          { "$ref": "#/components/parameters/SkipParam" },
-          { "$ref": "#/components/parameters/TakeParam" },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Collections retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaginatedResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/tokenization/collections/{id}": {
-      "get": {
-        "tags": ["Tokenization"],
-        "summary": "Get Collection",
-        "description": "Retrieve a specific collection",
-        "operationId": "getCollection",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Collection ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Collection retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": ["Tokenization"],
-        "summary": "Delete Collection",
-        "description": "Delete a collection",
-        "operationId": "deleteCollection",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Collection ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Collection deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/tokenization/collections/{id}/tokens/{tokenId}": {
-      "get": {
-        "tags": ["Tokenization"],
-        "summary": "Get Collection Token Details",
-        "description": "Retrieve details for a specific token in a collection",
-        "operationId": "getCollectionTokenDetails",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Collection ID"
-          },
-          {
-            "name": "tokenId",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Token ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Token details retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/tokenization/collections/{id}/tokens/mint": {
-      "post": {
-        "tags": ["Tokenization"],
-        "summary": "Mint Token",
-        "description": "Mint a new token in a collection",
-        "operationId": "mintToken",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Collection ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/MintTokenRequest" }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Token minted successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/tokenization/collections/{id}/tokens/burn": {
-      "post": {
-        "tags": ["Tokenization"],
-        "summary": "Burn Token",
-        "description": "Burn a token",
-        "operationId": "burnToken",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Collection ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/BurnTokenRequest" }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Token burned successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/tokenization/tokens/{id}": {
-      "delete": {
-        "tags": ["Tokenization"],
-        "summary": "Unlink Token",
-        "description": "Unlink a token from the platform",
-        "operationId": "unlinkToken",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Token ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Token unlinked successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "x-fern-ignore": true,
-        "tags": ["Tokenization"],
-        "summary": "Get Linked Token",
-        "description": "Retrieve details of a linked token",
-        "operationId": "getLinkedToken",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" },
-            "description": "Token ID"
-          },
-          { "$ref": "#/components/parameters/SdkVersionParam" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Linked token details retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/LinkedTokenResponse" },
-                "example": {
-                  "message": "Linked token found",
-                  "data": {
-                    "id": "tok_123",
-                    "linked": true,
-                    "collectionId": "col_456"
-                  },
-                  "success": true,
-                  "status": 200
+    ],
+    "paths": {
+        "/api/v1/profiles": {
+            "post": {
+                "tags": ["Profiles"],
+                "summary": "Create Profile",
+                "description": "Create a new user profile",
+                "operationId": "createProfile",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateProfileRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Profile created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
                 }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      },
-      "apiKeyAuth": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-api-key",
-        "description": "API key for authentication"
-      }
-    },
-    "parameters": {
-      "SkipParam": {
-        "name": "skip",
-        "in": "query",
-        "description": "Number of records to skip",
-        "required": false,
-        "schema": {
-          "type": "integer",
-          "minimum": 0,
-          "default": 0
-        }
-      },
-      "TakeParam": {
-        "name": "take",
-        "in": "query",
-        "description": "Number of records to take",
-        "required": false,
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 100,
-          "default": 10
-        }
-      },
-      "ApiKeyParam": {
-        "name": "x-api-key",
-        "in": "header",
-        "description": "API key for authentication",
-        "required": false,
-        "schema": {
-          "type": "string"
-        }
-      },
-      "SdkVersionParam": {
-        "name": "x-sdk-version",
-        "in": "header",
-        "description": "SDK version for tracking and compatibility",
-        "required": false,
-        "schema": {
-          "type": "string",
-          "default": "1.0.0"
-        }
-      }
-    },
-    "schemas": {
-      "LinkedTokenData": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "linked": { "type": "boolean" },
-          "collectionId": { "type": "string" }
-        },
-        "required": ["id", "linked"]
-      },
-      "LinkedTokenResponse": {
-        "allOf": [
-          { "$ref": "#/components/schemas/SuccessResponse" },
-          {
-            "type": "object",
-            "properties": {
-              "data": { "$ref": "#/components/schemas/LinkedTokenData" }
             },
-            "required": ["data"]
-          }
-        ]
-      },
-      "SuccessResponse": {
-        "type": "object",
-        "properties": {
-          "message": { "type": "string", "description": "Response message" },
-          "data": { "type": "object", "additionalProperties": true, "description": "Response data" },
-          "success": { "type": "boolean", "enum": [true], "description": "Indicates successful response" },
-          "status": { "type": "integer", "description": "HTTP status code" }
-        },
-        "required": ["message", "success", "status"]
-      },
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "message": { "type": "string", "description": "Error message" },
-          "errors": {
-            "type": "array",
-            "description": "Array of field-specific errors",
-            "items": {
-              "type": "object",
-              "properties": {
-                "field": { "type": "string", "description": "Field name that caused the error" },
-                "message": { "type": "string", "description": "Error message for the field" }
-              }
+            "get": {
+                "tags": ["Profiles"],
+                "summary": "List Profiles",
+                "description": "Retrieve a paginated list of profiles",
+                "operationId": "getProfiles",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Profiles retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
             }
-          },
-          "success": { "type": "boolean", "enum": [false], "description": "Indicates failed response" },
-          "status": { "type": "integer", "description": "HTTP status code" }
         },
-        "required": ["message", "success", "status"]
-      },
-      "PaginatedResponse": {
-        "allOf": [
-          { "$ref": "#/components/schemas/SuccessResponse" },
-          {
-            "type": "object",
-            "properties": {
-              "pagination": {
+        "/api/v1/wallets/organization": {
+            "get": {
+                "tags": ["Wallets"],
+                "summary": "Get Organization Wallets",
+                "description": "Retrieve wallets for the organization",
+                "operationId": "getOrganizationWallets",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Organization wallets retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/wallets/profile/{reference}": {
+            "get": {
+                "tags": ["Wallets"],
+                "summary": "Get Profile Wallets",
+                "description": "Retrieve wallets for a specific profile",
+                "operationId": "getProfileWallets",
+                "parameters": [
+                    {
+                        "name": "reference",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Profile reference"
+                    },
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Profile wallets retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/wallets/generate": {
+            "post": {
+                "tags": ["Wallets"],
+                "summary": "Generate Wallet",
+                "description": "Generate a new wallet for a profile",
+                "operationId": "generateWallet",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateWalletRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Wallet generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/addresses/organization": {
+            "get": {
+                "tags": ["Addresses"],
+                "summary": "Get Organization Addresses",
+                "description": "Retrieve addresses for the organization",
+                "operationId": "getOrganizationAddresses",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Organization addresses retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/addresses/{reference}": {
+            "get": {
+                "tags": ["Addresses"],
+                "summary": "Get Profile Addresses",
+                "description": "Retrieve addresses for a specific profile",
+                "operationId": "getProfileAddresses",
+                "parameters": [
+                    {
+                        "name": "reference",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Profile reference"
+                    },
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Profile addresses retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/addresses/generate": {
+            "post": {
+                "tags": ["Addresses"],
+                "summary": "Generate Address",
+                "description": "Generate a new address for a profile",
+                "operationId": "generateAddress",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAddressRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Address generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/addresses/generate": {
+            "post": {
+                "tags": ["Addresses"],
+                "summary": "Generate Address",
+                "description": "Generate a new address for a profile",
+                "operationId": "generateAddress",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAddressRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Address generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/transactions/address/{address}": {
+            "get": {
+                "tags": ["Transactions"],
+                "summary": "Get Transactions by Address",
+                "description": "Retrieve transactions for a specific address",
+                "operationId": "getTransactionsByAddress",
+                "parameters": [
+                    {
+                        "name": "address",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Blockchain address"
+                    },
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transactions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/transactions/wallet/{miniWalletId}": {
+            "get": {
+                "tags": ["Transactions"],
+                "summary": "Get Transactions by Wallet",
+                "description": "Retrieve transactions for a specific wallet",
+                "operationId": "getTransactionsByWallet",
+                "parameters": [
+                    {
+                        "name": "miniWalletId",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Mini wallet ID"
+                    },
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transactions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/transactions/organization": {
+            "get": {
+                "tags": ["Transactions"],
+                "summary": "Get Organization Transactions",
+                "description": "Retrieve transactions for the organization",
+                "operationId": "getOrganizationTransactions",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Organization transactions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/transactions/profile/{reference}": {
+            "get": {
+                "tags": ["Transactions"],
+                "summary": "Get Profile Transactions",
+                "description": "Retrieve transactions for a specific profile",
+                "operationId": "getProfileTransactions",
+                "parameters": [
+                    {
+                        "name": "reference",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Profile reference"
+                    },
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Profile transactions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/withdraw": {
+            "post": {
+                "tags": ["Withdrawals"],
+                "summary": "Create Withdrawal",
+                "description": "Create a new withdrawal request",
+                "operationId": "createWithdrawal",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateWithdrawalRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Withdrawal created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contract-templates": {
+            "get": {
+                "tags": ["Contract Templates"],
+                "summary": "List Contract Templates",
+                "description": "Retrieve a paginated list of contract templates",
+                "operationId": "getContractTemplates",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contract templates retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": ["Contract Templates"],
+                "summary": "Create Contract Template",
+                "description": "Create a new contract template",
+                "operationId": "createContractTemplate",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateContractTemplateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Contract template created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contract-templates/{templateId}": {
+            "get": {
+                "tags": ["Contract Templates"],
+                "summary": "Get Contract Template",
+                "description": "Retrieve a specific contract template",
+                "operationId": "getContractTemplate",
+                "parameters": [
+                    {
+                        "name": "templateId",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Contract template ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contract template retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Contract Templates"],
+                "summary": "Delete Contract Template",
+                "description": "Delete a contract template",
+                "operationId": "deleteContractTemplate",
+                "parameters": [
+                    {
+                        "name": "templateId",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Contract template ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contract template deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contract-templates/{templateId}/constructorInfo": {
+            "get": {
+                "tags": ["Contract Templates"],
+                "summary": "Get Contract Constructor",
+                "description": "Retrieve constructor information for a contract template",
+                "operationId": "getContractConstructor",
+                "parameters": [
+                    {
+                        "name": "templateId",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Contract template ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contract constructor retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contract-templates/{templateId}/function": {
+            "get": {
+                "tags": ["Contract Templates"],
+                "summary": "Get Contract Functions (Template)",
+                "description": "Retrieve function information for a contract template",
+                "operationId": "getTemplateFunctions",
+                "parameters": [
+                    {
+                        "name": "templateId",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Contract template ID"
+                    },
+                    {
+                        "name": "functionSignature",
+                        "in": "query",
+                        "required": false,
+                        "schema": { "type": "string" },
+                        "description": "Function signature to filter by"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contract functions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contract-templates/{templateId}/deploy": {
+            "post": {
+                "tags": ["Contract Templates"],
+                "summary": "Deploy Contract",
+                "description": "Deploy a contract from a template",
+                "operationId": "deployContract",
+                "parameters": [
+                    {
+                        "name": "templateId",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Contract template ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DeployContractRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Contract deployment initiated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/deployed-contracts": {
+            "get": {
+                "tags": ["Deployed Contracts"],
+                "summary": "List Deployed Contracts",
+                "description": "Retrieve a paginated list of deployed contracts",
+                "operationId": "getDeployedContracts",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    {
+                        "name": "contractAddress",
+                        "in": "query",
+                        "required": false,
+                        "schema": { "type": "string" },
+                        "description": "Filter by contract address"
+                    },
+                    {
+                        "name": "network",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": ["BTC", "tBTC", "ETH", "tETH"]
+                        },
+                        "description": "Filter by blockchain network"
+                    },
+                    {
+                        "name": "contractTemplateId",
+                        "in": "query",
+                        "required": false,
+                        "schema": { "type": "string" },
+                        "description": "Filter by contract template ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deployed contracts retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/deployed-contracts/{contractId}": {
+            "get": {
+                "tags": ["Deployed Contracts"],
+                "summary": "Get Deployed Contract",
+                "description": "Retrieve a specific deployed contract",
+                "operationId": "getDeployedContract",
+                "parameters": [
+                    {
+                        "name": "contractId",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Deployed contract ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deployed contract retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/deployed-contracts/{network}/{contractAddress}": {
+            "get": {
+                "tags": ["Deployed Contracts"],
+                "summary": "Get Deployed Contract by Address",
+                "description": "Retrieve a deployed contract by network and address",
+                "operationId": "getDeployedContractByAddress",
+                "parameters": [
+                    {
+                        "name": "network",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Blockchain network"
+                    },
+                    {
+                        "name": "contractAddress",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Contract address"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deployed contract retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/deployed-contracts/fetch-abi": {
+            "post": {
+                "tags": ["Deployed Contracts"],
+                "summary": "Fetch Contract ABI",
+                "description": "Fetch ABI for a deployed contract",
+                "operationId": "fetchContractABI",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FetchContractABIRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Contract ABI fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/deployed-contracts/add-abi": {
+            "post": {
+                "tags": ["Deployed Contracts"],
+                "summary": "Add Contract ABI",
+                "description": "Add ABI for a deployed contract",
+                "operationId": "addContractABI",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddContractABIRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Contract ABI added successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contract-interactions/network/{network}/contract-address/{contractAddress}/functions": {
+            "get": {
+                "tags": ["Contract Interactions"],
+                "summary": "Get Contract Functions",
+                "description": "Retrieve available functions for a deployed contract",
+                "operationId": "getContractFunctions",
+                "parameters": [
+                    {
+                        "name": "network",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Blockchain network"
+                    },
+                    {
+                        "name": "contractAddress",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Contract address"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contract functions retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contract-interactions/network/{network}/contract-address/{contractAddress}/functions/read": {
+            "post": {
+                "tags": ["Contract Interactions"],
+                "summary": "Call Read Function",
+                "description": "Call a read function on a deployed contract",
+                "operationId": "callReadFunction",
+                "parameters": [
+                    {
+                        "name": "network",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Blockchain network"
+                    },
+                    {
+                        "name": "contractAddress",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Contract address"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReadFunctionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Read function called successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contract-interactions/network/{network}/contract-address/{contractAddress}/functions/write": {
+            "post": {
+                "tags": ["Contract Interactions"],
+                "summary": "Call Write Function",
+                "description": "Call a write function on a deployed contract",
+                "operationId": "callWriteFunction",
+                "parameters": [
+                    {
+                        "name": "network",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Blockchain network"
+                    },
+                    {
+                        "name": "contractAddress",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Contract address"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WriteFunctionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Temporal write workflow started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contract-interactions/network/{network}/tx/{txId}": {
+            "get": {
+                "tags": ["Contract Interactions"],
+                "summary": "Get Transaction Receipt",
+                "description": "Retrieve transaction receipt for a specific transaction",
+                "operationId": "getTransactionReceipt",
+                "parameters": [
+                    {
+                        "name": "network",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Blockchain network"
+                    },
+                    {
+                        "name": "txId",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Transaction ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transaction receipt retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tokenization/tokens": {
+            "post": {
+                "tags": ["Tokenization"],
+                "summary": "Issue New Token",
+                "description": "Issue a new token using a contract template",
+                "operationId": "issueNewToken",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IssueNewTokenRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Token issued successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Tokenization"],
+                "summary": "List Tokens",
+                "description": "Retrieve a paginated list of tokens",
+                "operationId": "getTokens",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tokens retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tokenization/tokens/link": {
+            "post": {
+                "tags": ["Tokenization"],
+                "summary": "Link Contract",
+                "description": "Link an existing contract to the platform",
+                "operationId": "linkContract",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LinkContractRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Contract linked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tokenization/collections": {
+            "post": {
+                "tags": ["Tokenization"],
+                "summary": "Create Collection",
+                "description": "Create a new token collection",
+                "operationId": "createCollection",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateCollectionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Collection created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Tokenization"],
+                "summary": "List Collections",
+                "description": "Retrieve a paginated list of collections",
+                "operationId": "getCollections",
+                "parameters": [
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Collections retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tokenization/collections/{id}": {
+            "get": {
+                "tags": ["Tokenization"],
+                "summary": "Get Collection",
+                "description": "Retrieve a specific collection",
+                "operationId": "getCollection",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Collection ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Collection retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Tokenization"],
+                "summary": "Delete Collection",
+                "description": "Delete a collection",
+                "operationId": "deleteCollection",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Collection ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Collection deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tokenization/collections/{id}/tokens/{tokenId}": {
+            "get": {
+                "tags": ["Tokenization"],
+                "summary": "Get Collection Token Details",
+                "description": "Retrieve details for a specific token in a collection",
+                "operationId": "getCollectionTokenDetails",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Collection ID"
+                    },
+                    {
+                        "name": "tokenId",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Token ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tokenization/collections/{id}/tokens/mint": {
+            "post": {
+                "tags": ["Tokenization"],
+                "summary": "Mint Token",
+                "description": "Mint a new token in a collection",
+                "operationId": "mintToken",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Collection ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MintTokenRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Temporal mint workflow started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tokenization/collections/{id}/tokens/burn": {
+            "post": {
+                "tags": ["Tokenization"],
+                "summary": "Burn Token",
+                "description": "Burn a token",
+                "operationId": "burnToken",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Collection ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BurnTokenRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Temporal burn workflow started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tokenization/collection/tokens": {
+            "get": {
+                "tags": ["Tokenization"],
+                "summary": "Get Collection Tokens",
+                "description": "Retrieve collection tokens (mints or burns) filtered by collection ID and type",
+                "operationId": "getCollectionTokens",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "description": "Collection ID to filter by"
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": ["MINT", "BURN"]
+                        },
+                        "description": "Record type to filter by"
+                    },
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "get Collection Tokens",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Collection not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tokenization/tokens/{id}": {
+            "delete": {
+                "tags": ["Tokenization"],
+                "summary": "Unlink Token",
+                "description": "Unlink a token from the platform",
+                "operationId": "unlinkToken",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Token ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token unlinked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "x-fern-ignore": true,
+                "tags": ["Tokenization"],
+                "summary": "Get Linked Token",
+                "description": "Retrieve details of a linked token",
+                "operationId": "getLinkedToken",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Token ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Linked token details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LinkedTokenResponse"
+                                },
+                                "example": {
+                                    "message": "Linked token found",
+                                    "data": {
+                                        "id": "tok_123",
+                                        "linked": true,
+                                        "collectionId": "col_456"
+                                    },
+                                    "success": true,
+                                    "status": 200
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/temporal/workflows/{workflowId}/status": {
+            "get": {
+                "tags": ["Temporal"],
+                "summary": "Get Workflow Status",
+                "description": "Get workflow status and result",
+                "operationId": "getTemporalWorkflowStatus",
+                "parameters": [
+                    {
+                        "name": "workflowId",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "description": "Temporal workflow ID"
+                    },
+                    { "$ref": "#/components/parameters/SdkVersionParam" }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get workflow status and result",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Workflow not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/assets": {
+            "get": {
+                "tags": ["Assets"],
+                "summary": "List Assets",
+                "description": "Retrieve assets for the organization filtered by address, wallet ID, contract address, or tokenization ID",
+                "operationId": "getAssets",
+                "parameters": [
+                    {
+                        "name": "address",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "description": "Blockchain address to filter by"
+                    },
+                    {
+                        "name": "walletId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "description": "Wallet ID to filter by"
+                    },
+                    {
+                        "name": "contractAddress",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "description": "Contract address to filter by"
+                    },
+                    {
+                        "name": "tokenizationId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "description": "Tokenization ID to filter by"
+                    },
+                    { "$ref": "#/components/parameters/SkipParam" },
+                    { "$ref": "#/components/parameters/TakeParam" },
+                    {
+                        "$ref": "#/components/parameters/SdkVersionParam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Assets retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No assets found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            },
+            "apiKeyAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "x-api-key",
+                "description": "API key for authentication"
+            }
+        },
+        "parameters": {
+            "SkipParam": {
+                "name": "skip",
+                "in": "query",
+                "description": "Number of records to skip",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                }
+            },
+            "TakeParam": {
+                "name": "take",
+                "in": "query",
+                "description": "Number of records to take",
+                "required": false,
+                "schema": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 10
+                }
+            },
+            "ApiKeyParam": {
+                "name": "x-api-key",
+                "in": "header",
+                "description": "API key for authentication",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "SdkVersionParam": {
+                "name": "x-sdk-version",
+                "in": "header",
+                "description": "SDK version for tracking and compatibility",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "default": "1.0.0"
+                }
+            }
+        },
+        "schemas": {
+            "TemporalWorkflowStatusData": {
                 "type": "object",
                 "properties": {
-                  "skip": { "type": "integer", "description": "Number of records skipped" },
-                  "take": { "type": "integer", "description": "Number of records taken" },
-                  "totalElements": { "type": "integer", "description": "Total number of elements" },
-                  "totalPages": { "type": "integer", "description": "Total number of pages" }
+                    "workflowId": {
+                        "type": "string",
+                        "description": "Temporal workflow ID"
+                    },
+                    "runId": {
+                        "type": "string",
+                        "description": "Temporal run ID"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Workflow execution status"
+                    },
+                    "startTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Workflow start time (ISO 8601)"
+                    },
+                    "closeTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true,
+                        "description": "Workflow close time (ISO 8601) or null if running"
+                    },
+                    "executionTime": {
+                        "type": "integer",
+                        "description": "Execution time (implementation-defined units)"
+                    },
+                    "historyLength": {
+                        "type": "integer",
+                        "description": "Number of events in workflow history"
+                    },
+                    "result": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "nullable": true,
+                        "description": "Workflow result payload if completed"
+                    },
+                    "error": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "nullable": true,
+                        "description": "Error information if the workflow failed"
+                    }
                 },
-                "required": ["skip", "take", "totalElements", "totalPages"]
-              }
-            }
-          }
-        ]
-      },
-      "CreateProfileRequest": {
-        "type": "object",
-        "properties": {
-          "reference": { "type": "string", "minLength": 1, "description": "Profile reference identifier" },
-          "type": { "type": "string", "enum": ["User", "Department", "Merchant"], "description": "Profile type" }
-        },
-        "required": ["reference", "type"]
-      },
-      "CreateWalletRequest": {
-        "type": "object",
-        "properties": {
-          "reference": { "type": "string", "minLength": 1, "description": "Profile reference" },
-          "network": { "type": "string", "enum": ["BTC", "tBTC", "ETH", "tETH"], "description": "Blockchain network" }
-        },
-        "required": ["reference", "network"]
-      },
-      "CreateAddressRequest": {
-        "type": "object",
-        "properties": {
-          "reference": { "type": "string", "minLength": 1, "description": "Profile reference" },
-          "network": { "type": "string", "enum": ["BTC", "tBTC", "ETH", "tETH"], "description": "Blockchain network" },
-          "clientShare": { "type": "string", "minLength": 1, "description": "Client share for signing" }
-        },
-        "required": ["reference", "network", "clientShare"]
-      },
-      "CreateWithdrawalRequest": {
-        "type": "object",
-        "properties": {
-          "to": { "type": "string", "description": "Recipient address for withdrawal" },
-          "amount": { "type": "string", "description": "Withdrawal amount" },
-          "from": { 
-            "type": "array", 
-            "items": { "type": "string" },
-            "description": "Array of source addresses for withdrawal" 
-          },
-          "network": { "type": "string", "enum": ["BTC", "tBTC", "ETH", "tETH"], "description": "Blockchain network" },
-          "clientShare": { "type": "string", "description": "Client share for signing" }
-        },
-        "required": ["to", "amount", "from", "network", "clientShare"]
-      },
-      "CreateContractTemplateRequest": {
-        "type": "object",
-        "properties": {
-          "name": { "type": "string", "description": "Contract template name" },
-          "description": { "type": "string", "description": "Contract template description" },
-          "abi": {
-            "type": "array",
-            "description": "Contract ABI",
-            "items": { "type": "object" }
-          },
-          "bytecode": { "type": "string", "description": "Contract bytecode" },
-          "longDescription": { "type": "string", "description": "Long description of the contract" },
-          "sourceCode": { "type": "string", "description": "Contract source code" },
-          "type": { "type": "string", "description": "Contract type" },
-          "docs": {
-            "type": "object",
-            "description": "Contract documentation",
-            "properties": {
-              "details": { "type": "string" },
-              "events": { "type": "string" },
-              "kind": { "type": "string", "enum": ["dev", "user"] },
-              "methods": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "description": { "type": "string" },
-                    "params": { "type": "object" },
-                    "returns": { "type": "object" }
-                  }
-                }
-              },
-              "version": { "type": "string" }
-            }
-          },
-          "attributes": {
-            "type": "object",
-            "description": "Contract attributes",
-            "properties": {
-              "useCases": {
-                "type": "array",
-                "items": { "type": "string" }
-              },
-              "standards": {
-                "type": "array",
-                "items": { "type": "string" }
-              },
-              "auditor": {
+                "required": [
+                    "workflowId",
+                    "status",
+                    "startTime",
+                    "historyLength"
+                ]
+            },
+
+            "LinkedTokenData": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string" },
-                  "imageURL": { "type": "string" },
-                  "link": { "type": "string" }
-                }
-              }
-            }
-          }
-        },
-        "required": ["name", "description", "abi", "bytecode"]
-      },
-      "DeployContractRequest": {
-        "type": "object",
-        "properties": {
-          "network": { "type": "string", "description": "Target network" },
-          "addressId": { "type": "string", "description": "Address ID for deployment" },
-          "clientShare": { "type": "string", "description": "Client share for signing" },
-          "constructorParameters": {
-            "type": "array",
-            "description": "Constructor parameters",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": { "type": "string", "description": "Parameter name" },
-                "description": { "type": "string", "description": "Parameter description" },
-                "internalType": { "type": "string", "description": "Internal parameter type" },
-                "type": { "type": "string", "description": "Parameter type" },
-                "components": {
-                  "type": "array",
-                  "description": "Parameter components",
-                  "items": { "type": "object" }
+                    "id": { "type": "string" },
+                    "linked": { "type": "boolean" },
+                    "collectionId": { "type": "string" }
                 },
-                "value": { "type": "string", "description": "Parameter value" }
-              },
-              "required": ["name", "type"]
+                "required": ["id", "linked"]
+            },
+            "LinkedTokenResponse": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/SuccessResponse" },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "data": {
+                                "$ref": "#/components/schemas/LinkedTokenData"
+                            }
+                        },
+                        "required": ["data"]
+                    }
+                ]
+            },
+            "SuccessResponse": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "description": "Response message"
+                    },
+                    "data": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "description": "Response data"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [true],
+                        "description": "Indicates successful response"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "description": "HTTP status code"
+                    }
+                },
+                "required": ["message", "success", "status"]
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "description": "Error message"
+                    },
+                    "errors": {
+                        "type": "array",
+                        "description": "Array of field-specific errors",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "field": {
+                                    "type": "string",
+                                    "description": "Field name that caused the error"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error message for the field"
+                                }
+                            }
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [false],
+                        "description": "Indicates failed response"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "description": "HTTP status code"
+                    }
+                },
+                "required": ["message", "success", "status"]
+            },
+            "PaginatedResponse": {
+                "allOf": [
+                    { "$ref": "#/components/schemas/SuccessResponse" },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "pagination": {
+                                "type": "object",
+                                "properties": {
+                                    "skip": {
+                                        "type": "integer",
+                                        "description": "Number of records skipped"
+                                    },
+                                    "take": {
+                                        "type": "integer",
+                                        "description": "Number of records taken"
+                                    },
+                                    "totalElements": {
+                                        "type": "integer",
+                                        "description": "Total number of elements"
+                                    },
+                                    "totalPages": {
+                                        "type": "integer",
+                                        "description": "Total number of pages"
+                                    }
+                                },
+                                "required": [
+                                    "skip",
+                                    "take",
+                                    "totalElements",
+                                    "totalPages"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+            "CreateProfileRequest": {
+                "type": "object",
+                "properties": {
+                    "reference": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Profile reference identifier"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": ["User", "Department", "Merchant"],
+                        "description": "Profile type"
+                    }
+                },
+                "required": ["reference", "type"]
+            },
+            "CreateWalletRequest": {
+                "type": "object",
+                "properties": {
+                    "reference": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Profile reference"
+                    },
+                    "network": {
+                        "type": "string",
+                        "enum": ["BTC", "tBTC", "ETH", "tETH"],
+                        "description": "Blockchain network"
+                    }
+                },
+                "required": ["reference", "network"]
+            },
+            "CreateAddressRequest": {
+                "type": "object",
+                "properties": {
+                    "reference": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Profile reference"
+                    },
+                    "network": {
+                        "type": "string",
+                        "enum": ["BTC", "tBTC", "ETH", "tETH"],
+                        "description": "Blockchain network"
+                    },
+                    "clientShare": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Client share for signing"
+                    }
+                },
+                "required": ["reference", "network", "clientShare"]
+            },
+            "CreateWithdrawalRequest": {
+                "type": "object",
+                "properties": {
+                    "to": {
+                        "type": "string",
+                        "description": "Recipient address for withdrawal"
+                    },
+                    "amount": {
+                        "type": "string",
+                        "description": "Withdrawal amount"
+                    },
+                    "from": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "description": "Array of source addresses for withdrawal"
+                    },
+                    "network": {
+                        "type": "string",
+                        "enum": ["BTC", "tBTC", "ETH", "tETH"],
+                        "description": "Blockchain network"
+                    },
+                    "clientShare": {
+                        "type": "string",
+                        "description": "Client share for signing"
+                    }
+                },
+                "required": ["to", "amount", "from", "network", "clientShare"]
+            },
+            "CreateContractTemplateRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Contract template name"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Contract template description"
+                    },
+                    "abi": {
+                        "type": "array",
+                        "description": "Contract ABI",
+                        "items": { "type": "object" }
+                    },
+                    "bytecode": {
+                        "type": "string",
+                        "description": "Contract bytecode"
+                    },
+                    "longDescription": {
+                        "type": "string",
+                        "description": "Long description of the contract"
+                    },
+                    "sourceCode": {
+                        "type": "string",
+                        "description": "Contract source code"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Contract type"
+                    },
+                    "docs": {
+                        "type": "object",
+                        "description": "Contract documentation",
+                        "properties": {
+                            "details": { "type": "string" },
+                            "events": { "type": "string" },
+                            "kind": {
+                                "type": "string",
+                                "enum": ["dev", "user"]
+                            },
+                            "methods": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": { "type": "string" },
+                                        "description": { "type": "string" },
+                                        "params": { "type": "object" },
+                                        "returns": { "type": "object" }
+                                    }
+                                }
+                            },
+                            "version": { "type": "string" }
+                        }
+                    },
+                    "attributes": {
+                        "type": "object",
+                        "description": "Contract attributes",
+                        "properties": {
+                            "useCases": {
+                                "type": "array",
+                                "items": { "type": "string" }
+                            },
+                            "standards": {
+                                "type": "array",
+                                "items": { "type": "string" }
+                            },
+                            "auditor": {
+                                "type": "object",
+                                "properties": {
+                                    "name": { "type": "string" },
+                                    "imageURL": { "type": "string" },
+                                    "link": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "required": ["name", "description", "abi", "bytecode"]
+            },
+            "DeployContractRequest": {
+                "type": "object",
+                "properties": {
+                    "network": {
+                        "type": "string",
+                        "description": "Target network"
+                    },
+                    "addressId": {
+                        "type": "string",
+                        "description": "Address ID for deployment"
+                    },
+                    "clientShare": {
+                        "type": "string",
+                        "description": "Client share for signing"
+                    },
+                    "constructorParameters": {
+                        "type": "array",
+                        "description": "Constructor parameters",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "Parameter name"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "description": "Parameter description"
+                                },
+                                "internalType": {
+                                    "type": "string",
+                                    "description": "Internal parameter type"
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "description": "Parameter type"
+                                },
+                                "components": {
+                                    "type": "array",
+                                    "description": "Parameter components",
+                                    "items": { "type": "object" }
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "description": "Parameter value"
+                                }
+                            },
+                            "required": ["name", "type"]
+                        }
+                    }
+                },
+                "required": ["network", "addressId", "clientShare"]
+            },
+            "FetchContractABIRequest": {
+                "type": "object",
+                "properties": {
+                    "network": {
+                        "type": "string",
+                        "description": "Blockchain network"
+                    },
+                    "contractAddress": {
+                        "type": "string",
+                        "description": "Contract address"
+                    }
+                },
+                "required": ["network", "contractAddress"]
+            },
+            "AddContractABIRequest": {
+                "type": "object",
+                "properties": {
+                    "network": {
+                        "type": "string",
+                        "description": "Blockchain network"
+                    },
+                    "contractAddress": {
+                        "type": "string",
+                        "description": "Contract address"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Contract name"
+                    },
+                    "abi": {
+                        "type": "array",
+                        "description": "Contract ABI",
+                        "items": { "type": "object" }
+                    }
+                },
+                "required": ["network", "contractAddress", "name", "abi"]
+            },
+            "ReadFunctionRequest": {
+                "type": "object",
+                "properties": {
+                    "abiFunction": {
+                        "type": "object",
+                        "description": "ABI function definition",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "Function name"
+                            },
+                            "inputs": {
+                                "type": "array",
+                                "description": "Function input parameters",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": { "type": "string" },
+                                        "type": { "type": "string" },
+                                        "internalType": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "outputs": {
+                                "type": "array",
+                                "description": "Function output parameters",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": { "type": "string" },
+                                        "type": { "type": "string" },
+                                        "internalType": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "stateMutability": { "type": "string" },
+                            "type": { "type": "string" }
+                        },
+                        "required": ["name", "inputs", "outputs", "type"]
+                    }
+                },
+                "required": ["abiFunction"]
+            },
+            "WriteFunctionRequest": {
+                "type": "object",
+                "properties": {
+                    "addressId": {
+                        "type": "string",
+                        "description": "Address ID for transaction"
+                    },
+                    "clientShare": {
+                        "type": "string",
+                        "description": "Client share for signing"
+                    },
+                    "abiFunction": {
+                        "type": "object",
+                        "description": "ABI function definition",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "Function name"
+                            },
+                            "inputs": {
+                                "type": "array",
+                                "description": "Function input parameters",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": { "type": "string" },
+                                        "type": { "type": "string" },
+                                        "internalType": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "outputs": {
+                                "type": "array",
+                                "description": "Function output parameters",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": { "type": "string" },
+                                        "type": { "type": "string" },
+                                        "internalType": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "stateMutability": { "type": "string" },
+                            "type": { "type": "string" }
+                        },
+                        "required": ["name", "inputs", "outputs", "type"]
+                    },
+                    "amount": {
+                        "type": "string",
+                        "description": "ETH value to send"
+                    },
+                    "feeLevel": {
+                        "type": "string",
+                        "enum": ["LOW", "MEDIUM", "HIGH"],
+                        "description": "Fee level for transaction"
+                    }
+                },
+                "required": ["addressId", "clientShare", "abiFunction"]
+            },
+            "IssueNewTokenRequest": {
+                "type": "object",
+                "properties": {
+                    "network": {
+                        "type": "string",
+                        "description": "Blockchain network"
+                    },
+                    "addressId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Address ID for token creation"
+                    },
+                    "clientShare": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Client share for signing"
+                    },
+                    "deploymentId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Deployed contract ID"
+                    },
+                    "createParams": {
+                        "type": "object",
+                        "properties": {
+                            "initializeParams": {
+                                "type": "array",
+                                "description": "Initialize parameters",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "description": "Parameter name"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "description": "Parameter type"
+                                        },
+                                        "value": {
+                                            "type": "string",
+                                            "description": "Parameter value"
+                                        }
+                                    },
+                                    "required": ["name", "type", "value"]
+                                }
+                            }
+                        },
+                        "required": ["initializeParams"]
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "description": "Token display name"
+                    },
+                    "useGasless": {
+                        "type": "boolean",
+                        "description": "Use gasless transaction"
+                    },
+                    "fee": {
+                        "type": "string",
+                        "description": "Transaction fee"
+                    },
+                    "feeLevel": { "type": "string", "description": "Fee level" }
+                },
+                "required": [
+                    "addressId",
+                    "clientShare",
+                    "deploymentId",
+                    "createParams"
+                ]
+            },
+            "CreateCollectionRequest": {
+                "type": "object",
+                "properties": {
+                    "network": {
+                        "type": "string",
+                        "description": "Blockchain network"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": ["NON_FUNGIBLE_TOKEN", "SEMI_FUNGIBLE_TOKEN"],
+                        "description": "Collection type"
+                    },
+                    "addressId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Address ID for collection creation"
+                    },
+                    "clientShare": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Client share for signing"
+                    },
+                    "createParams": {
+                        "type": "object",
+                        "properties": {
+                            "initializeParams": {
+                                "type": "array",
+                                "description": "Initialize parameters",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "description": "Parameter name"
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "description": "Parameter type"
+                                        },
+                                        "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "description": "Parameter value"
+                                        }
+                                    },
+                                    "required": ["name", "type", "value"]
+                                }
+                            }
+                        },
+                        "required": ["initializeParams"]
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Collection description"
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "description": "Collection display name"
+                    },
+                    "useGasless": {
+                        "type": "boolean",
+                        "description": "Use gasless transaction"
+                    },
+                    "fee": {
+                        "type": "string",
+                        "description": "Transaction fee"
+                    },
+                    "feeLevel": { "type": "string", "description": "Fee level" }
+                },
+                "required": ["type", "addressId", "clientShare", "createParams"]
+            },
+            "MintTokenRequest": {
+                "type": "object",
+                "properties": {
+                    "addressId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Address ID for minting"
+                    },
+                    "clientShare": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Client share for signing"
+                    },
+                    "to": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Recipient address"
+                    },
+                    "tokenId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Token ID"
+                    },
+                    "amount": {
+                        "type": "string",
+                        "description": "Token amount"
+                    },
+                    "metadataURI": {
+                        "type": "string",
+                        "description": "Token metadata URI"
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "Token name"
+                            },
+                            "description": {
+                                "type": "string",
+                                "minLength": 1,
+                                "description": "Token description"
+                            },
+                            "image": {
+                                "type": "string",
+                                "description": "Token image URL"
+                            },
+                            "animation_url": {
+                                "type": "string",
+                                "description": "Token animation URL"
+                            },
+                            "external_url": {
+                                "type": "string",
+                                "description": "External URL"
+                            },
+                            "attributes": {
+                                "type": "array",
+                                "description": "Token attributes",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "trait_type": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "description": "Trait type"
+                                        },
+                                        "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "description": "Trait value"
+                                        },
+                                        "display_type": {
+                                            "type": "string",
+                                            "description": "Display type"
+                                        }
+                                    },
+                                    "required": ["trait_type", "value"]
+                                }
+                            }
+                        },
+                        "required": ["name", "description"]
+                    }
+                },
+                "required": ["addressId", "clientShare", "to", "tokenId"]
+            },
+            "BurnTokenRequest": {
+                "type": "object",
+                "properties": {
+                    "addressId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Address ID for burning"
+                    },
+                    "clientShare": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Client share for signing"
+                    },
+                    "tokenId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Token ID"
+                    },
+                    "from": {
+                        "type": "string",
+                        "description": "Address to burn from"
+                    },
+                    "amount": {
+                        "type": "string",
+                        "description": "Token amount to burn"
+                    }
+                },
+                "required": ["addressId", "clientShare", "tokenId"]
+            },
+            "LinkContractRequest": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "Contract type"
+                    },
+                    "refId": {
+                        "type": "string",
+                        "description": "Reference ID"
+                    },
+                    "displayName": {
+                        "type": "string",
+                        "description": "Display name"
+                    },
+                    "network": {
+                        "type": "string",
+                        "description": "Blockchain network"
+                    },
+                    "contractAddress": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Contract address"
+                    }
+                },
+                "required": ["contractAddress"]
             }
-          }
-        },
-        "required": ["network", "addressId", "clientShare"]
-      },
-      "FetchContractABIRequest": {
-        "type": "object",
-        "properties": {
-          "network": { "type": "string", "description": "Blockchain network" },
-          "contractAddress": { "type": "string", "description": "Contract address" }
-        },
-        "required": ["network", "contractAddress"]
-      },
-      "AddContractABIRequest": {
-        "type": "object",
-        "properties": {
-          "network": { "type": "string", "description": "Blockchain network" },
-          "contractAddress": { "type": "string", "description": "Contract address" },
-          "name": { "type": "string", "description": "Contract name" },
-          "abi": {
-            "type": "array",
-            "description": "Contract ABI",
-            "items": { "type": "object" }
-          }
-        },
-        "required": ["network", "contractAddress", "name", "abi"]
-      },
-      "ReadFunctionRequest": {
-        "type": "object",
-        "properties": {
-          "abiFunction": {
-            "type": "object",
-            "description": "ABI function definition",
-            "properties": {
-              "name": { "type": "string", "description": "Function name" },
-              "inputs": {
-                "type": "array",
-                "description": "Function input parameters",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "type": { "type": "string" },
-                    "internalType": { "type": "string" }
-                  }
-                }
-              },
-              "outputs": {
-                "type": "array",
-                "description": "Function output parameters",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "type": { "type": "string" },
-                    "internalType": { "type": "string" }
-                  }
-                }
-              },
-              "stateMutability": { "type": "string" },
-              "type": { "type": "string" }
-            },
-            "required": ["name", "inputs", "outputs", "type"]
-          }
-        },
-        "required": ["abiFunction"]
-      },
-      "WriteFunctionRequest": {
-        "type": "object",
-        "properties": {
-          "addressId": { "type": "string", "description": "Address ID for transaction" },
-          "clientShare": { "type": "string", "description": "Client share for signing" },
-          "abiFunction": {
-            "type": "object",
-            "description": "ABI function definition",
-            "properties": {
-              "name": { "type": "string", "description": "Function name" },
-              "inputs": {
-                "type": "array",
-                "description": "Function input parameters",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "type": { "type": "string" },
-                    "internalType": { "type": "string" }
-                  }
-                }
-              },
-              "outputs": {
-                "type": "array",
-                "description": "Function output parameters",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "type": { "type": "string" },
-                    "internalType": { "type": "string" }
-                  }
-                }
-              },
-              "stateMutability": { "type": "string" },
-              "type": { "type": "string" }
-            },
-            "required": ["name", "inputs", "outputs", "type"]
-          },
-          "amount": { "type": "string", "description": "ETH value to send" },
-          "feeLevel": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"], "description": "Fee level for transaction" }
-        },
-        "required": ["addressId", "clientShare", "abiFunction"]
-      },
-      "IssueNewTokenRequest": {
-        "type": "object",
-        "properties": {
-          "network": { "type": "string", "description": "Blockchain network" },
-          "addressId": { "type": "string", "minLength": 1, "description": "Address ID for token creation" },
-          "clientShare": { "type": "string", "minLength": 1, "description": "Client share for signing" },
-          "deploymentId": { "type": "string", "minLength": 1, "description": "Deployed contract ID" },
-          "createParams": {
-            "type": "object",
-            "properties": {
-              "initializeParams": {
-                "type": "array",
-                "description": "Initialize parameters",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string", "minLength": 1, "description": "Parameter name" },
-                    "type": { "type": "string", "minLength": 1, "description": "Parameter type" },
-                    "value": { "type": "string", "description": "Parameter value" }
-                  },
-                  "required": ["name", "type", "value"]
-                }
-              }
-            },
-            "required": ["initializeParams"]
-          },
-          "displayName": { "type": "string", "description": "Token display name" },
-          "useGasless": { "type": "boolean", "description": "Use gasless transaction" },
-          "fee": { "type": "string", "description": "Transaction fee" },
-          "feeLevel": { "type": "string", "description": "Fee level" }
-        },
-        "required": ["addressId", "clientShare", "deploymentId", "createParams"]
-      },
-      "CreateCollectionRequest": {
-        "type": "object",
-        "properties": {
-          "network": { "type": "string", "description": "Blockchain network" },
-          "type": { "type": "string", "enum": ["NON_FUNGIBLE_TOKEN", "SEMI_FUNGIBLE_TOKEN"], "description": "Collection type" },
-          "addressId": { "type": "string", "minLength": 1, "description": "Address ID for collection creation" },
-          "clientShare": { "type": "string", "minLength": 1, "description": "Client share for signing" },
-          "createParams": {
-            "type": "object",
-            "properties": {
-              "initializeParams": {
-                "type": "array",
-                "description": "Initialize parameters",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string", "minLength": 1, "description": "Parameter name" },
-                    "type": { "type": "string", "minLength": 1, "description": "Parameter type" },
-                    "value": { "type": "string", "minLength": 1, "description": "Parameter value" }
-                  },
-                  "required": ["name", "type", "value"]
-                }
-              }
-            },
-            "required": ["initializeParams"]
-          },
-          "description": { "type": "string", "description": "Collection description" },
-          "displayName": { "type": "string", "description": "Collection display name" },
-          "useGasless": { "type": "boolean", "description": "Use gasless transaction" },
-          "fee": { "type": "string", "description": "Transaction fee" },
-          "feeLevel": { "type": "string", "description": "Fee level" }
-        },
-        "required": ["type", "addressId", "clientShare", "createParams"]
-      },
-      "MintTokenRequest": {
-        "type": "object",
-        "properties": {
-          "addressId": { "type": "string", "minLength": 1, "description": "Address ID for minting" },
-          "clientShare": { "type": "string", "minLength": 1, "description": "Client share for signing" },
-          "to": { "type": "string", "minLength": 1, "description": "Recipient address" },
-          "tokenId": { "type": "string", "minLength": 1, "description": "Token ID" },
-          "amount": { "type": "string", "description": "Token amount" },
-          "metadataURI": { "type": "string", "description": "Token metadata URI" },
-          "metadata": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string", "minLength": 1, "description": "Token name" },
-              "description": { "type": "string", "minLength": 1, "description": "Token description" },
-              "image": { "type": "string", "description": "Token image URL" },
-              "animation_url": { "type": "string", "description": "Token animation URL" },
-              "external_url": { "type": "string", "description": "External URL" },
-              "attributes": {
-                "type": "array",
-                "description": "Token attributes",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "trait_type": { "type": "string", "minLength": 1, "description": "Trait type" },
-                    "value": { "type": "string", "minLength": 1, "description": "Trait value" },
-                    "display_type": { "type": "string", "description": "Display type" }
-                  },
-                  "required": ["trait_type", "value"]
-                }
-              }
-            },
-            "required": ["name", "description"]
-          }
-        },
-        "required": ["addressId", "clientShare", "to", "tokenId"]
-      },
-      "BurnTokenRequest": {
-        "type": "object",
-        "properties": {
-          "addressId": { "type": "string", "minLength": 1, "description": "Address ID for burning" },
-          "clientShare": { "type": "string", "minLength": 1, "description": "Client share for signing" },
-          "tokenId": { "type": "string", "minLength": 1, "description": "Token ID" },
-          "from": { "type": "string", "description": "Address to burn from" },
-          "amount": { "type": "string", "description": "Token amount to burn" }
-        },
-        "required": ["addressId", "clientShare", "tokenId"]
-      },
-      "LinkContractRequest": {
-        "type": "object",
-        "properties": {
-          "type": { "type": "string", "description": "Contract type" },
-          "refId": { "type": "string", "description": "Reference ID" },
-          "displayName": { "type": "string", "description": "Display name" },
-          "network": { "type": "string", "description": "Blockchain network" },
-          "contractAddress": { "type": "string", "minLength": 1, "description": "Contract address" }
-        },
-        "required": ["contractAddress"]
-      }
+        }
     }
-  }
 }
