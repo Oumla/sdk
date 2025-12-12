@@ -39,15 +39,6 @@ importers:
         specifier: 5.0.4
         version: 5.0.4
 
-  sdks/typescriptV2:
-    devDependencies:
-      tsup:
-        specifier: ^6.7.0
-        version: 6.7.0(postcss@8.5.6)(typescript@5.0.4)
-      typescript:
-        specifier: 5.0.4
-        version: 5.0.4
-
 packages:
 
   '@babel/runtime@7.28.4':

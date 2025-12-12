@@ -277,7 +277,7 @@
                 "tags": ["Addresses"],
                 "summary": "Generate Address",
                 "description": "Generate a new address for a profile",
-                "operationId": "generateAddress",
+                "operationId": "generateAddressV1",
                 "parameters": [
                     { "$ref": "#/components/parameters/SdkVersionParam" }
                 ],
@@ -310,7 +310,7 @@
                 "tags": ["Addresses"],
                 "summary": "Generate Address",
                 "description": "Generate a new address for a profile",
-                "operationId": "generateAddress",
+                "operationId": "generateAddressV2",
                 "parameters": [
                     { "$ref": "#/components/parameters/SdkVersionParam" }
                 ],

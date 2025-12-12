@@ -26,7 +26,9 @@ export interface CreateWithdrawalRequest {
 export namespace CreateWithdrawalRequest {
     /** Blockchain network */
     export const Network = {
+        Btc: "BTC",
         TBtc: "tBTC",
+        Eth: "ETH",
         TEth: "tETH",
     } as const;
     export type Network = (typeof Network)[keyof typeof Network];

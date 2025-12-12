@@ -5,3 +5,4 @@ export { type GetCollectionsRequest } from "./GetCollectionsRequest.js";
 export { type CreateCollectionRequest } from "./CreateCollectionRequest.js";
 export { type MintTokenRequest } from "./MintTokenRequest.js";
 export { type BurnTokenRequest } from "./BurnTokenRequest.js";
+export { type GetCollectionTokensRequest } from "./GetCollectionTokensRequest.js";
