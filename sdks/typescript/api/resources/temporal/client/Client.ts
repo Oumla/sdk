@@ -6,7 +6,7 @@ import * as OumlaSdkApi from "../../../index.js";
 import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as errors from "../../../../errors/index.js";
 
-export declare namespace Assets {
+export declare namespace Temporal {
     export interface Options {
         environment?: core.Supplier<environments.OumlaSdkApiEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
@@ -39,70 +39,37 @@ export declare namespace Assets {
 }
 
 /**
- * Asset management and tracking
+ * Temporal workflow operations
  */
-export class Assets {
-    protected readonly _options: Assets.Options;
+export class Temporal {
+    protected readonly _options: Temporal.Options;
 
-    constructor(_options: Assets.Options) {
+    constructor(_options: Temporal.Options) {
         this._options = _options;
     }
 
     /**
-     * Retrieve assets for the organization filtered by address, wallet ID, contract address, or tokenization ID
+     * Get workflow status and result
      *
-     * @param {OumlaSdkApi.GetAssetsRequest} request
-     * @param {Assets.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {string} workflowId - Temporal workflow ID
+     * @param {Temporal.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.NotFoundError}
      *
      * @example
-     *     await client.assets.getAssets({
-     *         address: "address",
-     *         walletId: "walletId",
-     *         contractAddress: "contractAddress",
-     *         tokenizationId: "tokenizationId",
-     *         skip: 1,
-     *         take: 1
-     *     })
+     *     await client.temporal.getTemporalWorkflowStatus("workflowId")
      */
-    public getAssets(
-        request: OumlaSdkApi.GetAssetsRequest = {},
-        requestOptions?: Assets.RequestOptions,
+    public getTemporalWorkflowStatus(
+        workflowId: string,
+        requestOptions?: Temporal.RequestOptions,
     ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getAssets(request, requestOptions));
+        return core.HttpResponsePromise.fromPromise(this.__getTemporalWorkflowStatus(workflowId, requestOptions));
     }
 
-    private async __getAssets(
-        request: OumlaSdkApi.GetAssetsRequest = {},
-        requestOptions?: Assets.RequestOptions,
+    private async __getTemporalWorkflowStatus(
+        workflowId: string,
+        requestOptions?: Temporal.RequestOptions,
     ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
-        const { address, walletId, contractAddress, tokenizationId, skip, take } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        if (address != null) {
-            _queryParams["address"] = address;
-        }
-
-        if (walletId != null) {
-            _queryParams["walletId"] = walletId;
-        }
-
-        if (contractAddress != null) {
-            _queryParams["contractAddress"] = contractAddress;
-        }
-
-        if (tokenizationId != null) {
-            _queryParams["tokenizationId"] = tokenizationId;
-        }
-
-        if (skip != null) {
-            _queryParams["skip"] = skip.toString();
-        }
-
-        if (take != null) {
-            _queryParams["take"] = take.toString();
-        }
-
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -117,11 +84,11 @@ export class Assets {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.OumlaSdkApiEnvironment.Production,
-                "api/v1/assets",
+                `api/v1/temporal/workflows/${encodeURIComponent(workflowId)}/status`,
             ),
             method: "GET",
             headers: _headers,
-            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
@@ -154,7 +121,9 @@ export class Assets {
                     rawResponse: _response.rawResponse,
                 });
             case "timeout":
-                throw new errors.OumlaSdkApiTimeoutError("Timeout exceeded when calling GET /api/v1/assets.");
+                throw new errors.OumlaSdkApiTimeoutError(
+                    "Timeout exceeded when calling GET /api/v1/temporal/workflows/{workflowId}/status.",
+                );
             case "unknown":
                 throw new errors.OumlaSdkApiError({
                     message: _response.error.errorMessage,

@@ -1,6 +1,6 @@
 {
   "name": "@oumla/sdk",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "type": "module",
   "description": "Official TypeScript SDK for Oumla - Blockchain integration made simple",
   "main": "./dist/index.cjs",

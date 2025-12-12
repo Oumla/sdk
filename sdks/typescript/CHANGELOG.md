@@ -5,7 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] - 2024-12-12
+
+### Added
+
+#### Temporal Workflow Status
+- New `temporal` resource for tracking async workflow status
+- `getTemporalWorkflowStatus(workflowId)` - Get status and result of temporal workflows
+- Enables tracking of async operations like create collection, mint, burn, and contract interactions
+- Returns workflow status, start/close time, execution time, history length, and result/error data
+
+#### Generate Address V2
+- Updated `generateAddress()` endpoint to use V2 API (`/api/v2/addresses/generate`)
+- Improved address generation with enhanced parameters
+
+#### New Collection Endpoints
+- `getCollection(id)` - Retrieve a specific collection by ID
+- `deleteCollection(id)` - Delete a collection
+- `getCollectionTokenDetails(collectionId, tokenId)` - Get detailed information for a specific token in a collection
+- `getCollectionTokens(request)` - Retrieve collection tokens (mints or burns) with filtering by collection ID and type
+
+#### New Token Operations
+- `unlinkToken(id)` - Unlink a token from the platform
+
+#### Contract Interactions
+- `getTransactionReceipt(network, txId)` - Retrieve transaction receipt for a specific transaction
+
+### Changed
+- Address generation now uses the V2 API endpoint for enhanced functionality
+- Updated example.ts with comprehensive examples for all new features
+- Updated README.md with documentation for temporal workflows, new collection endpoints, and V2 address generation
+
+---
+
+## [1.0.0] - 2024-11-13
 
 ### Added
 - Initial release of Oumla TypeScript SDK
@@ -38,10 +71,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive error handling with custom error types
 - Auto-generated from OpenAPI specification
 - Compatible with Node.js 18+ and modern browsers
-
-## [1.0.0] - 2024-01-XX
-
-### Added
-- Initial release
-- Complete SDK implementation
-- Documentation and examples

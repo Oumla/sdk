@@ -872,6 +872,113 @@ export class Tokenization {
     }
 
     /**
+     * Retrieve collection tokens (mints or burns) filtered by collection ID and type
+     *
+     * @param {OumlaSdkApi.GetCollectionTokensRequest} request
+     * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     *
+     * @example
+     *     await client.tokenization.getCollectionTokens({
+     *         id: "id",
+     *         type: "MINT",
+     *         skip: 1,
+     *         take: 1
+     *     })
+     */
+    public getCollectionTokens(
+        request: OumlaSdkApi.GetCollectionTokensRequest = {},
+        requestOptions?: Tokenization.RequestOptions,
+    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getCollectionTokens(request, requestOptions));
+    }
+
+    private async __getCollectionTokens(
+        request: OumlaSdkApi.GetCollectionTokensRequest = {},
+        requestOptions?: Tokenization.RequestOptions,
+    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+        const { id, type: type_, skip, take } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        if (id != null) {
+            _queryParams["id"] = id;
+        }
+
+        if (type_ != null) {
+            _queryParams["type"] = type_;
+        }
+
+        if (skip != null) {
+            _queryParams["skip"] = skip.toString();
+        }
+
+        if (take != null) {
+            _queryParams["take"] = take.toString();
+        }
+
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
+                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+            }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.OumlaSdkApiEnvironment.Production,
+                "api/v1/tokenization/collection/tokens",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.OumlaSdkApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.OumlaSdkApiTimeoutError(
+                    "Timeout exceeded when calling GET /api/v1/tokenization/collection/tokens.",
+                );
+            case "unknown":
+                throw new errors.OumlaSdkApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
      * Unlink a token from the platform
      *
      * @param {string} id - Token ID
