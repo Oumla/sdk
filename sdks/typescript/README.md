@@ -57,7 +57,7 @@ async function getProfiles() {
 // Example: Generate an address (V2 API)
 async function generateAddress() {
   try {
-    const address = await client.addresses.generateAddress({
+    const address = await client.addresses.generateAddressV2({
       reference: 'profile-reference',
       network: 'ETH',
       clientShare: 'your-client-share',
