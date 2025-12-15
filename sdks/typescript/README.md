@@ -100,7 +100,7 @@ Generate and manage blockchain addresses with the enhanced V2 API
 const addresses = await client.addresses.getProfileAddresses('profile-reference');
 
 // Generate a new address (V2)
-const address = await client.addresses.generateAddress({
+const address = await client.addresses.generateAddressV2({
   reference: 'profile-reference',
   network: 'ETH', // Supports: BTC, tBTC, ETH, tETH
   clientShare: 'your-client-share',
