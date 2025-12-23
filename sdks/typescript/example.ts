@@ -14,7 +14,7 @@ type SuccessResponse = any;
 // Initialize the client
 const client = new OumlaSdkApiClient({
   apiKey: 'your-api-key',
-  environment: OumlaSdkApiEnvironment.Production,
+  environment: OumlaSdkApiEnvironment.Mainnet,
   // sdkVersion not specified - should use default "1.0.0"
 });
 

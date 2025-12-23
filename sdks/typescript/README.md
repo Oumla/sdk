@@ -41,7 +41,7 @@ import { OumlaSdkApiClient, OumlaSdkApiEnvironment } from '@oumla/sdk';
 // Initialize the client
 const client = new OumlaSdkApiClient({
   apiKey: 'your-api-key-here',
-  environment: OumlaSdkApiEnvironment.Production,
+  environment: OumlaSdkApiEnvironment.Mainnet,
 });
 
 // Example: Get profiles
@@ -308,7 +308,7 @@ import { OumlaSdkApiClient, OumlaSdkApiEnvironment } from '@oumla/sdk';
 
 const client = new OumlaSdkApiClient({
   apiKey: process.env.OUMLA_API_KEY!,
-  environment: OumlaSdkApiEnvironment.Production, // or custom URL
+  environment: OumlaSdkApiEnvironment.Mainnet, // or custom URL
   baseUrl: 'https://custom-api.oumla.com', // Optional: custom base URL
   headers: {
     'Custom-Header': 'value', // Optional: additional headers
