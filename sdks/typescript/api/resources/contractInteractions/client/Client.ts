@@ -86,7 +86,7 @@ export class ContractInteractions {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/contract-interactions/network/${encodeURIComponent(network)}/contract-address/${encodeURIComponent(contractAddress)}/functions`,
             ),
             method: "GET",
@@ -175,7 +175,7 @@ export class ContractInteractions {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/contract-interactions/network/${encodeURIComponent(network)}/contract-address/${encodeURIComponent(contractAddress)}/functions/read`,
             ),
             method: "POST",
@@ -269,7 +269,7 @@ export class ContractInteractions {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/contract-interactions/network/${encodeURIComponent(network)}/contract-address/${encodeURIComponent(contractAddress)}/functions/write`,
             ),
             method: "POST",
@@ -349,7 +349,7 @@ export class ContractInteractions {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/contract-interactions/network/${encodeURIComponent(network)}/tx/${encodeURIComponent(txId)}`,
             ),
             method: "GET",

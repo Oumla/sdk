@@ -15,8 +15,9 @@
     },
     "servers": [
         {
-            "url": "https://api.oumla.com",
-            "description": "Production"
+            "url": "https://sandbox.oumla.com",
+            "description": "Mainnet",
+            "x-fern-server-name": "Mainnet"
         }
     ],
     "security": [
