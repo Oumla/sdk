@@ -109,7 +109,7 @@ export class DeployedContracts {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/deployed-contracts",
             ),
             method: "GET",
@@ -183,7 +183,7 @@ export class DeployedContracts {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/deployed-contracts/${encodeURIComponent(contractId)}`,
             ),
             method: "GET",
@@ -262,7 +262,7 @@ export class DeployedContracts {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/deployed-contracts/${encodeURIComponent(network)}/${encodeURIComponent(contractAddress)}`,
             ),
             method: "GET",
@@ -339,7 +339,7 @@ export class DeployedContracts {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/deployed-contracts/fetch-abi",
             ),
             method: "POST",
@@ -423,7 +423,7 @@ export class DeployedContracts {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/deployed-contracts/add-abi",
             ),
             method: "POST",

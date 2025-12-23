@@ -94,7 +94,7 @@ export class Profiles {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/profiles",
             ),
             method: "GET",
@@ -171,7 +171,7 @@ export class Profiles {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/profiles",
             ),
             method: "POST",

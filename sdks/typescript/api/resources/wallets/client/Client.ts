@@ -94,7 +94,7 @@ export class Wallets {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/wallets/organization",
             ),
             method: "GET",
@@ -184,7 +184,7 @@ export class Wallets {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/wallets/profile/${encodeURIComponent(reference)}`,
             ),
             method: "GET",
@@ -261,7 +261,7 @@ export class Wallets {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/wallets/generate",
             ),
             method: "POST",

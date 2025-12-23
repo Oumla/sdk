@@ -94,7 +94,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/tokenization/tokens",
             ),
             method: "GET",
@@ -179,7 +179,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/tokenization/tokens",
             ),
             method: "POST",
@@ -258,7 +258,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/tokenization/tokens/link",
             ),
             method: "POST",
@@ -348,7 +348,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/tokenization/collections",
             ),
             method: "GET",
@@ -433,7 +433,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/tokenization/collections",
             ),
             method: "POST",
@@ -510,7 +510,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/tokenization/collections/${encodeURIComponent(id)}`,
             ),
             method: "GET",
@@ -584,7 +584,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/tokenization/collections/${encodeURIComponent(id)}`,
             ),
             method: "DELETE",
@@ -661,7 +661,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/tokenization/collections/${encodeURIComponent(id)}/tokens/${encodeURIComponent(tokenId)}`,
             ),
             method: "GET",
@@ -743,7 +743,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/tokenization/collections/${encodeURIComponent(id)}/tokens/mint`,
             ),
             method: "POST",
@@ -827,7 +827,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/tokenization/collections/${encodeURIComponent(id)}/tokens/burn`,
             ),
             method: "POST",
@@ -929,7 +929,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 "api/v1/tokenization/collection/tokens",
             ),
             method: "GET",
@@ -1011,7 +1011,7 @@ export class Tokenization {
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Production,
+                    environments.OumlaSdkApiEnvironment.Mainnet,
                 `api/v1/tokenization/tokens/${encodeURIComponent(id)}`,
             ),
             method: "DELETE",
