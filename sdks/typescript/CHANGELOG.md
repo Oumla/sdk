@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-01-31
+
+### Added
+
+#### Enhanced Error Handling
+- Added comprehensive error types for better error handling:
+  - `BadGatewayError` (502) - Bad Gateway errors
+  - `ConflictError` (409) - Conflict errors
+  - `ForbiddenError` (403) - Forbidden access errors
+  - `GatewayTimeoutError` (504) - Gateway timeout errors
+  - `InternalServerError` (500) - Internal server errors
+  - `ServiceUnavailableError` (503) - Service unavailable errors
+  - `UnauthorizedError` (401) - Unauthorized access errors
+  - `UnprocessableEntityError` (422) - Unprocessable entity errors
+- All existing endpoints now include appropriate error codes in their documentation and error handling
+
+#### Portfolio Resource
+- `getNativeBalance()` - Get native balance for network, address, or wallet
+
+### Changed
+- Renamed `assets` resource to `portfolio` for better semantic clarity
+- Enhanced error handling across all endpoints with appropriate HTTP status code mappings
+- Improved type definitions with new response types for all endpoints
+- `readFunction()` renamed to `readCallFunction()` in contract interactions
+- `writeFunction()` renamed to `writeCallFunction()` in contract interactions
+- `getTransactionsByWallet()` renamed to `getTransactionsByMiniWallet()` in transactions
+- `createWithdrawal()` renamed to `createWithdraw()` in withdrawals
+
+---
+
 ## [1.2.4] - 2025-12-23
 
 ### Changed

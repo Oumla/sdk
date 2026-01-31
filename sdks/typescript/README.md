@@ -15,6 +15,14 @@ Official TypeScript SDK for Oumla - Blockchain integration made simple. This SDK
 - 🌐 **Multi-environment** - Support for different deployment environments
 - ⏱️ **Workflow Tracking** - Monitor async operations with Temporal workflow status
 
+## Supported Networks
+
+The SDK supports the following blockchain networks:
+
+- **tBTC** - Bitcoin Testnet
+- **tETH** - Ethereum Testnet
+- **SANDBOX** - Sandbox Environment
+
 ## Installation
 
 ```bash
@@ -57,9 +65,9 @@ async function getProfiles() {
 // Example: Generate an address (V2 API)
 async function generateAddress() {
   try {
-    const address = await client.addresses.generateAddressV2({
+    const address = await client.addresses.createAddressV2({
       reference: 'profile-reference',
-      network: 'ETH',
+      network: 'network',
       clientShare: 'your-client-share',
     });
     console.log('Generated address:', address);
@@ -86,59 +94,89 @@ const profile = await client.profiles.createProfile({
 ### 💼 Wallets
 Create and manage blockchain wallets
 ```typescript
-const wallets = await client.wallets.getProfileWallets('profile-reference');
-const wallet = await client.wallets.generateWallet({ 
+const wallets = await client.wallets.getWalletsByProfile('profile-reference');
+const wallet = await client.wallets.createWallet({ 
   reference: 'profile-reference', 
-  network: 'tETH' 
+  network: 'network' 
 });
 ```
 
-### 📍 Addresses (V2 API)
-Generate and manage blockchain addresses with the enhanced V2 API
+### 📍 Addresses
+Generate and manage blockchain addresses
 ```typescript
 // Get addresses for a profile
-const addresses = await client.addresses.getProfileAddresses('profile-reference');
+const addresses = await client.addresses.getAddressForProfile({
+  reference: 'profile-reference'
+});
 
-// Generate a new address (V2)
-const address = await client.addresses.generateAddressV2({
+// Generate a new address (V2 API - recommended)
+const address = await client.addresses.createAddressV2({
   reference: 'profile-reference',
-  network: 'ETH', // Supports: BTC, tBTC, ETH, tETH
+  network: 'network',
   clientShare: 'your-client-share',
 });
 
 // Get organization addresses
-const orgAddresses = await client.addresses.getOrganizationAddresses();
+const orgAddresses = await client.addresses.getAddressForOrganization();
 ```
 
 ### 💰 Transactions
 Track and manage blockchain transactions
 ```typescript
-const transactions = await client.transactions.getProfileTransactions('profile-reference');
+// Get transactions by profile
+const transactions = await client.transactions.getTransactionsByProfile({
+  reference: 'profile-reference'
+});
+
+// Get transactions by address
+const addressTransactions = await client.transactions.getTransactionsByAddress({
+  address: '0x...'
+});
+
+// Get transactions by organization
+const orgTransactions = await client.transactions.getTransactionsByOrganization({
+  reference: 'org-reference'
+});
 ```
 
-### 🎨 Assets
-Manage digital assets and collections
+### 💼 Portfolio
+Manage digital assets and portfolio tracking
 ```typescript
-const assets = await client.assets.getAssets();
+// Get assets for address, wallet, or contract
+const assets = await client.portfolio.getAssets({
+  address: '0x...',
+  walletId: 'wallet-id',
+  contractAddress: '0x...',
+  tokenizationId: 'token-id'
+});
+
+// Get native balance for network, address, or wallet
+const balance = await client.portfolio.getNativeBalance({
+  network: 'network',
+  address: '0x...',
+  walletId: 'wallet-id'
+});
 ```
 
 ### 🔥 Withdrawals
 Handle withdrawal operations
 ```typescript
-const withdrawal = await client.withdrawals.createWithdrawal({
+const withdrawal = await client.withdrawals.createWithdraw({
   walletId: 'wallet-id',
   amount: '1.0',
-  currency: 'ETH',
+  currency: 'network',
 });
 ```
 
 ### 📋 Contract Templates
 Deploy and manage smart contract templates
 ```typescript
-const templates = await client.contractTemplates.getContractTemplates();
-const template = await client.contractTemplates.createContractTemplate({
+const templates = await client.contractTemplates.getContracts();
+const template = await client.contractTemplates.createContract({
   name: 'My Contract',
   abi: contractAbi,
+  bytecode: '0x...',
+  description: 'Contract description'
 });
 ```
 
@@ -151,14 +189,14 @@ const contracts = await client.deployedContracts.getDeployedContracts();
 ### 🔧 Contract Interactions
 Read from and write to smart contracts
 ```typescript
-// Get available contract functions
-const functions = await client.contractInteractions.getContractFunctions(
+// Get ABI functions for a deployed contract
+const abi = await client.contractInteractions.getDeployedContractAbi(
   'network',
   'contractAddress'
 );
 
 // Read from contract
-const result = await client.contractInteractions.callReadFunction(
+const result = await client.contractInteractions.readCallFunction(
   'network',
   'contractAddress',
   {
@@ -168,11 +206,12 @@ const result = await client.contractInteractions.callReadFunction(
       outputs: [{ name: '', type: 'uint256' }],
       type: 'function',
     },
+    parameters: ['0x...']
   }
 );
 
 // Write to contract (triggers async workflow)
-const writeResult = await client.contractInteractions.callWriteFunction(
+const writeResult = await client.contractInteractions.writeCallFunction(
   'network',
   'contractAddress',
   {
@@ -187,6 +226,7 @@ const writeResult = await client.contractInteractions.callWriteFunction(
       outputs: [],
       type: 'function',
     },
+    parameters: ['0x...', '1000000000000000000']
   }
 );
 
@@ -337,20 +377,53 @@ const profiles = await client.profiles.getProfiles({
 
 ## Error Handling
 
-The SDK provides comprehensive error handling:
+The SDK provides comprehensive error handling with specific error types for different HTTP status codes:
 
 ```typescript
-import { OumlaSdkApiError, OumlaSdkApiTimeoutError } from '@oumla/sdk';
+import { 
+  OumlaSdkApiError, 
+  OumlaSdkApiTimeoutError,
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  NotFoundError,
+  ConflictError,
+  UnprocessableEntityError,
+  InternalServerError,
+  BadGatewayError,
+  ServiceUnavailableError,
+  GatewayTimeoutError
+} from '@oumla/sdk';
 
 try {
   const result = await client.profiles.getProfiles();
 } catch (error) {
-  if (error instanceof OumlaSdkApiError) {
+  if (error instanceof BadRequestError) {
+    console.error('Bad Request (400):', error.message);
+  } else if (error instanceof UnauthorizedError) {
+    console.error('Unauthorized (401):', error.message);
+  } else if (error instanceof ForbiddenError) {
+    console.error('Forbidden (403):', error.message);
+  } else if (error instanceof NotFoundError) {
+    console.error('Not Found (404):', error.message);
+  } else if (error instanceof ConflictError) {
+    console.error('Conflict (409):', error.message);
+  } else if (error instanceof UnprocessableEntityError) {
+    console.error('Unprocessable Entity (422):', error.message);
+  } else if (error instanceof InternalServerError) {
+    console.error('Internal Server Error (500):', error.message);
+  } else if (error instanceof BadGatewayError) {
+    console.error('Bad Gateway (502):', error.message);
+  } else if (error instanceof ServiceUnavailableError) {
+    console.error('Service Unavailable (503):', error.message);
+  } else if (error instanceof GatewayTimeoutError) {
+    console.error('Gateway Timeout (504):', error.message);
+  } else if (error instanceof OumlaSdkApiTimeoutError) {
+    console.error('Request timeout:', error.message);
+  } else if (error instanceof OumlaSdkApiError) {
     console.error('API Error:', error.message);
     console.error('Status Code:', error.statusCode);
     console.error('Response Body:', error.body);
-  } else if (error instanceof OumlaSdkApiTimeoutError) {
-    console.error('Request timeout:', error.message);
   } else {
     console.error('Unexpected error:', error);
   }

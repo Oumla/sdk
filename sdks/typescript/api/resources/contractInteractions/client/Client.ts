@@ -49,30 +49,36 @@ export class ContractInteractions {
     }
 
     /**
-     * Retrieve available functions for a deployed contract
+     * Get ABI functions for a deployed contract
      *
-     * @param {string} network - Blockchain network
+     * @param {OumlaSdkApi.GetDeployedContractAbiRequestNetwork} network - Network
      * @param {string} contractAddress - Contract address
      * @param {ContractInteractions.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.contractInteractions.getContractFunctions("network", "contractAddress")
+     *     await client.contractInteractions.getDeployedContractAbi("tBTC", "contractAddress")
      */
-    public getContractFunctions(
-        network: string,
+    public getDeployedContractAbi(
+        network: OumlaSdkApi.GetDeployedContractAbiRequestNetwork,
         contractAddress: string,
         requestOptions?: ContractInteractions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.ContractAbiResponse> {
         return core.HttpResponsePromise.fromPromise(
-            this.__getContractFunctions(network, contractAddress, requestOptions),
+            this.__getDeployedContractAbi(network, contractAddress, requestOptions),
         );
     }
 
-    private async __getContractFunctions(
-        network: string,
+    private async __getDeployedContractAbi(
+        network: OumlaSdkApi.GetDeployedContractAbiRequestNetwork,
         contractAddress: string,
         requestOptions?: ContractInteractions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.ContractAbiResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -97,15 +103,43 @@ export class ContractInteractions {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.ContractAbiResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -128,40 +162,42 @@ export class ContractInteractions {
     }
 
     /**
-     * Call a read function on a deployed contract
+     * Call a read-only contract function
      *
-     * @param {string} network - Blockchain network
+     * @param {OumlaSdkApi.ReadCallFunctionRequestNetwork} network - Network
      * @param {string} contractAddress - Contract address
-     * @param {OumlaSdkApi.ReadFunctionRequest} request
+     * @param {OumlaSdkApi.ReadCallFunctionRequest} request
      * @param {ContractInteractions.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.contractInteractions.callReadFunction("network", "contractAddress", {
+     *     await client.contractInteractions.readCallFunction("tBTC", "contractAddress", {
      *         abiFunction: {
-     *             name: "name",
-     *             inputs: [{}],
-     *             outputs: [{}],
-     *             type: "type"
+     *             "key": "value"
      *         }
      *     })
      */
-    public callReadFunction(
-        network: string,
+    public readCallFunction(
+        network: OumlaSdkApi.ReadCallFunctionRequestNetwork,
         contractAddress: string,
-        request: OumlaSdkApi.ReadFunctionRequest,
+        request: OumlaSdkApi.ReadCallFunctionRequest,
         requestOptions?: ContractInteractions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.ReadCallFunctionResponse> {
         return core.HttpResponsePromise.fromPromise(
-            this.__callReadFunction(network, contractAddress, request, requestOptions),
+            this.__readCallFunction(network, contractAddress, request, requestOptions),
         );
     }
 
-    private async __callReadFunction(
-        network: string,
+    private async __readCallFunction(
+        network: OumlaSdkApi.ReadCallFunctionRequestNetwork,
         contractAddress: string,
-        request: OumlaSdkApi.ReadFunctionRequest,
+        request: OumlaSdkApi.ReadCallFunctionRequest,
         requestOptions?: ContractInteractions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.ReadCallFunctionResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -189,15 +225,38 @@ export class ContractInteractions {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.ReadCallFunctionResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -220,42 +279,50 @@ export class ContractInteractions {
     }
 
     /**
-     * Call a write function on a deployed contract
+     * Call a write contract function (transaction)
      *
-     * @param {string} network - Blockchain network
+     * @param {OumlaSdkApi.WriteCallFunctionRequestNetwork} network - Network
      * @param {string} contractAddress - Contract address
-     * @param {OumlaSdkApi.WriteFunctionRequest} request
+     * @param {OumlaSdkApi.WriteCallFunctionRequest} request
      * @param {ContractInteractions.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.ConflictError}
+     * @throws {@link OumlaSdkApi.UnprocessableEntityError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     * @throws {@link OumlaSdkApi.BadGatewayError}
+     * @throws {@link OumlaSdkApi.ServiceUnavailableError}
+     * @throws {@link OumlaSdkApi.GatewayTimeoutError}
+     *
      * @example
-     *     await client.contractInteractions.callWriteFunction("network", "contractAddress", {
+     *     await client.contractInteractions.writeCallFunction("tBTC", "contractAddress", {
      *         addressId: "addressId",
      *         clientShare: "clientShare",
      *         abiFunction: {
-     *             name: "name",
-     *             inputs: [{}],
-     *             outputs: [{}],
-     *             type: "type"
+     *             "key": "value"
      *         }
      *     })
      */
-    public callWriteFunction(
-        network: string,
+    public writeCallFunction(
+        network: OumlaSdkApi.WriteCallFunctionRequestNetwork,
         contractAddress: string,
-        request: OumlaSdkApi.WriteFunctionRequest,
+        request: OumlaSdkApi.WriteCallFunctionRequest,
         requestOptions?: ContractInteractions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.WriteCallFunctionResponse> {
         return core.HttpResponsePromise.fromPromise(
-            this.__callWriteFunction(network, contractAddress, request, requestOptions),
+            this.__writeCallFunction(network, contractAddress, request, requestOptions),
         );
     }
 
-    private async __callWriteFunction(
-        network: string,
+    private async __writeCallFunction(
+        network: OumlaSdkApi.WriteCallFunctionRequestNetwork,
         contractAddress: string,
-        request: OumlaSdkApi.WriteFunctionRequest,
+        request: OumlaSdkApi.WriteCallFunctionRequest,
         requestOptions?: ContractInteractions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.WriteCallFunctionResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -283,15 +350,71 @@ export class ContractInteractions {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.WriteCallFunctionResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new OumlaSdkApi.ConflictError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new OumlaSdkApi.UnprocessableEntityError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 502:
+                    throw new OumlaSdkApi.BadGatewayError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 503:
+                    throw new OumlaSdkApi.ServiceUnavailableError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 504:
+                    throw new OumlaSdkApi.GatewayTimeoutError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -314,28 +437,34 @@ export class ContractInteractions {
     }
 
     /**
-     * Retrieve transaction receipt for a specific transaction
+     * Get transaction receipt by network and transaction ID
      *
-     * @param {string} network - Blockchain network
+     * @param {OumlaSdkApi.GetTransactionReceiptRequestNetwork} network - Network
      * @param {string} txId - Transaction ID
      * @param {ContractInteractions.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.contractInteractions.getTransactionReceipt("network", "txId")
+     *     await client.contractInteractions.getTransactionReceipt("tBTC", "txId")
      */
     public getTransactionReceipt(
-        network: string,
+        network: OumlaSdkApi.GetTransactionReceiptRequestNetwork,
         txId: string,
         requestOptions?: ContractInteractions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.TransactionReceiptResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getTransactionReceipt(network, txId, requestOptions));
     }
 
     private async __getTransactionReceipt(
-        network: string,
+        network: OumlaSdkApi.GetTransactionReceiptRequestNetwork,
         txId: string,
         requestOptions?: ContractInteractions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.TransactionReceiptResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -360,15 +489,46 @@ export class ContractInteractions {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.TransactionReceiptResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {

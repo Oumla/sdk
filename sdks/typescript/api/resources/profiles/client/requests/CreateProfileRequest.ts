@@ -3,7 +3,7 @@
 /**
  * @example
  *     {
- *         reference: "reference",
+ *         reference: "user-123",
  *         type: "User"
  *     }
  */

@@ -49,38 +49,33 @@ export class Wallets {
     }
 
     /**
-     * Retrieve wallets for the organization
+     * Generate a new wallet for a profile
      *
-     * @param {OumlaSdkApi.GetOrganizationWalletsRequest} request
+     * @param {OumlaSdkApi.CreateWalletRequest} request
      * @param {Wallets.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ConflictError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.wallets.getOrganizationWallets({
-     *         skip: 1,
-     *         take: 1
+     *     await client.wallets.createWallet({
+     *         reference: "user-123",
+     *         network: "tBTC"
      *     })
      */
-    public getOrganizationWallets(
-        request: OumlaSdkApi.GetOrganizationWalletsRequest = {},
+    public createWallet(
+        request: OumlaSdkApi.CreateWalletRequest,
         requestOptions?: Wallets.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.PaginatedResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getOrganizationWallets(request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.WalletResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__createWallet(request, requestOptions));
     }
 
-    private async __getOrganizationWallets(
-        request: OumlaSdkApi.GetOrganizationWalletsRequest = {},
+    private async __createWallet(
+        request: OumlaSdkApi.CreateWalletRequest,
         requestOptions?: Wallets.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.PaginatedResponse>> {
-        const { skip, take } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        if (skip != null) {
-            _queryParams["skip"] = skip.toString();
-        }
-
-        if (take != null) {
-            _queryParams["take"] = take.toString();
-        }
-
+    ): Promise<core.WithRawResponse<OumlaSdkApi.WalletResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -95,25 +90,51 @@ export class Wallets {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.OumlaSdkApiEnvironment.Mainnet,
-                "api/v1/wallets/organization",
+                "api/v1/wallets/generate",
             ),
-            method: "GET",
+            method: "POST",
             headers: _headers,
-            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.PaginatedResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.WalletResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new OumlaSdkApi.ConflictError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -125,7 +146,7 @@ export class Wallets {
                 });
             case "timeout":
                 throw new errors.OumlaSdkApiTimeoutError(
-                    "Timeout exceeded when calling GET /api/v1/wallets/organization.",
+                    "Timeout exceeded when calling POST /api/v1/wallets/generate.",
                 );
             case "unknown":
                 throw new errors.OumlaSdkApiError({
@@ -136,31 +157,37 @@ export class Wallets {
     }
 
     /**
-     * Retrieve wallets for a specific profile
+     * Get wallets for a specific profile
      *
-     * @param {string} reference - Profile reference
-     * @param {OumlaSdkApi.GetProfileWalletsRequest} request
+     * @param {string} reference - Profile or organization reference identifier
+     * @param {OumlaSdkApi.GetWalletsByProfileRequest} request
      * @param {Wallets.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.wallets.getProfileWallets("reference", {
+     *     await client.wallets.getWalletsByProfile("reference", {
      *         skip: 1,
      *         take: 1
      *     })
      */
-    public getProfileWallets(
+    public getWalletsByProfile(
         reference: string,
-        request: OumlaSdkApi.GetProfileWalletsRequest = {},
+        request: OumlaSdkApi.GetWalletsByProfileRequest = {},
         requestOptions?: Wallets.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.PaginatedResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getProfileWallets(reference, request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.WalletsResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getWalletsByProfile(reference, request, requestOptions));
     }
 
-    private async __getProfileWallets(
+    private async __getWalletsByProfile(
         reference: string,
-        request: OumlaSdkApi.GetProfileWalletsRequest = {},
+        request: OumlaSdkApi.GetWalletsByProfileRequest = {},
         requestOptions?: Wallets.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.PaginatedResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.WalletsResponse>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -195,15 +222,43 @@ export class Wallets {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.PaginatedResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.WalletsResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -226,28 +281,43 @@ export class Wallets {
     }
 
     /**
-     * Generate a new wallet for a profile
+     * Get all wallets for the organization
      *
-     * @param {OumlaSdkApi.CreateWalletRequest} request
+     * @param {OumlaSdkApi.GetWalletsForOrganizationRequest} request
      * @param {Wallets.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.wallets.generateWallet({
-     *         reference: "reference",
-     *         network: "BTC"
+     *     await client.wallets.getWalletsForOrganization({
+     *         skip: 1,
+     *         take: 1
      *     })
      */
-    public generateWallet(
-        request: OumlaSdkApi.CreateWalletRequest,
+    public getWalletsForOrganization(
+        request: OumlaSdkApi.GetWalletsForOrganizationRequest = {},
         requestOptions?: Wallets.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__generateWallet(request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.WalletsResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getWalletsForOrganization(request, requestOptions));
     }
 
-    private async __generateWallet(
-        request: OumlaSdkApi.CreateWalletRequest,
+    private async __getWalletsForOrganization(
+        request: OumlaSdkApi.GetWalletsForOrganizationRequest = {},
         requestOptions?: Wallets.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.WalletsResponse>> {
+        const { skip, take } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        if (skip != null) {
+            _queryParams["skip"] = skip.toString();
+        }
+
+        if (take != null) {
+            _queryParams["take"] = take.toString();
+        }
+
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -262,28 +332,48 @@ export class Wallets {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.OumlaSdkApiEnvironment.Mainnet,
-                "api/v1/wallets/generate",
+                "api/v1/wallets/organization",
             ),
-            method: "POST",
+            method: "GET",
             headers: _headers,
-            contentType: "application/json",
-            queryParameters: requestOptions?.queryParams,
-            requestType: "json",
-            body: request,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.WalletsResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -295,7 +385,7 @@ export class Wallets {
                 });
             case "timeout":
                 throw new errors.OumlaSdkApiTimeoutError(
-                    "Timeout exceeded when calling POST /api/v1/wallets/generate.",
+                    "Timeout exceeded when calling GET /api/v1/wallets/organization.",
                 );
             case "unknown":
                 throw new errors.OumlaSdkApiError({

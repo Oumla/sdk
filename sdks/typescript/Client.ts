@@ -7,13 +7,13 @@ import { Profiles } from "./api/resources/profiles/client/Client.js";
 import { Wallets } from "./api/resources/wallets/client/Client.js";
 import { Addresses } from "./api/resources/addresses/client/Client.js";
 import { Transactions } from "./api/resources/transactions/client/Client.js";
-import { Withdrawals } from "./api/resources/withdrawals/client/Client.js";
+import { Portfolio } from "./api/resources/portfolio/client/Client.js";
+import { Temporal } from "./api/resources/temporal/client/Client.js";
+import { Tokenization } from "./api/resources/tokenization/client/Client.js";
 import { ContractTemplates } from "./api/resources/contractTemplates/client/Client.js";
 import { DeployedContracts } from "./api/resources/deployedContracts/client/Client.js";
 import { ContractInteractions } from "./api/resources/contractInteractions/client/Client.js";
-import { Tokenization } from "./api/resources/tokenization/client/Client.js";
-import { Temporal } from "./api/resources/temporal/client/Client.js";
-import { Assets } from "./api/resources/assets/client/Client.js";
+import { Withdrawals } from "./api/resources/withdrawals/client/Client.js";
 
 export declare namespace OumlaSdkApiClient {
     export interface Options {
@@ -53,13 +53,13 @@ export class OumlaSdkApiClient {
     protected _wallets: Wallets | undefined;
     protected _addresses: Addresses | undefined;
     protected _transactions: Transactions | undefined;
-    protected _withdrawals: Withdrawals | undefined;
+    protected _portfolio: Portfolio | undefined;
+    protected _temporal: Temporal | undefined;
+    protected _tokenization: Tokenization | undefined;
     protected _contractTemplates: ContractTemplates | undefined;
     protected _deployedContracts: DeployedContracts | undefined;
     protected _contractInteractions: ContractInteractions | undefined;
-    protected _tokenization: Tokenization | undefined;
-    protected _temporal: Temporal | undefined;
-    protected _assets: Assets | undefined;
+    protected _withdrawals: Withdrawals | undefined;
 
     constructor(_options: OumlaSdkApiClient.Options) {
         this._options = {
@@ -93,8 +93,16 @@ export class OumlaSdkApiClient {
         return (this._transactions ??= new Transactions(this._options));
     }
 
-    public get withdrawals(): Withdrawals {
-        return (this._withdrawals ??= new Withdrawals(this._options));
+    public get portfolio(): Portfolio {
+        return (this._portfolio ??= new Portfolio(this._options));
+    }
+
+    public get temporal(): Temporal {
+        return (this._temporal ??= new Temporal(this._options));
+    }
+
+    public get tokenization(): Tokenization {
+        return (this._tokenization ??= new Tokenization(this._options));
     }
 
     public get contractTemplates(): ContractTemplates {
@@ -109,15 +117,7 @@ export class OumlaSdkApiClient {
         return (this._contractInteractions ??= new ContractInteractions(this._options));
     }
 
-    public get tokenization(): Tokenization {
-        return (this._tokenization ??= new Tokenization(this._options));
-    }
-
-    public get temporal(): Temporal {
-        return (this._temporal ??= new Temporal(this._options));
-    }
-
-    public get assets(): Assets {
-        return (this._assets ??= new Assets(this._options));
+    public get withdrawals(): Withdrawals {
+        return (this._withdrawals ??= new Withdrawals(this._options));
     }
 }

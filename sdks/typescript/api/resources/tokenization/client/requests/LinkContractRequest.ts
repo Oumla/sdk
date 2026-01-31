@@ -7,14 +7,9 @@
  *     }
  */
 export interface LinkContractRequest {
-    /** Contract type */
-    type?: string;
-    /** Reference ID */
-    refId?: string;
-    /** Display name */
-    displayName?: string;
-    /** Blockchain network */
-    network?: string;
-    /** Contract address */
     contractAddress: string;
+    network?: string;
+    displayName?: string;
+    refId?: string;
+    type?: string;
 }

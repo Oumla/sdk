@@ -49,28 +49,239 @@ export class Addresses {
     }
 
     /**
-     * Retrieve addresses for the organization
+     * Generate a new address for a profile
      *
-     * @param {OumlaSdkApi.GetOrganizationAddressesRequest} request
+     * @param {OumlaSdkApi.CreateAddressRequest} request
      * @param {Addresses.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.addresses.getOrganizationAddresses({
+     *     await client.addresses.createAddress({
+     *         reference: "user-123",
+     *         network: "tBTC",
+     *         clientShare: "clientShare"
+     *     })
+     */
+    public createAddress(
+        request: OumlaSdkApi.CreateAddressRequest,
+        requestOptions?: Addresses.RequestOptions,
+    ): core.HttpResponsePromise<OumlaSdkApi.CreateAddressResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__createAddress(request, requestOptions));
+    }
+
+    private async __createAddress(
+        request: OumlaSdkApi.CreateAddressRequest,
+        requestOptions?: Addresses.RequestOptions,
+    ): Promise<core.WithRawResponse<OumlaSdkApi.CreateAddressResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
+                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+            }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.OumlaSdkApiEnvironment.Mainnet,
+                "api/v1/addresses/generate",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as OumlaSdkApi.CreateAddressResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.OumlaSdkApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.OumlaSdkApiTimeoutError(
+                    "Timeout exceeded when calling POST /api/v1/addresses/generate.",
+                );
+            case "unknown":
+                throw new errors.OumlaSdkApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Generate a wallet if not exists and create address
+     *
+     * @param {OumlaSdkApi.CreateAddressRequest} request
+     * @param {Addresses.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
+     * @example
+     *     await client.addresses.createAddressV2({
+     *         reference: "user-123",
+     *         network: "tBTC",
+     *         clientShare: "clientShare"
+     *     })
+     */
+    public createAddressV2(
+        request: OumlaSdkApi.CreateAddressRequest,
+        requestOptions?: Addresses.RequestOptions,
+    ): core.HttpResponsePromise<OumlaSdkApi.CreateAddressResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__createAddressV2(request, requestOptions));
+    }
+
+    private async __createAddressV2(
+        request: OumlaSdkApi.CreateAddressRequest,
+        requestOptions?: Addresses.RequestOptions,
+    ): Promise<core.WithRawResponse<OumlaSdkApi.CreateAddressResponse>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
+                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+            }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.OumlaSdkApiEnvironment.Mainnet,
+                "api/v2/addresses/generate",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryParameters: requestOptions?.queryParams,
+            requestType: "json",
+            body: request,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as OumlaSdkApi.CreateAddressResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.OumlaSdkApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.OumlaSdkApiTimeoutError(
+                    "Timeout exceeded when calling POST /api/v2/addresses/generate.",
+                );
+            case "unknown":
+                throw new errors.OumlaSdkApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Get all addresses for the organization
+     *
+     * @param {OumlaSdkApi.GetAddressForOrganizationRequest} request
+     * @param {Addresses.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
+     * @example
+     *     await client.addresses.getAddressForOrganization({
      *         skip: 1,
      *         take: 1
      *     })
      */
-    public getOrganizationAddresses(
-        request: OumlaSdkApi.GetOrganizationAddressesRequest = {},
+    public getAddressForOrganization(
+        request: OumlaSdkApi.GetAddressForOrganizationRequest = {},
         requestOptions?: Addresses.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.PaginatedResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getOrganizationAddresses(request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.AddressesResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getAddressForOrganization(request, requestOptions));
     }
 
-    private async __getOrganizationAddresses(
-        request: OumlaSdkApi.GetOrganizationAddressesRequest = {},
+    private async __getAddressForOrganization(
+        request: OumlaSdkApi.GetAddressForOrganizationRequest = {},
         requestOptions?: Addresses.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.PaginatedResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.AddressesResponse>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -105,15 +316,38 @@ export class Addresses {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.PaginatedResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.AddressesResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -136,31 +370,37 @@ export class Addresses {
     }
 
     /**
-     * Retrieve addresses for a specific profile
+     * Get addresses for a specific profile
      *
-     * @param {string} reference - Profile reference
-     * @param {OumlaSdkApi.GetProfileAddressesRequest} request
+     * @param {string} reference - Profile or organization reference identifier
+     * @param {OumlaSdkApi.GetAddressForProfileRequest} request
      * @param {Addresses.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.addresses.getProfileAddresses("reference", {
+     *     await client.addresses.getAddressForProfile("reference", {
      *         skip: 1,
      *         take: 1
      *     })
      */
-    public getProfileAddresses(
+    public getAddressForProfile(
         reference: string,
-        request: OumlaSdkApi.GetProfileAddressesRequest = {},
+        request: OumlaSdkApi.GetAddressForProfileRequest = {},
         requestOptions?: Addresses.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.PaginatedResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getProfileAddresses(reference, request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.AddressesResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getAddressForProfile(reference, request, requestOptions));
     }
 
-    private async __getProfileAddresses(
+    private async __getAddressForProfile(
         reference: string,
-        request: OumlaSdkApi.GetProfileAddressesRequest = {},
+        request: OumlaSdkApi.GetAddressForProfileRequest = {},
         requestOptions?: Addresses.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.PaginatedResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.AddressesResponse>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -195,15 +435,43 @@ export class Addresses {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.PaginatedResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.AddressesResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -216,168 +484,6 @@ export class Addresses {
             case "timeout":
                 throw new errors.OumlaSdkApiTimeoutError(
                     "Timeout exceeded when calling GET /api/v1/addresses/{reference}.",
-                );
-            case "unknown":
-                throw new errors.OumlaSdkApiError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * Generate a new address for a profile
-     *
-     * @param {OumlaSdkApi.CreateAddressRequest} request
-     * @param {Addresses.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @example
-     *     await client.addresses.generateAddressV1({
-     *         reference: "reference",
-     *         network: "BTC",
-     *         clientShare: "clientShare"
-     *     })
-     */
-    public generateAddressV1(
-        request: OumlaSdkApi.CreateAddressRequest,
-        requestOptions?: Addresses.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__generateAddressV1(request, requestOptions));
-    }
-
-    private async __generateAddressV1(
-        request: OumlaSdkApi.CreateAddressRequest,
-        requestOptions?: Addresses.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
-                "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
-            }),
-            requestOptions?.headers,
-        );
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Mainnet,
-                "api/v1/addresses/generate",
-            ),
-            method: "POST",
-            headers: _headers,
-            contentType: "application/json",
-            queryParameters: requestOptions?.queryParams,
-            requestType: "json",
-            body: request,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.OumlaSdkApiError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.OumlaSdkApiTimeoutError(
-                    "Timeout exceeded when calling POST /api/v1/addresses/generate.",
-                );
-            case "unknown":
-                throw new errors.OumlaSdkApiError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * Generate a new address for a profile
-     *
-     * @param {OumlaSdkApi.CreateAddressRequest} request
-     * @param {Addresses.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @example
-     *     await client.addresses.generateAddressV2({
-     *         reference: "reference",
-     *         network: "BTC",
-     *         clientShare: "clientShare"
-     *     })
-     */
-    public generateAddressV2(
-        request: OumlaSdkApi.CreateAddressRequest,
-        requestOptions?: Addresses.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__generateAddressV2(request, requestOptions));
-    }
-
-    private async __generateAddressV2(
-        request: OumlaSdkApi.CreateAddressRequest,
-        requestOptions?: Addresses.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
-                "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
-            }),
-            requestOptions?.headers,
-        );
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Mainnet,
-                "api/v2/addresses/generate",
-            ),
-            method: "POST",
-            headers: _headers,
-            contentType: "application/json",
-            queryParameters: requestOptions?.queryParams,
-            requestType: "json",
-            body: request,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.OumlaSdkApiError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.OumlaSdkApiTimeoutError(
-                    "Timeout exceeded when calling POST /api/v2/addresses/generate.",
                 );
             case "unknown":
                 throw new errors.OumlaSdkApiError({

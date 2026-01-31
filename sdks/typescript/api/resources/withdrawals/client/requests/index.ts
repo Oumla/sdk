@@ -1,1 +1,1 @@
-export { type CreateWithdrawalRequest } from "./CreateWithdrawalRequest.js";
+export { type CreateWithdrawRequest } from "./CreateWithdrawRequest.js";

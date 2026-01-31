@@ -5,7 +5,7 @@
  * Note: This file is for documentation purposes and is not included in the npm package.
  */
 
-import { OumlaSdkApiClient, OumlaSdkApiEnvironment } from './dist/index.js';
+import { OumlaSdkApiClient, OumlaSdkApiEnvironment } from '@oumla/sdk';
 
 // Using any for return types to avoid TypeScript namespace issues
 type PaginatedResponse = any;
@@ -49,7 +49,7 @@ async function createProfile(reference: string, type: 'User' | 'Department' | 'M
 // Example: Get wallets for a profile
 async function getProfileWallets(profileReference: string): Promise<PaginatedResponse> {
   try {
-    const wallets = await client.wallets.getProfileWallets(profileReference);
+    const wallets = await client.wallets.getWalletsByProfile(profileReference);
     console.log('Profile wallets:', wallets);
     return wallets;
   } catch (error) {
@@ -61,7 +61,7 @@ async function getProfileWallets(profileReference: string): Promise<PaginatedRes
 // Example: Create a wallet
 async function createWallet(profileReference: string, network: 'tBTC'  | 'tETH' = 'tETH'): Promise<SuccessResponse> {
   try {
-    const wallet = await client.wallets.generateWallet({
+    const wallet = await client.wallets.createWallet({
       reference: profileReference,
       network,
     });
@@ -76,7 +76,9 @@ async function createWallet(profileReference: string, network: 'tBTC'  | 'tETH' 
 // Example: Get addresses for a profile
 async function getProfileAddresses(profileReference: string): Promise<PaginatedResponse> {
   try {
-    const addresses = await client.addresses.getProfileAddresses(profileReference);
+    const addresses = await client.addresses.getAddressForProfile({
+      reference: profileReference
+    });
     console.log('Profile addresses:', addresses);
     return addresses;
   } catch (error) {
@@ -85,10 +87,10 @@ async function getProfileAddresses(profileReference: string): Promise<PaginatedR
   }
 }
 
-// Example: Create a new address
+// Example: Create a new address (V2 API - recommended)
 async function createAddress(profileReference: string, network: 'tBTC' | 'tETH' = 'tETH'): Promise<SuccessResponse> {
   try {
-    const address = await client.addresses.generateAddress({
+    const address = await client.addresses.createAddressV2({
       reference: profileReference,
       network,
       clientShare: '1234567890'
@@ -104,11 +106,44 @@ async function createAddress(profileReference: string, network: 'tBTC' | 'tETH' 
 // Example: Get transactions
 async function getTransactions(profileReference: string): Promise<PaginatedResponse> {
   try {
-    const transactions = await client.transactions.getProfileTransactions(profileReference);
+    const transactions = await client.transactions.getTransactionsByProfile({
+      reference: profileReference
+    });
     console.log('Transactions:', transactions);
     return transactions;
   } catch (error) {
     console.error('Error fetching transactions:', error);
+    throw error;
+  }
+}
+
+// Example: Portfolio - Get assets
+async function getAssets(address?: string, walletId?: string): Promise<PaginatedResponse> {
+  try {
+    const assets = await client.portfolio.getAssets({
+      address,
+      walletId
+    });
+    console.log('Assets:', assets);
+    return assets;
+  } catch (error) {
+    console.error('Error fetching assets:', error);
+    throw error;
+  }
+}
+
+// Example: Portfolio - Get native balance
+async function getNativeBalance(network: string, address?: string, walletId?: string): Promise<SuccessResponse> {
+  try {
+    const balance = await client.portfolio.getNativeBalance({
+      network,
+      address,
+      walletId
+    });
+    console.log('Native balance:', balance);
+    return balance;
+  } catch (error) {
+    console.error('Error fetching native balance:', error);
     throw error;
   }
 }
@@ -152,7 +187,7 @@ async function createCollection(addressId: string, clientShare: string, displayN
 // Example: Contract interactions - Read function
 async function readContractFunction(network: string, contractAddress: string, functionName: string, parameters: string[] = []): Promise<SuccessResponse> {
   try {
-    const result = await client.contractInteractions.callReadFunction(
+    const result = await client.contractInteractions.readCallFunction(
       network,
       contractAddress,
       {
@@ -164,7 +199,8 @@ async function readContractFunction(network: string, contractAddress: string, fu
           })),
           outputs: [],
           type: 'function'
-        }
+        },
+        parameters: parameters
       }
     );
     console.log('Contract read result:', result);
@@ -178,7 +214,7 @@ async function readContractFunction(network: string, contractAddress: string, fu
 // Example: Contract interactions - Write function
 async function writeContractFunction(network: string, contractAddress: string, functionName: string, addressId: string, parameters: string[] = [], value?: string): Promise<SuccessResponse> {
   try {
-    const result = await client.contractInteractions.callWriteFunction(
+    const result = await client.contractInteractions.writeCallFunction(
       network,
       contractAddress,
       {
@@ -193,6 +229,7 @@ async function writeContractFunction(network: string, contractAddress: string, f
           outputs: [],
           type: 'function'
         },
+        parameters: parameters,
         amount: value,
       }
     );
@@ -243,6 +280,8 @@ export {
   getProfileAddresses,
   createAddress,
   getTransactions,
+  getAssets,
+  getNativeBalance,
   getCollections,
   createCollection,
   readContractFunction,

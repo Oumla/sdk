@@ -5,22 +5,22 @@ import * as OumlaSdkApi from "../../../../index.js";
 /**
  * @example
  *     {
- *         skip: 1,
- *         take: 1,
  *         contractAddress: "contractAddress",
- *         network: "BTC",
- *         contractTemplateId: "contractTemplateId"
+ *         network: "tBTC",
+ *         contractTemplateId: "contractTemplateId",
+ *         skip: 1,
+ *         take: 1
  *     }
  */
 export interface GetDeployedContractsRequest {
+    /** Contract address filter */
+    contractAddress?: string;
+    /** Network filter */
+    network?: OumlaSdkApi.GetDeployedContractsRequestNetwork;
+    /** Contract template ID filter */
+    contractTemplateId?: string;
     /** Number of records to skip */
     skip?: number;
     /** Number of records to take */
     take?: number;
-    /** Filter by contract address */
-    contractAddress?: string;
-    /** Filter by blockchain network */
-    network?: OumlaSdkApi.GetDeployedContractsRequestNetwork;
-    /** Filter by contract template ID */
-    contractTemplateId?: string;
 }
