@@ -9,33 +9,8 @@
  *     }
  */
 export interface DeployContractRequest {
-    /** Target network */
     network: string;
-    /** Address ID for deployment */
     addressId: string;
-    /** Client share for signing */
     clientShare: string;
-    /** Constructor parameters */
-    constructorParameters?: DeployContractRequest.ConstructorParameters.Item[];
-}
-
-export namespace DeployContractRequest {
-    export type ConstructorParameters = ConstructorParameters.Item[];
-
-    export namespace ConstructorParameters {
-        export interface Item {
-            /** Parameter name */
-            name: string;
-            /** Parameter description */
-            description?: string;
-            /** Internal parameter type */
-            internalType?: string;
-            /** Parameter type */
-            type: string;
-            /** Parameter components */
-            components?: Record<string, unknown>[];
-            /** Parameter value */
-            value?: string;
-        }
-    }
+    constructorParameters?: Record<string, unknown>[];
 }

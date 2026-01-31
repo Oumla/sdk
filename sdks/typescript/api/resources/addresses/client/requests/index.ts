@@ -1,2 +1,2 @@
-export { type GetOrganizationAddressesRequest } from "./GetOrganizationAddressesRequest.js";
-export { type GetProfileAddressesRequest } from "./GetProfileAddressesRequest.js";
+export { type GetAddressForOrganizationRequest } from "./GetAddressForOrganizationRequest.js";
+export { type GetAddressForProfileRequest } from "./GetAddressForProfileRequest.js";

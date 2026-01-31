@@ -49,11 +49,17 @@ export class Transactions {
     }
 
     /**
-     * Retrieve transactions for a specific address
+     * Get transactions for a specific address
      *
      * @param {string} address - Blockchain address
      * @param {OumlaSdkApi.GetTransactionsByAddressRequest} request
      * @param {Transactions.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
      *     await client.transactions.getTransactionsByAddress("address", {
@@ -65,7 +71,7 @@ export class Transactions {
         address: string,
         request: OumlaSdkApi.GetTransactionsByAddressRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.PaginatedResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.TransactionsResponse> {
         return core.HttpResponsePromise.fromPromise(this.__getTransactionsByAddress(address, request, requestOptions));
     }
 
@@ -73,7 +79,7 @@ export class Transactions {
         address: string,
         request: OumlaSdkApi.GetTransactionsByAddressRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.PaginatedResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.TransactionsResponse>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -108,15 +114,43 @@ export class Transactions {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.PaginatedResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.TransactionsResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -139,33 +173,39 @@ export class Transactions {
     }
 
     /**
-     * Retrieve transactions for a specific wallet
+     * Get transactions for a specific wallet
      *
-     * @param {string} miniWalletId - Mini wallet ID
-     * @param {OumlaSdkApi.GetTransactionsByWalletRequest} request
+     * @param {string} miniWalletId - Mini wallet identifier
+     * @param {OumlaSdkApi.GetTransactionsByMiniWalletRequest} request
      * @param {Transactions.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.transactions.getTransactionsByWallet("miniWalletId", {
+     *     await client.transactions.getTransactionsByMiniWallet("miniWalletId", {
      *         skip: 1,
      *         take: 1
      *     })
      */
-    public getTransactionsByWallet(
+    public getTransactionsByMiniWallet(
         miniWalletId: string,
-        request: OumlaSdkApi.GetTransactionsByWalletRequest = {},
+        request: OumlaSdkApi.GetTransactionsByMiniWalletRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.PaginatedResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.TransactionsResponse> {
         return core.HttpResponsePromise.fromPromise(
-            this.__getTransactionsByWallet(miniWalletId, request, requestOptions),
+            this.__getTransactionsByMiniWallet(miniWalletId, request, requestOptions),
         );
     }
 
-    private async __getTransactionsByWallet(
+    private async __getTransactionsByMiniWallet(
         miniWalletId: string,
-        request: OumlaSdkApi.GetTransactionsByWalletRequest = {},
+        request: OumlaSdkApi.GetTransactionsByMiniWalletRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.PaginatedResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.TransactionsResponse>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -200,15 +240,43 @@ export class Transactions {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.PaginatedResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.TransactionsResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -231,28 +299,33 @@ export class Transactions {
     }
 
     /**
-     * Retrieve transactions for the organization
+     * Get all transactions for the organization
      *
-     * @param {OumlaSdkApi.GetOrganizationTransactionsRequest} request
+     * @param {OumlaSdkApi.GetTransactionsByOrganizationRequest} request
      * @param {Transactions.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.transactions.getOrganizationTransactions({
+     *     await client.transactions.getTransactionsByOrganization({
      *         skip: 1,
      *         take: 1
      *     })
      */
-    public getOrganizationTransactions(
-        request: OumlaSdkApi.GetOrganizationTransactionsRequest = {},
+    public getTransactionsByOrganization(
+        request: OumlaSdkApi.GetTransactionsByOrganizationRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.PaginatedResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getOrganizationTransactions(request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.TransactionsResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getTransactionsByOrganization(request, requestOptions));
     }
 
-    private async __getOrganizationTransactions(
-        request: OumlaSdkApi.GetOrganizationTransactionsRequest = {},
+    private async __getTransactionsByOrganization(
+        request: OumlaSdkApi.GetTransactionsByOrganizationRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.PaginatedResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.TransactionsResponse>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -287,15 +360,38 @@ export class Transactions {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.PaginatedResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.TransactionsResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -318,31 +414,39 @@ export class Transactions {
     }
 
     /**
-     * Retrieve transactions for a specific profile
+     * Get transactions for a specific profile
      *
-     * @param {string} reference - Profile reference
-     * @param {OumlaSdkApi.GetProfileTransactionsRequest} request
+     * @param {string} reference - Profile or organization reference identifier
+     * @param {OumlaSdkApi.GetTransactionsByProfileRequest} request
      * @param {Transactions.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.transactions.getProfileTransactions("reference", {
+     *     await client.transactions.getTransactionsByProfile("reference", {
      *         skip: 1,
      *         take: 1
      *     })
      */
-    public getProfileTransactions(
+    public getTransactionsByProfile(
         reference: string,
-        request: OumlaSdkApi.GetProfileTransactionsRequest = {},
+        request: OumlaSdkApi.GetTransactionsByProfileRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.PaginatedResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getProfileTransactions(reference, request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.TransactionsByProfileResponse> {
+        return core.HttpResponsePromise.fromPromise(
+            this.__getTransactionsByProfile(reference, request, requestOptions),
+        );
     }
 
-    private async __getProfileTransactions(
+    private async __getTransactionsByProfile(
         reference: string,
-        request: OumlaSdkApi.GetProfileTransactionsRequest = {},
+        request: OumlaSdkApi.GetTransactionsByProfileRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.PaginatedResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.TransactionsByProfileResponse>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -377,15 +481,46 @@ export class Transactions {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.PaginatedResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.TransactionsByProfileResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {

@@ -5,54 +5,15 @@
  *     {
  *         addressId: "addressId",
  *         clientShare: "clientShare",
- *         to: "to",
- *         tokenId: "tokenId"
+ *         to: "to"
  *     }
  */
 export interface MintTokenRequest {
-    /** Address ID for minting */
     addressId: string;
-    /** Client share for signing */
     clientShare: string;
-    /** Recipient address */
     to: string;
-    /** Token ID */
-    tokenId: string;
-    /** Token amount */
-    amount?: string;
-    /** Token metadata URI */
-    metadataURI?: string;
-    metadata?: MintTokenRequest.Metadata;
-}
-
-export namespace MintTokenRequest {
-    export interface Metadata {
-        /** Token name */
-        name: string;
-        /** Token description */
-        description: string;
-        /** Token image URL */
-        image?: string;
-        /** Token animation URL */
-        animation_url?: string;
-        /** External URL */
-        external_url?: string;
-        /** Token attributes */
-        attributes?: Metadata.Attributes.Item[];
-    }
-
-    export namespace Metadata {
-        export type Attributes = Attributes.Item[];
-
-        export namespace Attributes {
-            export interface Item {
-                /** Trait type */
-                trait_type: string;
-                /** Trait value */
-                value: string;
-                /** Display type */
-                display_type?: string;
-            }
-        }
-    }
+    metadata?: Record<string, unknown>;
+    useGasless?: boolean;
+    fee?: string;
+    feeLevel?: string;
 }

@@ -49,28 +49,33 @@ export class ContractTemplates {
     }
 
     /**
-     * Retrieve a paginated list of contract templates
+     * Get list of contract templates with pagination
      *
-     * @param {OumlaSdkApi.GetContractTemplatesRequest} request
+     * @param {OumlaSdkApi.GetContractsRequest} request
      * @param {ContractTemplates.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.contractTemplates.getContractTemplates({
+     *     await client.contractTemplates.getContracts({
      *         skip: 1,
      *         take: 1
      *     })
      */
-    public getContractTemplates(
-        request: OumlaSdkApi.GetContractTemplatesRequest = {},
+    public getContracts(
+        request: OumlaSdkApi.GetContractsRequest = {},
         requestOptions?: ContractTemplates.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.PaginatedResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getContractTemplates(request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.ContractTemplatesResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getContracts(request, requestOptions));
     }
 
-    private async __getContractTemplates(
-        request: OumlaSdkApi.GetContractTemplatesRequest = {},
+    private async __getContracts(
+        request: OumlaSdkApi.GetContractsRequest = {},
         requestOptions?: ContractTemplates.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.PaginatedResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.ContractTemplatesResponse>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -105,15 +110,41 @@ export class ContractTemplates {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.PaginatedResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.ContractTemplatesResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -138,30 +169,41 @@ export class ContractTemplates {
     /**
      * Create a new contract template
      *
-     * @param {OumlaSdkApi.CreateContractTemplateRequest} request
+     * @param {OumlaSdkApi.CreateContractRequest} request
      * @param {ContractTemplates.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.ConflictError}
+     * @throws {@link OumlaSdkApi.UnprocessableEntityError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     * @throws {@link OumlaSdkApi.BadGatewayError}
+     * @throws {@link OumlaSdkApi.ServiceUnavailableError}
+     * @throws {@link OumlaSdkApi.GatewayTimeoutError}
+     *
      * @example
-     *     await client.contractTemplates.createContractTemplate({
+     *     await client.contractTemplates.createContract({
      *         name: "name",
      *         description: "description",
+     *         bytecode: "bytecode",
      *         abi: [{
      *                 "key": "value"
-     *             }],
-     *         bytecode: "bytecode"
+     *             }]
      *     })
      */
-    public createContractTemplate(
-        request: OumlaSdkApi.CreateContractTemplateRequest,
+    public createContract(
+        request: OumlaSdkApi.CreateContractRequest,
         requestOptions?: ContractTemplates.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__createContractTemplate(request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.ContractTemplateResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__createContract(request, requestOptions));
     }
 
-    private async __createContractTemplate(
-        request: OumlaSdkApi.CreateContractTemplateRequest,
+    private async __createContract(
+        request: OumlaSdkApi.CreateContractRequest,
         requestOptions?: ContractTemplates.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.ContractTemplateResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -189,15 +231,68 @@ export class ContractTemplates {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.ContractTemplateResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new OumlaSdkApi.ConflictError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new OumlaSdkApi.UnprocessableEntityError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 502:
+                    throw new OumlaSdkApi.BadGatewayError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 503:
+                    throw new OumlaSdkApi.ServiceUnavailableError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 504:
+                    throw new OumlaSdkApi.GatewayTimeoutError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -220,25 +315,31 @@ export class ContractTemplates {
     }
 
     /**
-     * Retrieve a specific contract template
+     * Get contract template details by ID
      *
      * @param {string} templateId - Contract template ID
      * @param {ContractTemplates.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.contractTemplates.getContractTemplate("templateId")
+     *     await client.contractTemplates.getContractById("templateId")
      */
-    public getContractTemplate(
+    public getContractById(
         templateId: string,
         requestOptions?: ContractTemplates.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getContractTemplate(templateId, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.ContractTemplateByIdResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getContractById(templateId, requestOptions));
     }
 
-    private async __getContractTemplate(
+    private async __getContractById(
         templateId: string,
         requestOptions?: ContractTemplates.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.ContractTemplateByIdResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -263,15 +364,46 @@ export class ContractTemplates {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.ContractTemplateByIdResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -294,25 +426,31 @@ export class ContractTemplates {
     }
 
     /**
-     * Delete a contract template
+     * Delete a contract template by ID
      *
      * @param {string} templateId - Contract template ID
      * @param {ContractTemplates.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.contractTemplates.deleteContractTemplate("templateId")
+     *     await client.contractTemplates.deleteContract("templateId")
      */
-    public deleteContractTemplate(
+    public deleteContract(
         templateId: string,
         requestOptions?: ContractTemplates.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__deleteContractTemplate(templateId, requestOptions));
+    ): core.HttpResponsePromise<Record<string, unknown>> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteContract(templateId, requestOptions));
     }
 
-    private async __deleteContractTemplate(
+    private async __deleteContract(
         templateId: string,
         requestOptions?: ContractTemplates.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<Record<string, unknown>>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -337,15 +475,43 @@ export class ContractTemplates {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as Record<string, unknown>, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -368,25 +534,31 @@ export class ContractTemplates {
     }
 
     /**
-     * Retrieve constructor information for a contract template
+     * Get contract constructor by template ID
      *
      * @param {string} templateId - Contract template ID
      * @param {ContractTemplates.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.contractTemplates.getContractConstructor("templateId")
+     *     await client.contractTemplates.getContractConstructorById("templateId")
      */
-    public getContractConstructor(
+    public getContractConstructorById(
         templateId: string,
         requestOptions?: ContractTemplates.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getContractConstructor(templateId, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.ContractConstructorResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getContractConstructorById(templateId, requestOptions));
     }
 
-    private async __getContractConstructor(
+    private async __getContractConstructorById(
         templateId: string,
         requestOptions?: ContractTemplates.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.ContractConstructorResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -401,7 +573,7 @@ export class ContractTemplates {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.OumlaSdkApiEnvironment.Mainnet,
-                `api/v1/contract-templates/${encodeURIComponent(templateId)}/constructorInfo`,
+                `api/v1/contract-templates/${encodeURIComponent(templateId)}/getConstructorInfo`,
             ),
             method: "GET",
             headers: _headers,
@@ -411,15 +583,46 @@ export class ContractTemplates {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.ContractConstructorResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -431,7 +634,7 @@ export class ContractTemplates {
                 });
             case "timeout":
                 throw new errors.OumlaSdkApiTimeoutError(
-                    "Timeout exceeded when calling GET /api/v1/contract-templates/{templateId}/constructorInfo.",
+                    "Timeout exceeded when calling GET /api/v1/contract-templates/{templateId}/getConstructorInfo.",
                 );
             case "unknown":
                 throw new errors.OumlaSdkApiError({
@@ -442,36 +645,31 @@ export class ContractTemplates {
     }
 
     /**
-     * Retrieve function information for a contract template
+     * Get contract functions by template ID
      *
      * @param {string} templateId - Contract template ID
-     * @param {OumlaSdkApi.GetTemplateFunctionsRequest} request
      * @param {ContractTemplates.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
      * @example
-     *     await client.contractTemplates.getTemplateFunctions("templateId", {
-     *         functionSignature: "functionSignature"
-     *     })
+     *     await client.contractTemplates.getContractFunctionById("templateId")
      */
-    public getTemplateFunctions(
+    public getContractFunctionById(
         templateId: string,
-        request: OumlaSdkApi.GetTemplateFunctionsRequest = {},
         requestOptions?: ContractTemplates.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getTemplateFunctions(templateId, request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.ContractFunctionsResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getContractFunctionById(templateId, requestOptions));
     }
 
-    private async __getTemplateFunctions(
+    private async __getContractFunctionById(
         templateId: string,
-        request: OumlaSdkApi.GetTemplateFunctionsRequest = {},
         requestOptions?: ContractTemplates.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
-        const { functionSignature } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        if (functionSignature != null) {
-            _queryParams["functionSignature"] = functionSignature;
-        }
-
+    ): Promise<core.WithRawResponse<OumlaSdkApi.ContractFunctionsResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -490,21 +688,52 @@ export class ContractTemplates {
             ),
             method: "GET",
             headers: _headers,
-            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.ContractFunctionsResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
@@ -527,11 +756,22 @@ export class ContractTemplates {
     }
 
     /**
-     * Deploy a contract from a template
+     * Deploy a contract from template
      *
      * @param {string} templateId - Contract template ID
      * @param {OumlaSdkApi.DeployContractRequest} request
      * @param {ContractTemplates.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.ConflictError}
+     * @throws {@link OumlaSdkApi.UnprocessableEntityError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     * @throws {@link OumlaSdkApi.BadGatewayError}
+     * @throws {@link OumlaSdkApi.ServiceUnavailableError}
+     * @throws {@link OumlaSdkApi.GatewayTimeoutError}
      *
      * @example
      *     await client.contractTemplates.deployContract("templateId", {
@@ -544,7 +784,7 @@ export class ContractTemplates {
         templateId: string,
         request: OumlaSdkApi.DeployContractRequest,
         requestOptions?: ContractTemplates.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.DeployContractResponse> {
         return core.HttpResponsePromise.fromPromise(this.__deployContract(templateId, request, requestOptions));
     }
 
@@ -552,7 +792,7 @@ export class ContractTemplates {
         templateId: string,
         request: OumlaSdkApi.DeployContractRequest,
         requestOptions?: ContractTemplates.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.DeployContractResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -580,15 +820,68 @@ export class ContractTemplates {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.DeployContractResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new OumlaSdkApi.ConflictError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new OumlaSdkApi.UnprocessableEntityError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 502:
+                    throw new OumlaSdkApi.BadGatewayError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 503:
+                    throw new OumlaSdkApi.ServiceUnavailableError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 504:
+                    throw new OumlaSdkApi.GatewayTimeoutError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {

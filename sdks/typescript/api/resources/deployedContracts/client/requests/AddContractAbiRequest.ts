@@ -3,8 +3,8 @@
 /**
  * @example
  *     {
- *         network: "network",
  *         contractAddress: "contractAddress",
+ *         network: "network",
  *         name: "name",
  *         abi: [{
  *                 "key": "value"
@@ -12,12 +12,8 @@
  *     }
  */
 export interface AddContractAbiRequest {
-    /** Blockchain network */
-    network: string;
-    /** Contract address */
     contractAddress: string;
-    /** Contract name */
+    network: string;
     name: string;
-    /** Contract ABI */
     abi: Record<string, unknown>[];
 }

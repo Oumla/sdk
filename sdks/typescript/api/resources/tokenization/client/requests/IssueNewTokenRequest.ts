@@ -3,56 +3,34 @@
 /**
  * @example
  *     {
+ *         network: "tBTC",
  *         addressId: "addressId",
  *         clientShare: "clientShare",
- *         deploymentId: "deploymentId",
  *         createParams: {
- *             initializeParams: [{
- *                     name: "name",
- *                     type: "type",
- *                     value: "value"
- *                 }]
- *         }
+ *             "key": "value"
+ *         },
+ *         deploymentId: "deploymentId"
  *     }
  */
 export interface IssueNewTokenRequest {
-    /** Blockchain network */
-    network?: string;
-    /** Address ID for token creation */
+    network: IssueNewTokenRequest.Network;
     addressId: string;
-    /** Client share for signing */
     clientShare: string;
-    /** Deployed contract ID */
-    deploymentId: string;
-    createParams: IssueNewTokenRequest.CreateParams;
-    /** Token display name */
+    createParams: Record<string, unknown>;
     displayName?: string;
-    /** Use gasless transaction */
+    deploymentId: string;
     useGasless?: boolean;
-    /** Transaction fee */
     fee?: string;
-    /** Fee level */
     feeLevel?: string;
 }
 
 export namespace IssueNewTokenRequest {
-    export interface CreateParams {
-        /** Initialize parameters */
-        initializeParams: CreateParams.InitializeParams.Item[];
-    }
-
-    export namespace CreateParams {
-        export type InitializeParams = InitializeParams.Item[];
-
-        export namespace InitializeParams {
-            export interface Item {
-                /** Parameter name */
-                name: string;
-                /** Parameter type */
-                type: string;
-                /** Parameter value */
-                value: string;
-            }
-        }
-    }
+    export const Network = {
+        TBtc: "tBTC",
+        TEth: "tETH",
+        Avax: "AVAX",
+        Fuji: "FUJI",
+        Sandbox: "SANDBOX",
+    } as const;
+    export type Network = (typeof Network)[keyof typeof Network];
 }

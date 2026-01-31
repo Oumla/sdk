@@ -3,13 +3,11 @@
 /**
  * @example
  *     {
- *         network: "network",
- *         contractAddress: "contractAddress"
+ *         contractAddress: "contractAddress",
+ *         network: "network"
  *     }
  */
 export interface FetchContractAbiRequest {
-    /** Blockchain network */
-    network: string;
-    /** Contract address */
     contractAddress: string;
+    network: string;
 }

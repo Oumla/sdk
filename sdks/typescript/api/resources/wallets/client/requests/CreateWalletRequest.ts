@@ -3,8 +3,8 @@
 /**
  * @example
  *     {
- *         reference: "reference",
- *         network: "BTC"
+ *         reference: "user-123",
+ *         network: "tBTC"
  *     }
  */
 export interface CreateWalletRequest {
@@ -17,10 +17,11 @@ export interface CreateWalletRequest {
 export namespace CreateWalletRequest {
     /** Blockchain network */
     export const Network = {
-        Btc: "BTC",
         TBtc: "tBTC",
-        Eth: "ETH",
         TEth: "tETH",
+        Avax: "AVAX",
+        Fuji: "FUJI",
+        Sandbox: "SANDBOX",
     } as const;
     export type Network = (typeof Network)[keyof typeof Network];
 }

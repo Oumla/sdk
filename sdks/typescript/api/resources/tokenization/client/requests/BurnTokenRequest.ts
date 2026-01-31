@@ -9,14 +9,10 @@
  *     }
  */
 export interface BurnTokenRequest {
-    /** Address ID for burning */
     addressId: string;
-    /** Client share for signing */
     clientShare: string;
-    /** Token ID */
     tokenId: string;
-    /** Address to burn from */
-    from?: string;
-    /** Token amount to burn */
-    amount?: string;
+    useGasless?: boolean;
+    fee?: string;
+    feeLevel?: string;
 }

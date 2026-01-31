@@ -49,27 +49,31 @@ export class Temporal {
     }
 
     /**
-     * Get workflow status and result
+     * Get status and result of a Temporal workflow
      *
      * @param {string} workflowId - Temporal workflow ID
      * @param {Temporal.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
-     *     await client.temporal.getTemporalWorkflowStatus("workflowId")
+     *     await client.temporal.getWorkflowStatus("workflowId")
      */
-    public getTemporalWorkflowStatus(
+    public getWorkflowStatus(
         workflowId: string,
         requestOptions?: Temporal.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getTemporalWorkflowStatus(workflowId, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.TemporalWorkflowStatusData> {
+        return core.HttpResponsePromise.fromPromise(this.__getWorkflowStatus(workflowId, requestOptions));
     }
 
-    private async __getTemporalWorkflowStatus(
+    private async __getWorkflowStatus(
         workflowId: string,
         requestOptions?: Temporal.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.TemporalWorkflowStatusData>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -94,13 +98,36 @@ export class Temporal {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.TemporalWorkflowStatusData,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
                 case 404:
                     throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
                         _response.error.body as OumlaSdkApi.ErrorResponse,
                         _response.rawResponse,
                     );

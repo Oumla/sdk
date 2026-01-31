@@ -3,65 +3,24 @@
 /**
  * @example
  *     {
- *         type: "NON_FUNGIBLE_TOKEN",
+ *         network: "network",
  *         addressId: "addressId",
  *         clientShare: "clientShare",
  *         createParams: {
- *             initializeParams: [{
- *                     name: "name",
- *                     type: "type",
- *                     value: "value"
- *                 }]
- *         }
+ *             "key": "value"
+ *         },
+ *         deploymentId: "deploymentId"
  *     }
  */
 export interface CreateCollectionRequest {
-    /** Blockchain network */
-    network?: string;
-    /** Collection type */
-    type: CreateCollectionRequest.Type;
-    /** Address ID for collection creation */
+    network: string;
     addressId: string;
-    /** Client share for signing */
     clientShare: string;
-    createParams: CreateCollectionRequest.CreateParams;
-    /** Collection description */
-    description?: string;
-    /** Collection display name */
+    createParams: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
     displayName?: string;
-    /** Use gasless transaction */
+    deploymentId: string;
     useGasless?: boolean;
-    /** Transaction fee */
     fee?: string;
-    /** Fee level */
     feeLevel?: string;
-}
-
-export namespace CreateCollectionRequest {
-    /** Collection type */
-    export const Type = {
-        NonFungibleToken: "NON_FUNGIBLE_TOKEN",
-        SemiFungibleToken: "SEMI_FUNGIBLE_TOKEN",
-    } as const;
-    export type Type = (typeof Type)[keyof typeof Type];
-
-    export interface CreateParams {
-        /** Initialize parameters */
-        initializeParams: CreateParams.InitializeParams.Item[];
-    }
-
-    export namespace CreateParams {
-        export type InitializeParams = InitializeParams.Item[];
-
-        export namespace InitializeParams {
-            export interface Item {
-                /** Parameter name */
-                name: string;
-                /** Parameter type */
-                type: string;
-                /** Parameter value */
-                value: string;
-            }
-        }
-    }
 }

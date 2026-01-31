@@ -49,31 +49,42 @@ export class Withdrawals {
     }
 
     /**
-     * Create a new withdrawal request
+     * Create a withdrawal transaction
      *
-     * @param {OumlaSdkApi.CreateWithdrawalRequest} request
+     * @param {OumlaSdkApi.CreateWithdrawRequest} request
      * @param {Withdrawals.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.ConflictError}
+     * @throws {@link OumlaSdkApi.UnprocessableEntityError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     * @throws {@link OumlaSdkApi.BadGatewayError}
+     * @throws {@link OumlaSdkApi.ServiceUnavailableError}
+     * @throws {@link OumlaSdkApi.GatewayTimeoutError}
+     *
      * @example
-     *     await client.withdrawals.createWithdrawal({
+     *     await client.withdrawals.createWithdraw({
      *         to: "to",
      *         amount: "amount",
      *         from: ["from"],
-     *         network: "BTC",
+     *         network: "tBTC",
      *         clientShare: "clientShare"
      *     })
      */
-    public createWithdrawal(
-        request: OumlaSdkApi.CreateWithdrawalRequest,
+    public createWithdraw(
+        request: OumlaSdkApi.CreateWithdrawRequest,
         requestOptions?: Withdrawals.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.SuccessResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__createWithdrawal(request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.WithdrawResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__createWithdraw(request, requestOptions));
     }
 
-    private async __createWithdrawal(
-        request: OumlaSdkApi.CreateWithdrawalRequest,
+    private async __createWithdraw(
+        request: OumlaSdkApi.CreateWithdrawRequest,
         requestOptions?: Withdrawals.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.SuccessResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.WithdrawResponse>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -101,15 +112,68 @@ export class Withdrawals {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.SuccessResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.WithdrawResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new OumlaSdkApi.ConflictError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new OumlaSdkApi.UnprocessableEntityError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 502:
+                    throw new OumlaSdkApi.BadGatewayError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 503:
+                    throw new OumlaSdkApi.ServiceUnavailableError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                case 504:
+                    throw new OumlaSdkApi.GatewayTimeoutError(
+                        _response.error.body as OumlaSdkApi.ErrorResponse,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
         }
 
         switch (_response.error.reason) {
