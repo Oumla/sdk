@@ -5344,7 +5344,7 @@
                 }
             }
         },
-        "/api/v1/deployed-contracts/{contractId}": {
+        "/api/v1/deployed-contracts/{deploymentId}": {
             "get": {
                 "tags": [
                     "Deployed Contracts"
@@ -5354,13 +5354,13 @@
                 "operationId": "getDeployedContractById",
                 "parameters": [
                     {
-                        "name": "contractId",
+                        "name": "deploymentId",
                         "in": "path",
                         "required": true,
                         "schema": {
                             "type": "string"
                         },
-                        "description": "Deployed contract ID"
+                        "description": "Deployment ID"
                     },
                     {
                         "$ref": "#/components/parameters/SdkVersionHeader"
