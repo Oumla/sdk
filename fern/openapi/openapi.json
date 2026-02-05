@@ -2940,6 +2940,26 @@
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/CreateCollectionRequest"
+                            },
+                            "example": {
+                                "network": "ETHEREUM",
+                                "addressId": "your-address-id",
+                                "type": "NON_FUNGIBLE_TOKEN",
+                                "clientShare": "your-client-share",
+                                "createParams": {
+                                    "initializeParams": [
+                                        { "name": "_name", "type": "string", "value": "My Collection" },
+                                        { "name": "_symbol", "type": "string", "value": "MYC" },
+                                        { "name": "defaultAdmin", "type": "address", "value": "0x1111111111111111111111111111111111111111" },
+                                        { "name": "minter", "type": "address", "value": "0x2222222222222222222222222222222222222222" },
+                                        { "name": "pauser", "type": "address", "value": "0x3333333333333333333333333333333333333333" }
+                                    ]
+                                },
+                                "displayName": "My Collection",
+                                "useGasless": false,
+                                "fee": "0",
+                                "feeLevel": "standard",
+                                "description": "Optional collection description"
                             }
                         }
                     },
@@ -7830,7 +7850,34 @@
                         "type": "string"
                     },
                     "createParams": {
-                        "type": "object"
+                    "type": "object",
+                    "required": ["initializeParams"],
+                    "properties": {
+                        "initializeParams": {
+                        "description": "Exactly 5 init params in order: _name (string), _symbol (string), defaultAdmin (address), minter (address), pauser (address)",
+                        "type": "array",
+                        "minItems": 5,
+                        "maxItems": 5,
+                        "items": {
+                            "type": "object",
+                            "required": ["name", "type", "value"],
+                            "properties": {
+                                "name": { "type": "string" },
+                                "type": { "type": "string" },
+                                "value": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                        },
+                        "example": [
+                            { "name": "_name", "type": "string", "value": "My Token" },
+                            { "name": "_symbol", "type": "string", "value": "MYC" },
+                            { "name": "defaultAdmin", "type": "address", "value": "0x1111111111111111111111111111111111111111" },
+                            { "name": "minter", "type": "address", "value": "0x2222222222222222222222222222222222222222" },
+                            { "name": "pauser", "type": "address", "value": "0x3333333333333333333333333333333333333333" }
+                        ]
+                        }
+                    },
+                    "additionalProperties": false
                     },
                     "displayName": {
                         "type": "string"
@@ -7998,47 +8045,74 @@
             },
             "CreateCollectionRequest": {
                 "type": "object",
+                "required": ["addressId", "type", "clientShare", "createParams"],
                 "properties": {
-                    "network": {
-                        "type": "string"
+                    "network": { "type": "string" },
+                    "addressId": { "type": "string", "minLength": 1 },
+                    "type": {
+                    "type": "string",
+                    "enum": ["NON_FUNGIBLE_TOKEN", "SEMI_FUNGIBLE_TOKEN"]
                     },
-                    "addressId": {
-                        "type": "string"
-                    },
-                    "clientShare": {
-                        "type": "string"
-                    },
+                    "clientShare": { "type": "string", "minLength": 1 },
                     "createParams": {
-                        "type": "object"
+                    "type": "object",
+                    "required": ["initializeParams"],
+                    "properties": {
+                        "initializeParams": {
+                        "description": "Exactly 5 init params in order: _name (string), _symbol (string), defaultAdmin (address), minter (address), pauser (address)",
+                        "type": "array",
+                        "minItems": 5,
+                        "maxItems": 5,
+                        "items": {
+                            "type": "object",
+                            "required": ["name", "type", "value"],
+                            "properties": {
+                                "name": { "type": "string" },
+                                "type": { "type": "string" },
+                                "value": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                        },
+                        "example": [
+                            { "name": "_name", "type": "string", "value": "My Collection" },
+                            { "name": "_symbol", "type": "string", "value": "MYC" },
+                            { "name": "defaultAdmin", "type": "address", "value": "0x1111111111111111111111111111111111111111" },
+                            { "name": "minter", "type": "address", "value": "0x2222222222222222222222222222222222222222" },
+                            { "name": "pauser", "type": "address", "value": "0x3333333333333333333333333333333333333333" }
+                        ]
+                        }
                     },
-                    "metadata": {
-                        "type": "object"
+                    "additionalProperties": false
                     },
-                    "displayName": {
-                        "type": "string"
-                    },
-                    "deploymentId": {
-                        "type": "string"
-                    },
-                    "useGasless": {
-                        "type": "boolean"
-                    },
-                    "fee": {
-                        "type": "string"
-                    },
-                    "feeLevel": {
-                        "type": "string"
-                    }
+                    "displayName": { "type": "string" },
+                    "useGasless": { "type": "boolean" },
+                    "fee": { "type": "string" },
+                    "feeLevel": { "type": "string" },
+                    "description": { "type": "string" }
                 },
-                "required": [
-                    "network",
-                    "addressId",
-                    "clientShare",
-                    "createParams",
-                    "deploymentId"
-                ],
-                "description": "Create collection request object"
-            },
+                "additionalProperties": false,
+                "example": {
+                    "network": "ETHEREUM",
+                    "addressId": "your-address-id",
+                    "type": "NON_FUNGIBLE_TOKEN",
+                    "clientShare": "your-client-share",
+                    "createParams": {
+                    "initializeParams": [
+                        { "name": "_name",        "type": "string",  "value": "My Collection" },
+                        { "name": "_symbol",      "type": "string",  "value": "MYC" },
+                        { "name": "defaultAdmin", "type": "address", "value": "0x1111111111111111111111111111111111111111" },
+                        { "name": "minter",       "type": "address", "value": "0x2222222222222222222222222222222222222222" },
+                        { "name": "pauser",       "type": "address", "value": "0x3333333333333333333333333333333333333333" }
+                    ]
+                    },
+                    "displayName": "My Collection",
+                    "useGasless": false,
+                    "fee": "0",
+                    "feeLevel": "standard",
+                    "description": "Optional collection description"
+                }
+                },
+
             "WorkflowResponse": {
                 "type": "object",
                 "properties": {
