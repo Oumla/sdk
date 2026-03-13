@@ -14,7 +14,7 @@ import { ContractInteractions } from "./api/resources/contractInteractions/clien
 import { Assets } from "./api/resources/assets/client/Client.js";
 import { DeployedContracts } from "./api/resources/deployedContracts/client/Client.js";
 import { ContractTemplates } from "./api/resources/contractTemplates/client/Client.js";
-import { Temporal } from "./api/resources/temporal/client/Client.js";
+import { Workflows } from "./api/resources/workflows/client/Client.js";
 
 export declare namespace OumlaSdkApiClient {
     export interface Options {
@@ -57,7 +57,7 @@ export class OumlaSdkApiClient {
     protected _assets: Assets | undefined;
     protected _deployedContracts: DeployedContracts | undefined;
     protected _contractTemplates: ContractTemplates | undefined;
-    protected _temporal: Temporal | undefined;
+    protected _workflows: Workflows | undefined;
 
     constructor(_options: OumlaSdkApiClient.Options) {
         this._options = {
@@ -118,7 +118,7 @@ export class OumlaSdkApiClient {
         return (this._contractTemplates ??= new ContractTemplates(this._options));
     }
 
-    public get temporal(): Temporal {
-        return (this._temporal ??= new Temporal(this._options));
+    public get workflows(): Workflows {
+        return (this._workflows ??= new Workflows(this._options));
     }
 }

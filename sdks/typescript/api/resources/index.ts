@@ -10,7 +10,7 @@ export * as contractInteractions from "./contractInteractions/index.js";
 export * as assets from "./assets/index.js";
 export * as deployedContracts from "./deployedContracts/index.js";
 export * as contractTemplates from "./contractTemplates/index.js";
-export * as temporal from "./temporal/index.js";
+export * as workflows from "./workflows/index.js";
 export * from "./addresses/client/requests/index.js";
 export * from "./networks/client/requests/index.js";
 export * from "./transactions/client/requests/index.js";

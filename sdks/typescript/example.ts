@@ -2,7 +2,7 @@
  * Oumla TypeScript SDK — Usage Examples
  *
  * Demonstrates production-ready patterns for integrating with the Oumla API.
- * All async operations that return a workflowResult must be polled via the Temporal resource.
+ * All async operations that return a workflowResult must be polled via the Workflows resource.
  */
 
 import {
@@ -19,15 +19,15 @@ const client = new OumlaSdkApiClient({
   environment: OumlaSdkApiEnvironment.Mainnet,
 });
 
-// ─── Temporal Workflow Helper ─────────────────────────────────────────────────
+// ─── Workflow Status Helper ───────────────────────────────────────────────────
 
 /**
- * Polls a temporal workflow until it reaches a terminal state.
+ * Polls a workflow until it reaches a terminal state.
  * Use this after any operation that returns a workflowResult.workflowId.
  */
 async function waitForWorkflow(workflowId: string, pollIntervalMs = 2000): Promise<Record<string, unknown> | undefined> {
   while (true) {
-    const status = await client.temporal.getWorkflowStatus(workflowId);
+    const status = await client.workflows.getWorkflowStatus(workflowId);
 
     if (status.status === 'COMPLETED') return status.result;
 

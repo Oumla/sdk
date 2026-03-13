@@ -144,9 +144,9 @@ The following error classes have been removed. Catch `OumlaSdkApiError` directly
 
 ### Added
 
-#### Temporal Workflow Status
-- New `temporal` resource for tracking async workflow status
-- `getTemporalWorkflowStatus(workflowId)` - Get status and result of temporal workflows
+#### Workflow Status
+- New `workflows` resource for tracking async operation status
+- `getWorkflowStatus(workflowId)` - Get status and result of async workflows
 - Enables tracking of async operations like create collection, mint, burn, and contract interactions
 - Returns workflow status, start/close time, execution time, history length, and result/error data
 
@@ -169,7 +169,7 @@ The following error classes have been removed. Catch `OumlaSdkApiError` directly
 ### Changed
 - Address generation now uses the V2 API endpoint for enhanced functionality
 - Updated example.ts with comprehensive examples for all new features
-- Updated README.md with documentation for temporal workflows, new collection endpoints, and V2 address generation
+- Updated README.md with documentation for async workflows, new collection endpoints, and V2 address generation
 
 ---
 

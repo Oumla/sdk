@@ -9981,9 +9981,9 @@
         ]
       }
     },
-    "/api/v1/temporal/workflows/{workflowId}/status": {
+    "/api/v1/workflows/{workflowId}/status": {
       "get": {
-        "description": "Get the status and result of a Temporal workflow by ID.",
+        "description": "Get the status and result of a workflow by ID.",
         "operationId": "getWorkflowStatus",
         "parameters": [
           {
@@ -10202,7 +10202,7 @@
         ],
         "summary": "Get Workflow status and result",
         "tags": [
-          "temporal"
+          "workflows"
         ]
       }
     }
