@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/%40oumla%2Fsdk.svg)](https://badge.fury.io/js/%40oumla%2Fsdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Official TypeScript SDK for the Oumla API — enterprise-grade blockchain infrastructure for financial institutions. Build custody, tokenization, and smart contract workflows with full type safety and minimal configuration.
+Official TypeScript SDK for the Oumla API — blockchain integration with full type safety and minimal configuration. Build tokenization and smart contract workflows with ease.
 
 ## Table of Contents
 
@@ -36,8 +36,7 @@ Official TypeScript SDK for the Oumla API — enterprise-grade blockchain infras
 - **Type Safety** — Strict TypeScript types for every request and response
 - **Dynamic Networks** — Networks are managed per organization; no hardcoded chain strings
 - **Async Workflow Tracking** — Long-running operations return a workflow ID, polled via the Workflows resource
-- **MPC Custody Model** — Client-share pattern built into address and signing flows
-- **Tree Shakeable** — ESM + CJS dual output for optimal bundle size
+ **Tree Shakeable** — ESM + CJS dual output for optimal bundle size
 
 ## Installation
 
