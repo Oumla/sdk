@@ -3,41 +3,49 @@
 [![npm version](https://badge.fury.io/js/%40oumla%2Fsdk.svg)](https://badge.fury.io/js/%40oumla%2Fsdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Official TypeScript SDK for Oumla - Blockchain integration made simple. This SDK provides a comprehensive interface to interact with the Oumla API, enabling developers to build blockchain applications with ease.
+Official TypeScript SDK for the Oumla API — enterprise-grade blockchain infrastructure for financial institutions. Build custody, tokenization, and smart contract workflows with full type safety and minimal configuration.
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [API Resources](#api-resources)
+  - [Networks](#-networks)
+  - [Profiles](#-profiles)
+  - [Wallets](#-wallets)
+  - [Addresses](#-addresses)
+  - [Transactions](#-transactions)
+  - [Assets](#-assets)
+  - [Withdraw](#-withdraw)
+  - [Contract Templates](#-contract-templates)
+  - [Deployed Contracts](#️-deployed-contracts)
+  - [Contract Interactions](#-contract-interactions)
+  - [Tokenization](#-tokenization)
+  - [Temporal Workflow Status](#️-temporal-workflow-status)
+- [Error Handling](#error-handling)
+- [Configuration](#configuration)
+- [TypeScript Types](#typescript-types)
+- [Complete Example](#complete-example--onboard-a-user-and-mint-an-nft)
+- [Development](#development)
+- [Support](#support)
 
 ## Features
 
-- 🚀 **Full API Coverage** - Complete access to all Oumla API endpoints
-- 🔒 **Type Safety** - Full TypeScript support with comprehensive type definitions
-- 🎯 **Easy Integration** - Simple and intuitive API design
-- 📦 **Tree Shakeable** - Optimized bundle size with ES modules support
-- 🔄 **Auto-generated** - Always up-to-date with the latest API changes
-- 🌐 **Multi-environment** - Support for different deployment environments
-- ⏱️ **Workflow Tracking** - Monitor async operations with Temporal workflow status
-
-## Supported Networks
-
-The SDK supports the following blockchain networks:
-
-- **tBTC** - Bitcoin Testnet
-- **tETH** - Ethereum Testnet
-- **SANDBOX** - Sandbox Environment
+- **Full API Coverage** — Complete access to all Oumla API endpoints
+- **Type Safety** — Strict TypeScript types for every request and response
+- **Dynamic Networks** — Networks are managed per organization; no hardcoded chain strings
+- **Async Workflow Tracking** — Long-running operations return a workflow ID, polled via the Temporal resource
+- **MPC Custody Model** — Client-share pattern built into address and signing flows
+- **Tree Shakeable** — ESM + CJS dual output for optimal bundle size
 
 ## Installation
 
 ```bash
 npm install @oumla/sdk
-```
-
-or
-
-```bash
+# or
 yarn add @oumla/sdk
-```
-
-or
-
-```bash
+# or
 pnpm add @oumla/sdk
 ```
 
@@ -46,495 +54,445 @@ pnpm add @oumla/sdk
 ```typescript
 import { OumlaSdkApiClient, OumlaSdkApiEnvironment } from '@oumla/sdk';
 
-// Initialize the client
 const client = new OumlaSdkApiClient({
-  apiKey: 'your-api-key-here',
+  apiKey: OUMLA_API_KEY,
   environment: OumlaSdkApiEnvironment.Mainnet,
 });
 
-// Example: Get profiles
-async function getProfiles() {
-  try {
-    const profiles = await client.profiles.getProfiles();
-    console.log('Profiles:', profiles);
-  } catch (error) {
-    console.error('Error fetching profiles:', error);
-  }
-}
+// Fetch networks enabled for your organization
+const { data } = await client.networks.getNetworks({ skip: 0, take: 50, enabled: true });
+const networkId = data.networks[0].id;
 
-// Example: Generate an address (V2 API)
-async function generateAddress() {
-  try {
-    const address = await client.addresses.createAddressV2({
-      reference: 'profile-reference',
-      network: 'network',
-      clientShare: 'your-client-share',
-    });
-    console.log('Generated address:', address);
-  } catch (error) {
-    console.error('Error generating address:', error);
-  }
-}
+// Create a profile and generate an address
+await client.profiles.createProfile({ reference: 'user-001', type: 'User' });
+const address = await client.addresses.createAddressV2({
+  reference: 'user-001',
+  networkId,
+  clientShare: '<client-share>',
+});
 ```
 
 ## API Resources
 
-The SDK provides access to the following resources:
+### 🌐 Networks
+
+Retrieve the networks available and enabled for your organization. Use the returned `id` values wherever a `networkId` is required.
+
+```typescript
+const { data } = await client.networks.getNetworks({ skip: 0, take: 50, enabled: true });
+// data.networks[].id  — use this as networkId throughout the SDK
+```
+
+---
 
 ### 🏠 Profiles
-Manage user profiles and organizations
+
 ```typescript
-const profiles = await client.profiles.getProfiles();
-const profile = await client.profiles.createProfile({ 
-  reference: 'my-profile',
-  type: 'User' 
-});
+// List profiles
+const { data } = await client.profiles.getProfiles({ skip: 0, take: 20 });
+
+// Create a profile
+await client.profiles.createProfile({ reference: 'user-001', type: 'User' });
 ```
+
+---
 
 ### 💼 Wallets
-Create and manage blockchain wallets
+
 ```typescript
-const wallets = await client.wallets.getWalletsByProfile('profile-reference');
-const wallet = await client.wallets.createWallet({ 
-  reference: 'profile-reference', 
-  network: 'network' 
-});
+// List wallets for a profile
+const { data } = await client.wallets.getWalletsByProfile('user-001');
+
+// Create a wallet
+await client.wallets.createWallet({ reference: 'user-001', networkId: '<network-id>' });
 ```
+
+---
 
 ### 📍 Addresses
-Generate and manage blockchain addresses
+
 ```typescript
-// Get addresses for a profile
-const addresses = await client.addresses.getAddressForProfile({
-  reference: 'profile-reference'
+// List addresses for a profile
+const { data } = await client.addresses.getAddressForProfile('user-001');
+
+// Generate a new address (V2 — recommended)
+await client.addresses.createAddressV2({
+  reference: 'user-001',
+  networkId: '<network-id>',
+  clientShare: '<client-share>',
 });
 
-// Generate a new address (V2 API - recommended)
-const address = await client.addresses.createAddressV2({
-  reference: 'profile-reference',
-  network: 'network',
-  clientShare: 'your-client-share',
-});
-
-// Get organization addresses
-const orgAddresses = await client.addresses.getAddressForOrganization();
+// List addresses for the organization
+const { data: orgAddresses } = await client.addresses.getAddressForOrganization();
 ```
+
+---
 
 ### 💰 Transactions
-Track and manage blockchain transactions
+
 ```typescript
-// Get transactions by profile
-const transactions = await client.transactions.getTransactionsByProfile({
-  reference: 'profile-reference'
-});
+// By profile
+const { data } = await client.transactions.getTransactionsByProfile({ reference: 'user-001' });
 
-// Get transactions by address
-const addressTransactions = await client.transactions.getTransactionsByAddress({
-  address: '0x...'
-});
+// By address
+const { data } = await client.transactions.getTransactionsByAddress({ address: '0x...' });
 
-// Get transactions by organization
-const orgTransactions = await client.transactions.getTransactionsByOrganization({
-  reference: 'org-reference'
-});
+// By organization
+const { data } = await client.transactions.getTransactionsByOrganization({ reference: 'org-001' });
 ```
 
-### 💼 Portfolio
-Manage digital assets and portfolio tracking
+---
+
+### 💼 Assets
+
 ```typescript
-// Get assets for address, wallet, or contract
-const assets = await client.portfolio.getAssets({
+// Token balances for an address
+const { data } = await client.assets.getAssets({
+  skip: 0,
+  take: 20,
   address: '0x...',
-  walletId: 'wallet-id',
-  contractAddress: '0x...',
-  tokenizationId: 'token-id'
+  network: '<network-id>',   // optional filter
 });
 
-// Get native balance for network, address, or wallet
-const balance = await client.portfolio.getNativeBalance({
-  network: 'network',
+// Native balance (ETH, BTC, etc.)
+const { data } = await client.assets.getNativeBalance({
+  skip: 0,
+  take: 20,
   address: '0x...',
-  walletId: 'wallet-id'
+  network: '<network-id>',   // optional filter
 });
 ```
 
-### 🔥 Withdrawals
-Handle withdrawal operations
+---
+
+### 🔄 Withdraw
+
 ```typescript
-const withdrawal = await client.withdrawals.createWithdraw({
-  walletId: 'wallet-id',
-  amount: '1.0',
-  currency: 'network',
+await client.withdraw.createWithdraw({
+  to: '0xDestinationAddress',
+  from: ['0xSourceAddress'],   // UTXOs or source addresses
+  amount: '1.5',
+  networkId: '<network-id>',
+  clientShare: '<client-share>',
 });
 ```
+
+---
 
 ### 📋 Contract Templates
-Deploy and manage smart contract templates
+
 ```typescript
-const templates = await client.contractTemplates.getContracts();
-const template = await client.contractTemplates.createContract({
-  name: 'My Contract',
+// List templates
+const { data } = await client.contractTemplates.getContracts();
+
+// Create a template
+await client.contractTemplates.createContract({
+  name: 'ERC-20 Token',
   abi: contractAbi,
   bytecode: '0x...',
-  description: 'Contract description'
+  description: 'Standard fungible token',
 });
+
+// Deploy — async, returns a workflow ID
+const { data } = await client.contractTemplates.deployContract('<template-id>', {
+  networkId: '<network-id>',
+  addressId: '<address-id>',
+  clientShare: '<client-share>',
+});
+const result = await waitForWorkflow(data.workflowResult.workflowId);
 ```
+
+---
 
 ### 🏗️ Deployed Contracts
-Interact with deployed smart contracts
+
 ```typescript
-const contracts = await client.deployedContracts.getDeployedContracts();
+// List deployed contracts
+const { data } = await client.deployedContracts.getDeployedContracts();
+
+// Get by ID
+const { data } = await client.deployedContracts.getDeployedContractById('<contract-id>');
+
+// Get by address
+const { data } = await client.deployedContracts.getDeployedContractByAddress('<address>');
 ```
+
+---
 
 ### 🔧 Contract Interactions
-Read from and write to smart contracts
-```typescript
-// Get ABI functions for a deployed contract
-const abi = await client.contractInteractions.getDeployedContractAbi(
-  'network',
-  'contractAddress'
-);
 
-// Read from contract
-const result = await client.contractInteractions.readCallFunction(
-  'network',
-  'contractAddress',
+ABI function inputs and outputs use `InputOutputDto`, which requires a `value` field to carry the parameter data.
+
+```typescript
+// Read a contract function (view/pure)
+const { data } = await client.contractInteractions.readCallFunction(
+  '<network-id>',
+  '<contract-address>',
   {
     abiFunction: {
-      name: 'balanceOf',
-      inputs: [{ name: 'account', type: 'address' }],
-      outputs: [{ name: '', type: 'uint256' }],
       type: 'function',
+      name: 'balanceOf',
+      inputs: [{ name: 'account', type: 'address', value: { raw: '0xOwnerAddress' } }],
+      outputs: [{ name: '', type: 'uint256', value: {} }],
     },
-    parameters: ['0x...']
   }
 );
 
-// Write to contract (triggers async workflow)
-const writeResult = await client.contractInteractions.writeCallFunction(
-  'network',
-  'contractAddress',
+// Write to a contract — triggers an async workflow
+const { data } = await client.contractInteractions.writeCallFunction(
+  '<network-id>',
+  '<contract-address>',
   {
-    addressId: 'your-address-id',
-    clientShare: 'your-client-share',
+    addressId: '<address-id>',
+    clientShare: '<client-share>',
     abiFunction: {
+      type: 'function',
       name: 'transfer',
       inputs: [
-        { name: 'to', type: 'address' },
-        { name: 'amount', type: 'uint256' },
+        { name: 'to',     type: 'address', value: { raw: '0xRecipient' } },
+        { name: 'amount', type: 'uint256', value: { raw: '1000000000000000000' } },
       ],
       outputs: [],
-      type: 'function',
     },
-    parameters: ['0x...', '1000000000000000000']
   }
 );
 
-// Get transaction receipt
-const receipt = await client.contractInteractions.getTransactionReceipt(
-  'network',
-  'txId'
-);
+// Get a transaction receipt
+const { data } = await client.contractInteractions.getTransactionReceipt('<network-id>', '<tx-hash>');
 ```
+
+---
 
 ### 🪙 Tokenization
-Create and manage tokens and collections with full lifecycle support
 
-#### Collections
+All mutating token operations (create collection, mint, burn) are asynchronous and return a `workflowResult.workflowId`.
+
 ```typescript
-// Get all collections
-const collections = await client.tokenization.getCollections();
+// List collections
+const { data } = await client.tokenization.getCollections();
 
-// Get a specific collection
-const collection = await client.tokenization.getCollection('collection-id');
+// Get a collection
+const { data } = await client.tokenization.getCollection('<collection-id>');
 
-// Create a new collection (triggers async workflow)
-const newCollection = await client.tokenization.createCollection({
+// Create a collection — async
+const { data } = await client.tokenization.createCollection({
+  networkId: '<network-id>',
+  addressId: '<address-id>',
+  clientShare: '<client-share>',
   type: 'NON_FUNGIBLE_TOKEN',
-  addressId: 'your-address-id',
-  clientShare: 'your-client-share',
+  displayName: 'My NFT Collection',
   createParams: {
-    initializeParams: [{
-      name: 'name',
-      type: 'string',
-      value: 'My NFT Collection',
-    }],
+    initializeParams: [{ name: 'name', type: 'string', value: 'My NFT Collection' }],
   },
-  displayName: 'My Collection',
 });
+await waitForWorkflow(data.workflowResult.workflowId);
 
-// Delete a collection
-await client.tokenization.deleteCollection('collection-id');
-```
-
-#### Token Operations
-```typescript
-// Mint a token (triggers async workflow)
-const mintResult = await client.tokenization.mintToken('collection-id', {
-  addressId: 'your-address-id',
-  clientShare: 'your-client-share',
-  to: 'recipient-address',
+// Mint a token — async
+const { data: mint } = await client.tokenization.mintToken('<collection-id>', {
+  addressId: '<address-id>',
+  clientShare: '<client-share>',
+  to: '<recipient-address>',
   tokenId: '1',
 });
+await waitForWorkflow(mint.workflowResult.workflowId);
 
-// Burn a token (triggers async workflow)
-const burnResult = await client.tokenization.burnToken('collection-id', {
-  addressId: 'your-address-id',
-  clientShare: 'your-client-share',
+// Burn a token — async
+const { data: burn } = await client.tokenization.burnToken('<collection-id>', {
+  addressId: '<address-id>',
+  clientShare: '<client-share>',
   tokenId: '1',
 });
+await waitForWorkflow(burn.workflowResult.workflowId);
 
-// Get token details
-const tokenDetails = await client.tokenization.getCollectionTokenDetails(
-  'collection-id',
-  'token-id'
-);
-
-// Get collection tokens (mints or burns)
-const tokens = await client.tokenization.getCollectionTokens({
-  id: 'collection-id',
-  type: 'MINT', // or 'BURN'
+// Get tokens in a collection
+const { data } = await client.tokenization.getCollectionTokens({
+  id: '<collection-id>',
+  type: 'MINT',
   skip: 0,
   take: 50,
 });
 
-// Link an existing contract
-await client.tokenization.linkContract({
-  contractAddress: '0x...',
-});
-
-// Unlink a token
-await client.tokenization.unlinkToken('token-id');
+// Link / unlink an existing contract
+await client.tokenization.linkContract({ contractAddress: '0x...' });
+await client.tokenization.unlinkToken('<token-id>');
 ```
 
+---
+
 ### ⏱️ Temporal Workflow Status
-Track the status of async operations like collection creation, minting, burning, and contract interactions
+
+Any operation that returns a `workflowResult.workflowId` is asynchronous. Poll via the Temporal resource until the workflow reaches a terminal state.
 
 ```typescript
-// Get workflow status
-const status = await client.temporal.getTemporalWorkflowStatus('workflow-id');
-
-console.log('Workflow ID:', status.data.workflowId);
-console.log('Status:', status.data.status); // RUNNING, COMPLETED, FAILED, etc.
-console.log('Start Time:', status.data.startTime);
-console.log('Result:', status.data.result);
-
-// Example: Poll until workflow completes
-async function waitForWorkflow(workflowId: string) {
+async function waitForWorkflow(workflowId: string): Promise<Record<string, unknown> | undefined> {
   while (true) {
-    const status = await client.temporal.getTemporalWorkflowStatus(workflowId);
-    
-    if (status.data.status === 'COMPLETED') {
-      console.log('Workflow completed:', status.data.result);
-      return status.data.result;
+    const { data } = await client.temporal.getWorkflowStatus(workflowId);
+
+    if (data.status === 'COMPLETED') return data.result;
+
+    if (data.status === 'FAILED' || data.status === 'TERMINATED') {
+      throw new Error(`Workflow ${workflowId} ended with status "${data.status}": ${data.error}`);
     }
-    
-    if (status.data.status === 'FAILED') {
-      throw new Error(`Workflow failed: ${JSON.stringify(status.data.error)}`);
-    }
-    
-    // Wait before polling again
+
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
 }
 ```
 
-## Configuration
-
-### Environment Setup
-
-```typescript
-import { OumlaSdkApiClient, OumlaSdkApiEnvironment } from '@oumla/sdk';
-
-const client = new OumlaSdkApiClient({
-  apiKey: process.env.OUMLA_API_KEY!,
-  environment: OumlaSdkApiEnvironment.Mainnet, // or custom URL
-  baseUrl: 'https://custom-api.oumla.com', // Optional: custom base URL
-  headers: {
-    'Custom-Header': 'value', // Optional: additional headers
-  },
-});
-```
-
-### Request Options
-
-```typescript
-// Global request options
-const client = new OumlaSdkApiClient({
-  apiKey: 'your-api-key',
-  // ... other options
-});
-
-// Per-request options
-const profiles = await client.profiles.getProfiles({
-  timeoutInSeconds: 30,
-  maxRetries: 3,
-  headers: {
-    'Custom-Header': 'value',
-  },
-});
-```
+---
 
 ## Error Handling
 
-The SDK provides comprehensive error handling with specific error types for different HTTP status codes:
-
 ```typescript
-import { 
-  OumlaSdkApiError, 
+import {
+  OumlaSdkApiError,
   OumlaSdkApiTimeoutError,
   BadRequestError,
   UnauthorizedError,
   ForbiddenError,
   NotFoundError,
   ConflictError,
-  UnprocessableEntityError,
   InternalServerError,
-  BadGatewayError,
-  ServiceUnavailableError,
-  GatewayTimeoutError
 } from '@oumla/sdk';
 
 try {
-  const result = await client.profiles.getProfiles();
+  await client.profiles.getProfiles({ skip: 0, take: 20 });
 } catch (error) {
-  if (error instanceof BadRequestError) {
-    console.error('Bad Request (400):', error.message);
-  } else if (error instanceof UnauthorizedError) {
-    console.error('Unauthorized (401):', error.message);
-  } else if (error instanceof ForbiddenError) {
-    console.error('Forbidden (403):', error.message);
-  } else if (error instanceof NotFoundError) {
-    console.error('Not Found (404):', error.message);
-  } else if (error instanceof ConflictError) {
-    console.error('Conflict (409):', error.message);
-  } else if (error instanceof UnprocessableEntityError) {
-    console.error('Unprocessable Entity (422):', error.message);
-  } else if (error instanceof InternalServerError) {
-    console.error('Internal Server Error (500):', error.message);
-  } else if (error instanceof BadGatewayError) {
-    console.error('Bad Gateway (502):', error.message);
-  } else if (error instanceof ServiceUnavailableError) {
-    console.error('Service Unavailable (503):', error.message);
-  } else if (error instanceof GatewayTimeoutError) {
-    console.error('Gateway Timeout (504):', error.message);
-  } else if (error instanceof OumlaSdkApiTimeoutError) {
-    console.error('Request timeout:', error.message);
-  } else if (error instanceof OumlaSdkApiError) {
-    console.error('API Error:', error.message);
-    console.error('Status Code:', error.statusCode);
-    console.error('Response Body:', error.body);
-  } else {
-    console.error('Unexpected error:', error);
-  }
+  if (error instanceof BadRequestError)    console.error('400 Bad Request',    error.body);
+  else if (error instanceof UnauthorizedError)  console.error('401 Unauthorized',   'check your API key');
+  else if (error instanceof ForbiddenError)     console.error('403 Forbidden',      error.body);
+  else if (error instanceof NotFoundError)      console.error('404 Not Found',      error.body);
+  else if (error instanceof ConflictError)      console.error('409 Conflict',       error.body);
+  else if (error instanceof InternalServerError) console.error('500 Server Error',  error.body);
+  else if (error instanceof OumlaSdkApiTimeoutError) console.error('Request timed out');
+  else if (error instanceof OumlaSdkApiError)   console.error(`HTTP ${error.statusCode}`, error.body);
+  else throw error;
 }
 ```
 
-## TypeScript Support
+---
 
-The SDK is built with TypeScript and provides full type safety:
+## Configuration
 
 ```typescript
-import type { 
-  CreateProfileRequest,
-  GetProfilesRequest,
-  Profile,
-  PaginatedResponse,
-  TemporalWorkflowStatusData,
-} from '@oumla/sdk';
-
-// Type-safe request parameters
-const createProfileRequest: CreateProfileRequest = {
-  reference: 'my-profile',
-  type: 'User',
-};
-
-// Type-safe response handling
-const response: PaginatedResponse = await client.profiles.getProfiles();
+const client = new OumlaSdkApiClient({
+  apiKey: OUMLA_API_KEY,
+  environment: OumlaSdkApiEnvironment.Mainnet,  // default
+  baseUrl: 'https://custom.oumla.com',          // optional override
+  headers: { 'X-Request-ID': 'trace-001' },     // optional extra headers
+});
 ```
 
-## Complete Workflow Examples
-
-### Create Collection and Mint NFT with Status Tracking
+### Per-request options
 
 ```typescript
-async function createCollectionAndMint() {
-  // 1. Create a collection
-  const collectionResponse = await client.tokenization.createCollection({
+await client.profiles.getProfiles(
+  { skip: 0, take: 20 },
+  { timeoutInSeconds: 30, maxRetries: 3 }
+);
+```
+
+---
+
+## TypeScript Types
+
+Key request and response types exported from `@oumla/sdk`:
+
+| Type | Used for |
+|---|---|
+| `CreateProfileRequestBodyDto` | `createProfile()` body |
+| `CreateWalletRequestBodyDto` | `createWallet()` body |
+| `CreateAddressRequestBodyDto` | `createAddressV2()` body |
+| `CreateCollectionBodyDto` | `createCollection()` body |
+| `DeployContractRequestBodyDto` | `deployContract()` body |
+| `WriteCallFunctionBody` | `writeCallFunction()` body |
+| `ReadCallFunctionBody` | `readCallFunction()` body |
+| `CreateWithdrawRequestBodyDto` | `createWithdraw()` body |
+| `OrgNetworkItemDto` | Network entity from `getNetworks()` |
+| `WalletDataDto` | Wallet entity |
+| `AddressDataDto` | Address entity |
+| `TransactionItemDto` | Transaction entity |
+| `AssetItemDto` | Token balance entry |
+| `WorkflowStartResultDto` | Async operation response containing `workflowId` |
+| `GetWorkflowStatusResponseDto` | Workflow poll response |
+
+---
+
+## Complete Example — Onboard a User and Mint an NFT
+
+```typescript
+async function onboardAndMint(profileReference: string, clientShare: string) {
+  // 1. Resolve an enabled network
+  const { data: networksData } = await client.networks.getNetworks({ skip: 0, take: 50, enabled: true });
+  const networkId = networksData.networks[0].id;
+
+  // 2. Create a profile
+  await client.profiles.createProfile({ reference: profileReference, type: 'User' });
+
+  // 3. Create a wallet
+  await client.wallets.createWallet({ reference: profileReference, networkId });
+
+  // 4. Generate an address
+  const { data: addressData } = await client.addresses.createAddressV2({
+    reference: profileReference,
+    networkId,
+    clientShare,
+  });
+
+  // 5. Create an NFT collection and wait for deployment
+  const { data: collection } = await client.tokenization.createCollection({
+    networkId,
+    addressId: addressData.data!.id,
+    clientShare,
     type: 'NON_FUNGIBLE_TOKEN',
-    addressId: 'your-address-id',
-    clientShare: 'your-client-share',
+    displayName: 'Loyalty Points',
     createParams: {
-      initializeParams: [{
-        name: 'name',
-        type: 'string',
-        value: 'My NFT Collection',
-      }],
+      initializeParams: [{ name: 'name', type: 'string', value: 'Loyalty Points' }],
     },
   });
-  
-  // 2. Wait for collection creation workflow to complete
-  if (collectionResponse.data?.workflowId) {
-    await waitForWorkflow(collectionResponse.data.workflowId);
-  }
-  
-  // 3. Mint a token
-  const mintResult = await client.tokenization.mintToken(
-    collectionResponse.data.id,
+  await waitForWorkflow(collection.workflowResult.workflowId);
+
+  // 6. Mint the first token
+  const { data: mint } = await client.tokenization.mintToken(
+    collection.workflowResult.operationId,
     {
-      addressId: 'your-address-id',
-      clientShare: 'your-client-share',
-      to: 'recipient-address',
+      addressId: addressData.data!.id,
+      clientShare,
+      to: addressData.data!.address,
       tokenId: '1',
     }
   );
-  
-  // 4. Wait for mint workflow to complete
-  if (mintResult.data?.workflowId) {
-    await waitForWorkflow(mintResult.data.workflowId);
-  }
-  
-  console.log('NFT minted successfully!');
+  await waitForWorkflow(mint.workflowResult.workflowId);
+
+  console.log('User onboarded and token minted successfully.');
 }
 ```
 
+---
+
 ## Development
 
-### Building from Source
-
 ```bash
-# Clone the repository
 git clone https://github.com/oumla/sdk.git
 cd sdk/sdks/typescript
-
-# Install dependencies
 pnpm install
-
-# Build the SDK
-pnpm run build
-
-# Run in development mode
-pnpm run dev
+pnpm run build    # compile to dist/
+pnpm run dev      # watch mode
 ```
-
-### Contributing
-
-We welcome contributions! Please see our [Contributing Guide](https://github.com/oumla/sdk/blob/main/CONTRIBUTING.md) for details.
 
 ## Support
 
-- 📚 [Documentation](https://docs.oumla.com)
-- 🐛 [Issue Tracker](https://github.com/oumla/sdk/issues)
-- 💬 [Discord Community](https://discord.gg/oumla)
-- 📧 [Email Support](mailto:support@oumla.com)
+- [Documentation](https://docs.oumla.com)
+- [Issue Tracker](https://github.com/oumla/sdk/issues)
+- [Email Support](mailto:support@oumla.com)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE) for details.
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for a list of changes and version history.
+See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ---
 
