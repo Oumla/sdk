@@ -1,2 +1,2 @@
-export { type ReadCallFunctionRequest } from "./ReadCallFunctionRequest.js";
-export { type WriteCallFunctionRequest } from "./WriteCallFunctionRequest.js";
+export { type ReadCallFunctionBody } from "./ReadCallFunctionBody.js";
+export { type WriteCallFunctionBody } from "./WriteCallFunctionBody.js";

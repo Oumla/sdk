@@ -1,2 +1,2 @@
 export { type GetProfilesRequest } from "./GetProfilesRequest.js";
-export { type CreateProfileRequest } from "./CreateProfileRequest.js";
+export { type CreateProfileRequestBodyDto } from "./CreateProfileRequestBodyDto.js";

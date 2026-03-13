@@ -11,11 +11,9 @@ export declare namespace DeployedContracts {
         environment?: core.Supplier<environments.OumlaSdkApiEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
+        apiKey: core.Supplier<string>;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey: core.Supplier<string>;
         /** Additional headers to include in requests. */
         headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
     }
@@ -29,8 +27,6 @@ export declare namespace DeployedContracts {
         abortSignal?: AbortSignal;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey?: string;
         /** Additional query string parameters to include in the request. */
         queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
@@ -38,9 +34,6 @@ export declare namespace DeployedContracts {
     }
 }
 
-/**
- * Deployed contract management
- */
 export class DeployedContracts {
     protected readonly _options: DeployedContracts.Options;
 
@@ -49,7 +42,7 @@ export class DeployedContracts {
     }
 
     /**
-     * Get list of deployed contracts with pagination
+     * List deployed contracts with optional filters and pagination.
      *
      * @param {OumlaSdkApi.GetDeployedContractsRequest} request
      * @param {DeployedContracts.RequestOptions} requestOptions - Request-specific configuration.
@@ -61,38 +54,26 @@ export class DeployedContracts {
      *
      * @example
      *     await client.deployedContracts.getDeployedContracts({
+     *         skip: 0,
+     *         take: 10,
      *         contractAddress: "contractAddress",
-     *         network: "tBTC",
-     *         contractTemplateId: "contractTemplateId",
-     *         skip: 1,
-     *         take: 1
+     *         networkId: "networkId",
+     *         contractTemplateId: "contractTemplateId"
      *     })
      */
     public getDeployedContracts(
         request: OumlaSdkApi.GetDeployedContractsRequest = {},
         requestOptions?: DeployedContracts.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.DeployedContractsResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetDeployedContractsResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__getDeployedContracts(request, requestOptions));
     }
 
     private async __getDeployedContracts(
         request: OumlaSdkApi.GetDeployedContractsRequest = {},
         requestOptions?: DeployedContracts.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.DeployedContractsResponse>> {
-        const { contractAddress, network, contractTemplateId, skip, take } = request;
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetDeployedContractsResponseDto>> {
+        const { skip, take, contractAddress, networkId, contractTemplateId } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        if (contractAddress != null) {
-            _queryParams["contractAddress"] = contractAddress;
-        }
-
-        if (network != null) {
-            _queryParams["network"] = network;
-        }
-
-        if (contractTemplateId != null) {
-            _queryParams["contractTemplateId"] = contractTemplateId;
-        }
-
         if (skip != null) {
             _queryParams["skip"] = skip.toString();
         }
@@ -101,12 +82,23 @@ export class DeployedContracts {
             _queryParams["take"] = take.toString();
         }
 
+        if (contractAddress != null) {
+            _queryParams["contractAddress"] = contractAddress;
+        }
+
+        if (networkId != null) {
+            _queryParams["networkId"] = networkId;
+        }
+
+        if (contractTemplateId != null) {
+            _queryParams["contractTemplateId"] = contractTemplateId;
+        }
+
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -126,7 +118,7 @@ export class DeployedContracts {
         });
         if (_response.ok) {
             return {
-                data: _response.body as OumlaSdkApi.DeployedContractsResponse,
+                data: _response.body as OumlaSdkApi.GetDeployedContractsResponseDto,
                 rawResponse: _response.rawResponse,
             };
         }
@@ -134,25 +126,13 @@ export class DeployedContracts {
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -182,37 +162,35 @@ export class DeployedContracts {
     }
 
     /**
-     * Get deployed contract details by ID
+     * Get a deployed contract by its deployment ID.
      *
-     * @param {string} contractId - Deployed contract ID
+     * @param {string} deploymentId - Deployment ID
      * @param {DeployedContracts.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
      * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
      * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
-     *     await client.deployedContracts.getDeployedContractById("contractId")
+     *     await client.deployedContracts.getDeployedContractById("deploymentId")
      */
     public getDeployedContractById(
-        contractId: string,
+        deploymentId: string,
         requestOptions?: DeployedContracts.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.DeployedContractByIdResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getDeployedContractById(contractId, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.GetDeployedContractByIdResponseDto> {
+        return core.HttpResponsePromise.fromPromise(this.__getDeployedContractById(deploymentId, requestOptions));
     }
 
     private async __getDeployedContractById(
-        contractId: string,
+        deploymentId: string,
         requestOptions?: DeployedContracts.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.DeployedContractByIdResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetDeployedContractByIdResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -221,7 +199,7 @@ export class DeployedContracts {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.OumlaSdkApiEnvironment.Mainnet,
-                `api/v1/deployed-contracts/${encodeURIComponent(contractId)}`,
+                `api/v1/deployed-contracts/${encodeURIComponent(deploymentId)}`,
             ),
             method: "GET",
             headers: _headers,
@@ -232,38 +210,21 @@ export class DeployedContracts {
         });
         if (_response.ok) {
             return {
-                data: _response.body as OumlaSdkApi.DeployedContractByIdResponse,
+                data: _response.body as OumlaSdkApi.GetDeployedContractByIdResponseDto,
                 rawResponse: _response.rawResponse,
             };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
-                case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -282,7 +243,7 @@ export class DeployedContracts {
                 });
             case "timeout":
                 throw new errors.OumlaSdkApiTimeoutError(
-                    "Timeout exceeded when calling GET /api/v1/deployed-contracts/{contractId}.",
+                    "Timeout exceeded when calling GET /api/v1/deployed-contracts/{deploymentId}.",
                 );
             case "unknown":
                 throw new errors.OumlaSdkApiError({
@@ -293,42 +254,40 @@ export class DeployedContracts {
     }
 
     /**
-     * Get deployed contract by address and network
+     * Get a deployed contract by contract address and networkId.
      *
      * @param {string} contractAddress - Contract address
-     * @param {OumlaSdkApi.GetDeployedContractByAddressRequestNetwork} network - Network
+     * @param {string} networkId - Network Id
      * @param {DeployedContracts.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
      * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
      * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
-     *     await client.deployedContracts.getDeployedContractByAddress("contractAddress", "tBTC")
+     *     await client.deployedContracts.getDeployedContractByAddress("contractAddress", "networkId")
      */
     public getDeployedContractByAddress(
         contractAddress: string,
-        network: OumlaSdkApi.GetDeployedContractByAddressRequestNetwork,
+        networkId: string,
         requestOptions?: DeployedContracts.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.DeployedContractByAddressResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetDeployedContractByAddressResponseDto> {
         return core.HttpResponsePromise.fromPromise(
-            this.__getDeployedContractByAddress(contractAddress, network, requestOptions),
+            this.__getDeployedContractByAddress(contractAddress, networkId, requestOptions),
         );
     }
 
     private async __getDeployedContractByAddress(
         contractAddress: string,
-        network: OumlaSdkApi.GetDeployedContractByAddressRequestNetwork,
+        networkId: string,
         requestOptions?: DeployedContracts.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.DeployedContractByAddressResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetDeployedContractByAddressResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -337,7 +296,7 @@ export class DeployedContracts {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.OumlaSdkApiEnvironment.Mainnet,
-                `api/v1/deployed-contracts/${encodeURIComponent(contractAddress)}/${encodeURIComponent(network)}`,
+                `api/v1/deployed-contracts/${encodeURIComponent(contractAddress)}/${encodeURIComponent(networkId)}`,
             ),
             method: "GET",
             headers: _headers,
@@ -348,38 +307,21 @@ export class DeployedContracts {
         });
         if (_response.ok) {
             return {
-                data: _response.body as OumlaSdkApi.DeployedContractByAddressResponse,
+                data: _response.body as OumlaSdkApi.GetDeployedContractByAddressResponseDto,
                 rawResponse: _response.rawResponse,
             };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
-                case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -398,7 +340,7 @@ export class DeployedContracts {
                 });
             case "timeout":
                 throw new errors.OumlaSdkApiTimeoutError(
-                    "Timeout exceeded when calling GET /api/v1/deployed-contracts/{contractAddress}/{network}.",
+                    "Timeout exceeded when calling GET /api/v1/deployed-contracts/{contractAddress}/{networkId}.",
                 );
             case "unknown":
                 throw new errors.OumlaSdkApiError({
@@ -409,39 +351,39 @@ export class DeployedContracts {
     }
 
     /**
-     * Fetch contract ABI from blockchain
+     * Fetch contract ABI from chain/explorer by address and network.
      *
-     * @param {OumlaSdkApi.FetchContractAbiRequest} request
+     * @param {OumlaSdkApi.FetchContractAbiRequestBodyDto} request
      * @param {DeployedContracts.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
      * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
      *     await client.deployedContracts.fetchContractAbi({
      *         contractAddress: "contractAddress",
-     *         network: "network"
+     *         networkId: "networkId"
      *     })
      */
     public fetchContractAbi(
-        request: OumlaSdkApi.FetchContractAbiRequest,
+        request: OumlaSdkApi.FetchContractAbiRequestBodyDto,
         requestOptions?: DeployedContracts.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.FetchContractAbiResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.FetchContractAbiResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__fetchContractAbi(request, requestOptions));
     }
 
     private async __fetchContractAbi(
-        request: OumlaSdkApi.FetchContractAbiRequest,
+        request: OumlaSdkApi.FetchContractAbiRequestBodyDto,
         requestOptions?: DeployedContracts.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.FetchContractAbiResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.FetchContractAbiResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -463,31 +405,24 @@ export class DeployedContracts {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.FetchContractAbiResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.FetchContractAbiResponseDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -517,45 +452,41 @@ export class DeployedContracts {
     }
 
     /**
-     * Add ABI for a deployed contract
+     * Add or update ABI for a deployed contract.
      *
-     * @param {OumlaSdkApi.AddContractAbiRequest} request
+     * @param {OumlaSdkApi.AddContractAbiRequestBodyDto} request
      * @param {DeployedContracts.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
-     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.ConflictError}
-     * @throws {@link OumlaSdkApi.UnprocessableEntityError}
      * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
      *     await client.deployedContracts.addContractAbi({
      *         contractAddress: "contractAddress",
-     *         network: "network",
+     *         networkId: "networkId",
      *         name: "name",
-     *         abi: [{
-     *                 "key": "value"
-     *             }]
+     *         abi: [[]]
      *     })
      */
     public addContractAbi(
-        request: OumlaSdkApi.AddContractAbiRequest,
+        request: OumlaSdkApi.AddContractAbiRequestBodyDto,
         requestOptions?: DeployedContracts.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.AddContractAbiResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.AddContractAbiResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__addContractAbi(request, requestOptions));
     }
 
     private async __addContractAbi(
-        request: OumlaSdkApi.AddContractAbiRequest,
+        request: OumlaSdkApi.AddContractAbiRequestBodyDto,
         requestOptions?: DeployedContracts.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.AddContractAbiResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.AddContractAbiResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -577,41 +508,24 @@ export class DeployedContracts {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.AddContractAbiResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.AddContractAbiResponseDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 409:
-                    throw new OumlaSdkApi.ConflictError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 422:
-                    throw new OumlaSdkApi.UnprocessableEntityError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ConflictError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -640,12 +554,8 @@ export class DeployedContracts {
         }
     }
 
-    protected async _getAuthorizationHeader(): Promise<string | undefined> {
-        const bearer = await core.Supplier.get(this._options.token);
-        if (bearer != null) {
-            return `Bearer ${bearer}`;
-        }
-
-        return undefined;
+    protected async _getCustomAuthorizationHeaders(): Promise<Record<string, string | undefined>> {
+        const apiKeyValue = await core.Supplier.get(this._options.apiKey);
+        return { "x-api-key": apiKeyValue };
     }
 }
