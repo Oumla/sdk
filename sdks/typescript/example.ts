@@ -103,7 +103,7 @@ async function getAddressesForProfile(profileReference: string) {
 
 /**
  * Generate a new blockchain address for a profile.
- * @param clientShare  Your client-side key share (MPC custody model).
+ * @param clientShare  Client share for the address creation request.
  */
 async function createAddress(profileReference: string, networkId: string, clientShare: string) {
   try {
