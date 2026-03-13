@@ -6,7 +6,7 @@ import * as OumlaSdkApi from "../../../index.js";
 import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as errors from "../../../../errors/index.js";
 
-export declare namespace Temporal {
+export declare namespace Workflows {
     export interface Options {
         environment?: core.Supplier<environments.OumlaSdkApiEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
@@ -34,18 +34,18 @@ export declare namespace Temporal {
     }
 }
 
-export class Temporal {
-    protected readonly _options: Temporal.Options;
+export class Workflows {
+    protected readonly _options: Workflows.Options;
 
-    constructor(_options: Temporal.Options) {
+    constructor(_options: Workflows.Options) {
         this._options = _options;
     }
 
     /**
-     * Get the status and result of a Temporal workflow by ID.
+     * Get the status and result of a workflow by ID.
      *
      * @param {string} workflowId - Workflow ID
-     * @param {Temporal.RequestOptions} requestOptions - Request-specific configuration.
+     * @param {Workflows.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
@@ -54,18 +54,18 @@ export class Temporal {
      * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
-     *     await client.temporal.getWorkflowStatus("create-collection-123e4567-e89b-12d3-a456-426614174000")
+     *     await client.workflows.getWorkflowStatus("create-collection-123e4567-e89b-12d3-a456-426614174000")
      */
     public getWorkflowStatus(
         workflowId: string,
-        requestOptions?: Temporal.RequestOptions,
+        requestOptions?: Workflows.RequestOptions,
     ): core.HttpResponsePromise<OumlaSdkApi.GetWorkflowStatusResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__getWorkflowStatus(workflowId, requestOptions));
     }
 
     private async __getWorkflowStatus(
         workflowId: string,
-        requestOptions?: Temporal.RequestOptions,
+        requestOptions?: Workflows.RequestOptions,
     ): Promise<core.WithRawResponse<OumlaSdkApi.GetWorkflowStatusResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
@@ -80,7 +80,7 @@ export class Temporal {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.OumlaSdkApiEnvironment.Mainnet,
-                `api/v1/temporal/workflows/${encodeURIComponent(workflowId)}/status`,
+                `api/v1/workflows/${encodeURIComponent(workflowId)}/status`,
             ),
             method: "GET",
             headers: _headers,
@@ -126,7 +126,7 @@ export class Temporal {
                 });
             case "timeout":
                 throw new errors.OumlaSdkApiTimeoutError(
-                    "Timeout exceeded when calling GET /api/v1/temporal/workflows/{workflowId}/status.",
+                    "Timeout exceeded when calling GET /api/v1/workflows/{workflowId}/status.",
                 );
             case "unknown":
                 throw new errors.OumlaSdkApiError({

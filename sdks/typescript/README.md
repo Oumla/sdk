@@ -22,7 +22,7 @@ Official TypeScript SDK for the Oumla API — enterprise-grade blockchain infras
   - [Deployed Contracts](#️-deployed-contracts)
   - [Contract Interactions](#-contract-interactions)
   - [Tokenization](#-tokenization)
-  - [Temporal Workflow Status](#️-temporal-workflow-status)
+  - [Workflow Status](#️-workflow-status)
 - [Error Handling](#error-handling)
 - [Configuration](#configuration)
 - [TypeScript Types](#typescript-types)
@@ -35,7 +35,7 @@ Official TypeScript SDK for the Oumla API — enterprise-grade blockchain infras
 - **Full API Coverage** — Complete access to all Oumla API endpoints
 - **Type Safety** — Strict TypeScript types for every request and response
 - **Dynamic Networks** — Networks are managed per organization; no hardcoded chain strings
-- **Async Workflow Tracking** — Long-running operations return a workflow ID, polled via the Temporal resource
+- **Async Workflow Tracking** — Long-running operations return a workflow ID, polled via the Workflows resource
 - **MPC Custody Model** — Client-share pattern built into address and signing flows
 - **Tree Shakeable** — ESM + CJS dual output for optimal bundle size
 
@@ -319,14 +319,14 @@ await client.tokenization.unlinkToken('<token-id>');
 
 ---
 
-### ⏱️ Temporal Workflow Status
+### ⏱️ Workflow Status
 
-Any operation that returns a `workflowResult.workflowId` is asynchronous. Poll via the Temporal resource until the workflow reaches a terminal state.
+Any operation that returns a `workflowResult.workflowId` is asynchronous. Poll via the Workflows resource until the workflow reaches a terminal state.
 
 ```typescript
 async function waitForWorkflow(workflowId: string): Promise<Record<string, unknown> | undefined> {
   while (true) {
-    const { data } = await client.temporal.getWorkflowStatus(workflowId);
+    const { data } = await client.workflows.getWorkflowStatus(workflowId);
 
     if (data.status === 'COMPLETED') return data.result;
 
