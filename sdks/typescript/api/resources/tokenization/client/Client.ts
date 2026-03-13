@@ -11,11 +11,9 @@ export declare namespace Tokenization {
         environment?: core.Supplier<environments.OumlaSdkApiEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
+        apiKey: core.Supplier<string>;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey: core.Supplier<string>;
         /** Additional headers to include in requests. */
         headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
     }
@@ -29,8 +27,6 @@ export declare namespace Tokenization {
         abortSignal?: AbortSignal;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey?: string;
         /** Additional query string parameters to include in the request. */
         queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
@@ -38,9 +34,6 @@ export declare namespace Tokenization {
     }
 }
 
-/**
- * Token creation, minting, and management
- */
 export class Tokenization {
     protected readonly _options: Tokenization.Options;
 
@@ -49,7 +42,7 @@ export class Tokenization {
     }
 
     /**
-     * Get list of tokens with pagination
+     * List issued tokens for the organization with pagination.
      *
      * @param {OumlaSdkApi.GetTokensRequest} request
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
@@ -61,21 +54,21 @@ export class Tokenization {
      *
      * @example
      *     await client.tokenization.getTokens({
-     *         skip: 1,
-     *         take: 1
+     *         skip: 0,
+     *         take: 25
      *     })
      */
     public getTokens(
         request: OumlaSdkApi.GetTokensRequest = {},
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.TokensResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetTokensResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__getTokens(request, requestOptions));
     }
 
     private async __getTokens(
         request: OumlaSdkApi.GetTokensRequest = {},
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.TokensResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetTokensResponseDto>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -89,9 +82,8 @@ export class Tokenization {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -110,31 +102,19 @@ export class Tokenization {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.TokensResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.GetTokensResponseDto, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -164,50 +144,51 @@ export class Tokenization {
     }
 
     /**
-     * Issue a new token
+     * Issue a new token from a deployed contract template.
      *
-     * @param {OumlaSdkApi.IssueNewTokenRequest} request
+     * @param {OumlaSdkApi.IssueNewTokenRequestBody} request
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
      * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
-     * @throws {@link OumlaSdkApi.ConflictError}
-     * @throws {@link OumlaSdkApi.UnprocessableEntityError}
      * @throws {@link OumlaSdkApi.InternalServerError}
-     * @throws {@link OumlaSdkApi.BadGatewayError}
-     * @throws {@link OumlaSdkApi.ServiceUnavailableError}
-     * @throws {@link OumlaSdkApi.GatewayTimeoutError}
      *
      * @example
      *     await client.tokenization.issueNewToken({
-     *         network: "tBTC",
+     *         networkId: "networkId",
      *         addressId: "addressId",
      *         clientShare: "clientShare",
      *         createParams: {
-     *             "key": "value"
+     *             initializeParams: [{
+     *                     name: "name",
+     *                     type: "type",
+     *                     value: "value"
+     *                 }]
      *         },
-     *         deploymentId: "deploymentId"
+     *         deploymentId: "deploymentId",
+     *         displayName: "displayName",
+     *         useGasless: true,
+     *         fee: "fee"
      *     })
      */
     public issueNewToken(
-        request: OumlaSdkApi.IssueNewTokenRequest,
+        request: OumlaSdkApi.IssueNewTokenRequestBody,
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.TokenData> {
+    ): core.HttpResponsePromise<OumlaSdkApi.IssueTokenResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__issueNewToken(request, requestOptions));
     }
 
     private async __issueNewToken(
-        request: OumlaSdkApi.IssueNewTokenRequest,
+        request: OumlaSdkApi.IssueNewTokenRequestBody,
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.TokenData>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.IssueTokenResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -229,61 +210,21 @@ export class Tokenization {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.TokenData, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.IssueTokenResponseDto, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 409:
-                    throw new OumlaSdkApi.ConflictError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 422:
-                    throw new OumlaSdkApi.UnprocessableEntityError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 502:
-                    throw new OumlaSdkApi.BadGatewayError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 503:
-                    throw new OumlaSdkApi.ServiceUnavailableError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 504:
-                    throw new OumlaSdkApi.GatewayTimeoutError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -313,40 +254,40 @@ export class Tokenization {
     }
 
     /**
-     * Link an existing contract
+     * Link an existing deployed contract to the organization for tokenization.
      *
-     * @param {OumlaSdkApi.LinkContractRequest} request
+     * @param {OumlaSdkApi.LinkContractBodyDto} request
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
      * @throws {@link OumlaSdkApi.ConflictError}
-     * @throws {@link OumlaSdkApi.UnprocessableEntityError}
      * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
      *     await client.tokenization.linkContract({
+     *         networkId: "networkId",
      *         contractAddress: "contractAddress"
      *     })
      */
     public linkContract(
-        request: OumlaSdkApi.LinkContractRequest,
+        request: OumlaSdkApi.LinkContractBodyDto,
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.LinkContractResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.LinkContractResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__linkContract(request, requestOptions));
     }
 
     private async __linkContract(
-        request: OumlaSdkApi.LinkContractRequest,
+        request: OumlaSdkApi.LinkContractBodyDto,
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.LinkContractResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.LinkContractResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -368,41 +309,23 @@ export class Tokenization {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.LinkContractResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.LinkContractResponseDto, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 409:
-                    throw new OumlaSdkApi.ConflictError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 422:
-                    throw new OumlaSdkApi.UnprocessableEntityError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ConflictError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -432,223 +355,7 @@ export class Tokenization {
     }
 
     /**
-     * Get linked token by ID
-     *
-     * @param {string} id - Token ID
-     * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link OumlaSdkApi.BadRequestError}
-     * @throws {@link OumlaSdkApi.UnauthorizedError}
-     * @throws {@link OumlaSdkApi.ForbiddenError}
-     * @throws {@link OumlaSdkApi.NotFoundError}
-     * @throws {@link OumlaSdkApi.InternalServerError}
-     *
-     * @example
-     *     await client.tokenization.getLinkedToken("id")
-     */
-    public getLinkedToken(
-        id: string,
-        requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.GetLinkedTokenResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getLinkedToken(id, requestOptions));
-    }
-
-    private async __getLinkedToken(
-        id: string,
-        requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.GetLinkedTokenResponse>> {
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
-                "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
-            }),
-            requestOptions?.headers,
-        );
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Mainnet,
-                `api/v1/tokenization/tokens/${encodeURIComponent(id)}`,
-            ),
-            method: "GET",
-            headers: _headers,
-            queryParameters: requestOptions?.queryParams,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.GetLinkedTokenResponse, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch (_response.error.statusCode) {
-                case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                default:
-                    throw new errors.OumlaSdkApiError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.OumlaSdkApiError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.OumlaSdkApiTimeoutError(
-                    "Timeout exceeded when calling GET /api/v1/tokenization/tokens/{id}.",
-                );
-            case "unknown":
-                throw new errors.OumlaSdkApiError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * Unlink a token
-     *
-     * @param {string} id - Token ID
-     * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link OumlaSdkApi.BadRequestError}
-     * @throws {@link OumlaSdkApi.UnauthorizedError}
-     * @throws {@link OumlaSdkApi.ForbiddenError}
-     * @throws {@link OumlaSdkApi.NotFoundError}
-     * @throws {@link OumlaSdkApi.InternalServerError}
-     *
-     * @example
-     *     await client.tokenization.unlinkToken("id")
-     */
-    public unlinkToken(
-        id: string,
-        requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.UnlinkTokenResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__unlinkToken(id, requestOptions));
-    }
-
-    private async __unlinkToken(
-        id: string,
-        requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.UnlinkTokenResponse>> {
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
-                "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
-            }),
-            requestOptions?.headers,
-        );
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Mainnet,
-                `api/v1/tokenization/tokens/${encodeURIComponent(id)}`,
-            ),
-            method: "DELETE",
-            headers: _headers,
-            queryParameters: requestOptions?.queryParams,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.UnlinkTokenResponse, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch (_response.error.statusCode) {
-                case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                default:
-                    throw new errors.OumlaSdkApiError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.OumlaSdkApiError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.OumlaSdkApiTimeoutError(
-                    "Timeout exceeded when calling DELETE /api/v1/tokenization/tokens/{id}.",
-                );
-            case "unknown":
-                throw new errors.OumlaSdkApiError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * Get list of collections with pagination
+     * List tokenization collections for the organization with pagination.
      *
      * @param {OumlaSdkApi.GetCollectionsRequest} request
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
@@ -660,21 +367,21 @@ export class Tokenization {
      *
      * @example
      *     await client.tokenization.getCollections({
-     *         skip: 1,
-     *         take: 1
+     *         skip: 0,
+     *         take: 25
      *     })
      */
     public getCollections(
         request: OumlaSdkApi.GetCollectionsRequest = {},
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.CollectionsResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetCollectionsResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__getCollections(request, requestOptions));
     }
 
     private async __getCollections(
         request: OumlaSdkApi.GetCollectionsRequest = {},
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.CollectionsResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetCollectionsResponseDto>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -688,9 +395,8 @@ export class Tokenization {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -709,31 +415,22 @@ export class Tokenization {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.CollectionsResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.GetCollectionsResponseDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -763,50 +460,48 @@ export class Tokenization {
     }
 
     /**
-     * Create a new collection - workflow started
+     * Start the create-collection workflow. Returns workflow ID; collection is created asynchronously.
      *
-     * @param {OumlaSdkApi.CreateCollectionRequest} request
+     * @param {OumlaSdkApi.CreateCollectionBodyDto} request
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
      * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
-     * @throws {@link OumlaSdkApi.ConflictError}
-     * @throws {@link OumlaSdkApi.UnprocessableEntityError}
      * @throws {@link OumlaSdkApi.InternalServerError}
-     * @throws {@link OumlaSdkApi.BadGatewayError}
-     * @throws {@link OumlaSdkApi.ServiceUnavailableError}
-     * @throws {@link OumlaSdkApi.GatewayTimeoutError}
      *
      * @example
      *     await client.tokenization.createCollection({
-     *         network: "network",
+     *         networkId: "networkId",
      *         addressId: "addressId",
+     *         type: "NON_FUNGIBLE_TOKEN",
      *         clientShare: "clientShare",
      *         createParams: {
-     *             "key": "value"
-     *         },
-     *         deploymentId: "deploymentId"
+     *             initializeParams: [{
+     *                     name: "name",
+     *                     type: "type",
+     *                     value: "value"
+     *                 }]
+     *         }
      *     })
      */
     public createCollection(
-        request: OumlaSdkApi.CreateCollectionRequest,
+        request: OumlaSdkApi.CreateCollectionBodyDto,
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.WorkflowResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.CreateCollectionWorkflowResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__createCollection(request, requestOptions));
     }
 
     private async __createCollection(
-        request: OumlaSdkApi.CreateCollectionRequest,
+        request: OumlaSdkApi.CreateCollectionBodyDto,
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.WorkflowResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.CreateCollectionWorkflowResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -828,61 +523,24 @@ export class Tokenization {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.WorkflowResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.CreateCollectionWorkflowResponseDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 409:
-                    throw new OumlaSdkApi.ConflictError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 422:
-                    throw new OumlaSdkApi.UnprocessableEntityError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 502:
-                    throw new OumlaSdkApi.BadGatewayError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 503:
-                    throw new OumlaSdkApi.ServiceUnavailableError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 504:
-                    throw new OumlaSdkApi.GatewayTimeoutError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -912,12 +570,11 @@ export class Tokenization {
     }
 
     /**
-     * Get collection details by ID
+     * Get a single collection by its ID.
      *
      * @param {string} id - Collection ID
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
      * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
@@ -929,20 +586,19 @@ export class Tokenization {
     public getCollectionById(
         id: string,
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.CollectionResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetCollectionByIdResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__getCollectionById(id, requestOptions));
     }
 
     private async __getCollectionById(
         id: string,
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.CollectionResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetCollectionByIdResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -961,36 +617,22 @@ export class Tokenization {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.CollectionResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.GetCollectionByIdResponseDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
-                case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -1020,12 +662,11 @@ export class Tokenization {
     }
 
     /**
-     * Delete a collection by ID
+     * Delete a collection and its associated data.
      *
      * @param {string} id - Collection ID
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
      * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
@@ -1037,20 +678,19 @@ export class Tokenization {
     public deleteCollection(
         id: string,
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<Record<string, unknown>> {
+    ): core.HttpResponsePromise<OumlaSdkApi.DeleteCollectionResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__deleteCollection(id, requestOptions));
     }
 
     private async __deleteCollection(
         id: string,
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<Record<string, unknown>>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.DeleteCollectionResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -1069,36 +709,22 @@ export class Tokenization {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as Record<string, unknown>, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.DeleteCollectionResponseDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
-                case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -1128,13 +754,12 @@ export class Tokenization {
     }
 
     /**
-     * Get token details from a collection
+     * Get details of a specific token within a collection.
      *
      * @param {string} id - Collection ID
      * @param {string} tokenId - Token ID
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
      * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
@@ -1147,7 +772,7 @@ export class Tokenization {
         id: string,
         tokenId: string,
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.CollectionTokenDetailsResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetCollectionTokenDetailsResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__getCollectionTokenDetails(id, tokenId, requestOptions));
     }
 
@@ -1155,13 +780,12 @@ export class Tokenization {
         id: string,
         tokenId: string,
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.CollectionTokenDetailsResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetCollectionTokenDetailsResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -1181,38 +805,21 @@ export class Tokenization {
         });
         if (_response.ok) {
             return {
-                data: _response.body as OumlaSdkApi.CollectionTokenDetailsResponse,
+                data: _response.body as OumlaSdkApi.GetCollectionTokenDetailsResponseDto,
                 rawResponse: _response.rawResponse,
             };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
-                case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -1242,49 +849,44 @@ export class Tokenization {
     }
 
     /**
-     * Mint new tokens in a collection
+     * Start mint workflow for a collection. Requires mint policy.
      *
      * @param {string} id - Collection ID
-     * @param {OumlaSdkApi.MintTokenRequest} request
+     * @param {OumlaSdkApi.MintTokenBodyDto} request
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
      * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
-     * @throws {@link OumlaSdkApi.ConflictError}
-     * @throws {@link OumlaSdkApi.UnprocessableEntityError}
      * @throws {@link OumlaSdkApi.InternalServerError}
-     * @throws {@link OumlaSdkApi.BadGatewayError}
-     * @throws {@link OumlaSdkApi.ServiceUnavailableError}
-     * @throws {@link OumlaSdkApi.GatewayTimeoutError}
      *
      * @example
      *     await client.tokenization.mintToken("id", {
      *         addressId: "addressId",
      *         clientShare: "clientShare",
-     *         to: "to"
+     *         to: "to",
+     *         tokenId: "tokenId"
      *     })
      */
     public mintToken(
         id: string,
-        request: OumlaSdkApi.MintTokenRequest,
+        request: OumlaSdkApi.MintTokenBodyDto,
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.MintTokenResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.MintTokenResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__mintToken(id, request, requestOptions));
     }
 
     private async __mintToken(
         id: string,
-        request: OumlaSdkApi.MintTokenRequest,
+        request: OumlaSdkApi.MintTokenBodyDto,
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.MintTokenResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.MintTokenResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -1306,61 +908,21 @@ export class Tokenization {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.MintTokenResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.MintTokenResponseDto, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 409:
-                    throw new OumlaSdkApi.ConflictError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 422:
-                    throw new OumlaSdkApi.UnprocessableEntityError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 502:
-                    throw new OumlaSdkApi.BadGatewayError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 503:
-                    throw new OumlaSdkApi.ServiceUnavailableError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 504:
-                    throw new OumlaSdkApi.GatewayTimeoutError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -1390,22 +952,132 @@ export class Tokenization {
     }
 
     /**
-     * Burn tokens from a collection
+     * List tokens in a collection, optionally filtered by type, with pagination.
      *
-     * @param {string} id - Collection ID
-     * @param {OumlaSdkApi.BurnTokenRequest} request
+     * @param {OumlaSdkApi.GetCollectionTokensRequest} request
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
      * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
-     * @throws {@link OumlaSdkApi.ConflictError}
-     * @throws {@link OumlaSdkApi.UnprocessableEntityError}
      * @throws {@link OumlaSdkApi.InternalServerError}
-     * @throws {@link OumlaSdkApi.BadGatewayError}
-     * @throws {@link OumlaSdkApi.ServiceUnavailableError}
-     * @throws {@link OumlaSdkApi.GatewayTimeoutError}
+     *
+     * @example
+     *     await client.tokenization.getCollectionTokens({
+     *         skip: 0,
+     *         take: 25,
+     *         id: "id",
+     *         type: "MINT"
+     *     })
+     */
+    public getCollectionTokens(
+        request: OumlaSdkApi.GetCollectionTokensRequest,
+        requestOptions?: Tokenization.RequestOptions,
+    ): core.HttpResponsePromise<OumlaSdkApi.GetCollectionTokensResponseDto> {
+        return core.HttpResponsePromise.fromPromise(this.__getCollectionTokens(request, requestOptions));
+    }
+
+    private async __getCollectionTokens(
+        request: OumlaSdkApi.GetCollectionTokensRequest,
+        requestOptions?: Tokenization.RequestOptions,
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetCollectionTokensResponseDto>> {
+        const { skip, take, id, type: type_ } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        if (skip != null) {
+            _queryParams["skip"] = skip.toString();
+        }
+
+        if (take != null) {
+            _queryParams["take"] = take.toString();
+        }
+
+        _queryParams["id"] = id;
+        if (type_ != null) {
+            _queryParams["type"] = type_;
+        }
+
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({
+                "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.OumlaSdkApiEnvironment.Mainnet,
+                "api/v1/tokenization/collection/tokens",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as OumlaSdkApi.GetCollectionTokensResponseDto,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.OumlaSdkApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.OumlaSdkApiTimeoutError(
+                    "Timeout exceeded when calling GET /api/v1/tokenization/collection/tokens.",
+                );
+            case "unknown":
+                throw new errors.OumlaSdkApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
+     * Start burn workflow for tokens in a collection. Requires burn policy.
+     *
+     * @param {string} id - Collection ID
+     * @param {OumlaSdkApi.BurnTokenBodyDto} request
+     * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link OumlaSdkApi.BadRequestError}
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
      *     await client.tokenization.burnToken("id", {
@@ -1416,23 +1088,22 @@ export class Tokenization {
      */
     public burnToken(
         id: string,
-        request: OumlaSdkApi.BurnTokenRequest,
+        request: OumlaSdkApi.BurnTokenBodyDto,
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.BurnTokenResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.BurnTokenResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__burnToken(id, request, requestOptions));
     }
 
     private async __burnToken(
         id: string,
-        request: OumlaSdkApi.BurnTokenRequest,
+        request: OumlaSdkApi.BurnTokenBodyDto,
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.BurnTokenResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.BurnTokenResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -1454,61 +1125,21 @@ export class Tokenization {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.BurnTokenResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as OumlaSdkApi.BurnTokenResponseDto, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 409:
-                    throw new OumlaSdkApi.ConflictError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 422:
-                    throw new OumlaSdkApi.UnprocessableEntityError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 502:
-                    throw new OumlaSdkApi.BadGatewayError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 503:
-                    throw new OumlaSdkApi.ServiceUnavailableError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 504:
-                    throw new OumlaSdkApi.GatewayTimeoutError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -1538,60 +1169,35 @@ export class Tokenization {
     }
 
     /**
-     * Get tokens from a collection by ID or type
+     * Get a linked token by its ID.
      *
-     * @param {OumlaSdkApi.GetCollectionTokensRequest} request
+     * @param {string} id - Token ID
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
      * @throws {@link OumlaSdkApi.ForbiddenError}
      * @throws {@link OumlaSdkApi.NotFoundError}
      * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
-     *     await client.tokenization.getCollectionTokens({
-     *         id: "id",
-     *         type: "type",
-     *         skip: 1,
-     *         take: 1
-     *     })
+     *     await client.tokenization.getLinkedToken("id")
      */
-    public getCollectionTokens(
-        request: OumlaSdkApi.GetCollectionTokensRequest = {},
+    public getLinkedToken(
+        id: string,
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.CollectionTokensResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getCollectionTokens(request, requestOptions));
+    ): core.HttpResponsePromise<OumlaSdkApi.GetLinkedTokenResponseDto> {
+        return core.HttpResponsePromise.fromPromise(this.__getLinkedToken(id, requestOptions));
     }
 
-    private async __getCollectionTokens(
-        request: OumlaSdkApi.GetCollectionTokensRequest = {},
+    private async __getLinkedToken(
+        id: string,
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.CollectionTokensResponse>> {
-        const { id, type: type_, skip, take } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        if (id != null) {
-            _queryParams["id"] = id;
-        }
-
-        if (type_ != null) {
-            _queryParams["type"] = type_;
-        }
-
-        if (skip != null) {
-            _queryParams["skip"] = skip.toString();
-        }
-
-        if (take != null) {
-            _queryParams["take"] = take.toString();
-        }
-
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetLinkedTokenResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -1600,46 +1206,32 @@ export class Tokenization {
                 (await core.Supplier.get(this._options.baseUrl)) ??
                     (await core.Supplier.get(this._options.environment)) ??
                     environments.OumlaSdkApiEnvironment.Mainnet,
-                "api/v1/tokenization/collection/tokens",
+                `api/v1/tokenization/tokens/${encodeURIComponent(id)}`,
             ),
             method: "GET",
             headers: _headers,
-            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            queryParameters: requestOptions?.queryParams,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.CollectionTokensResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.GetLinkedTokenResponseDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
-                case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -1658,7 +1250,7 @@ export class Tokenization {
                 });
             case "timeout":
                 throw new errors.OumlaSdkApiTimeoutError(
-                    "Timeout exceeded when calling GET /api/v1/tokenization/collection/tokens.",
+                    "Timeout exceeded when calling GET /api/v1/tokenization/tokens/{id}.",
                 );
             case "unknown":
                 throw new errors.OumlaSdkApiError({
@@ -1668,12 +1260,97 @@ export class Tokenization {
         }
     }
 
-    protected async _getAuthorizationHeader(): Promise<string | undefined> {
-        const bearer = await core.Supplier.get(this._options.token);
-        if (bearer != null) {
-            return `Bearer ${bearer}`;
+    /**
+     * Unlink a token from the organization.
+     *
+     * @param {string} id - Token ID
+     * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
+     * @example
+     *     await client.tokenization.unlinkToken("id")
+     */
+    public unlinkToken(
+        id: string,
+        requestOptions?: Tokenization.RequestOptions,
+    ): core.HttpResponsePromise<OumlaSdkApi.UnlinkTokenResponseDto> {
+        return core.HttpResponsePromise.fromPromise(this.__unlinkToken(id, requestOptions));
+    }
+
+    private async __unlinkToken(
+        id: string,
+        requestOptions?: Tokenization.RequestOptions,
+    ): Promise<core.WithRawResponse<OumlaSdkApi.UnlinkTokenResponseDto>> {
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({
+                "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.OumlaSdkApiEnvironment.Mainnet,
+                `api/v1/tokenization/tokens/${encodeURIComponent(id)}`,
+            ),
+            method: "DELETE",
+            headers: _headers,
+            queryParameters: requestOptions?.queryParams,
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return { data: _response.body as OumlaSdkApi.UnlinkTokenResponseDto, rawResponse: _response.rawResponse };
         }
 
-        return undefined;
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.OumlaSdkApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.OumlaSdkApiTimeoutError(
+                    "Timeout exceeded when calling DELETE /api/v1/tokenization/tokens/{id}.",
+                );
+            case "unknown":
+                throw new errors.OumlaSdkApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    protected async _getCustomAuthorizationHeaders(): Promise<Record<string, string | undefined>> {
+        const apiKeyValue = await core.Supplier.get(this._options.apiKey);
+        return { "x-api-key": apiKeyValue };
     }
 }

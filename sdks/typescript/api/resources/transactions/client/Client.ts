@@ -11,11 +11,9 @@ export declare namespace Transactions {
         environment?: core.Supplier<environments.OumlaSdkApiEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
+        apiKey: core.Supplier<string>;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey: core.Supplier<string>;
         /** Additional headers to include in requests. */
         headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
     }
@@ -29,8 +27,6 @@ export declare namespace Transactions {
         abortSignal?: AbortSignal;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey?: string;
         /** Additional query string parameters to include in the request. */
         queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
@@ -38,9 +34,6 @@ export declare namespace Transactions {
     }
 }
 
-/**
- * Transaction history and tracking
- */
 export class Transactions {
     protected readonly _options: Transactions.Options;
 
@@ -49,9 +42,9 @@ export class Transactions {
     }
 
     /**
-     * Get transactions for a specific address
+     * List transactions for a given address with pagination.
      *
-     * @param {string} address - Blockchain address
+     * @param {string} address - Address
      * @param {OumlaSdkApi.GetTransactionsByAddressRequest} request
      * @param {Transactions.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -63,15 +56,15 @@ export class Transactions {
      *
      * @example
      *     await client.transactions.getTransactionsByAddress("address", {
-     *         skip: 1,
-     *         take: 1
+     *         skip: 0,
+     *         take: 10
      *     })
      */
     public getTransactionsByAddress(
         address: string,
         request: OumlaSdkApi.GetTransactionsByAddressRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.TransactionsResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetTransactionListResponseBodyDto> {
         return core.HttpResponsePromise.fromPromise(this.__getTransactionsByAddress(address, request, requestOptions));
     }
 
@@ -79,7 +72,7 @@ export class Transactions {
         address: string,
         request: OumlaSdkApi.GetTransactionsByAddressRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.TransactionsResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetTransactionListResponseBodyDto>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -93,9 +86,8 @@ export class Transactions {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -114,36 +106,24 @@ export class Transactions {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.TransactionsResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.GetTransactionListResponseBodyDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -173,9 +153,9 @@ export class Transactions {
     }
 
     /**
-     * Get transactions for a specific wallet
+     * List transactions for a mini wallet with pagination.
      *
-     * @param {string} miniWalletId - Mini wallet identifier
+     * @param {string} miniWalletId - Mini wallet ID
      * @param {OumlaSdkApi.GetTransactionsByMiniWalletRequest} request
      * @param {Transactions.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -187,15 +167,15 @@ export class Transactions {
      *
      * @example
      *     await client.transactions.getTransactionsByMiniWallet("miniWalletId", {
-     *         skip: 1,
-     *         take: 1
+     *         skip: 0,
+     *         take: 10
      *     })
      */
     public getTransactionsByMiniWallet(
         miniWalletId: string,
         request: OumlaSdkApi.GetTransactionsByMiniWalletRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.TransactionsResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetTransactionListResponseBodyDto> {
         return core.HttpResponsePromise.fromPromise(
             this.__getTransactionsByMiniWallet(miniWalletId, request, requestOptions),
         );
@@ -205,7 +185,7 @@ export class Transactions {
         miniWalletId: string,
         request: OumlaSdkApi.GetTransactionsByMiniWalletRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.TransactionsResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetTransactionListResponseBodyDto>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -219,9 +199,8 @@ export class Transactions {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -240,36 +219,24 @@ export class Transactions {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.TransactionsResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.GetTransactionListResponseBodyDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -299,7 +266,7 @@ export class Transactions {
     }
 
     /**
-     * Get all transactions for the organization
+     * List transactions for the authenticated user's organization with pagination.
      *
      * @param {OumlaSdkApi.GetTransactionsByOrganizationRequest} request
      * @param {Transactions.RequestOptions} requestOptions - Request-specific configuration.
@@ -311,21 +278,21 @@ export class Transactions {
      *
      * @example
      *     await client.transactions.getTransactionsByOrganization({
-     *         skip: 1,
-     *         take: 1
+     *         skip: 0,
+     *         take: 10
      *     })
      */
     public getTransactionsByOrganization(
         request: OumlaSdkApi.GetTransactionsByOrganizationRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.TransactionsResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetTransactionListResponseBodyDto> {
         return core.HttpResponsePromise.fromPromise(this.__getTransactionsByOrganization(request, requestOptions));
     }
 
     private async __getTransactionsByOrganization(
         request: OumlaSdkApi.GetTransactionsByOrganizationRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.TransactionsResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetTransactionListResponseBodyDto>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -339,9 +306,8 @@ export class Transactions {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -360,31 +326,22 @@ export class Transactions {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.TransactionsResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.GetTransactionListResponseBodyDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -414,9 +371,9 @@ export class Transactions {
     }
 
     /**
-     * Get transactions for a specific profile
+     * List transactions for a profile by reference with pagination.
      *
-     * @param {string} reference - Profile or organization reference identifier
+     * @param {string} reference - Profile reference
      * @param {OumlaSdkApi.GetTransactionsByProfileRequest} request
      * @param {Transactions.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -428,15 +385,15 @@ export class Transactions {
      *
      * @example
      *     await client.transactions.getTransactionsByProfile("reference", {
-     *         skip: 1,
-     *         take: 1
+     *         skip: 0,
+     *         take: 10
      *     })
      */
     public getTransactionsByProfile(
         reference: string,
         request: OumlaSdkApi.GetTransactionsByProfileRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.TransactionsByProfileResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetTransactionListByProfileResponseBodyDto> {
         return core.HttpResponsePromise.fromPromise(
             this.__getTransactionsByProfile(reference, request, requestOptions),
         );
@@ -446,7 +403,7 @@ export class Transactions {
         reference: string,
         request: OumlaSdkApi.GetTransactionsByProfileRequest = {},
         requestOptions?: Transactions.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.TransactionsByProfileResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetTransactionListByProfileResponseBodyDto>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
         if (skip != null) {
@@ -460,9 +417,8 @@ export class Transactions {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -482,7 +438,7 @@ export class Transactions {
         });
         if (_response.ok) {
             return {
-                data: _response.body as OumlaSdkApi.TransactionsByProfileResponse,
+                data: _response.body as OumlaSdkApi.GetTransactionListByProfileResponseBodyDto,
                 rawResponse: _response.rawResponse,
             };
         }
@@ -490,30 +446,15 @@ export class Transactions {
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -542,12 +483,8 @@ export class Transactions {
         }
     }
 
-    protected async _getAuthorizationHeader(): Promise<string | undefined> {
-        const bearer = await core.Supplier.get(this._options.token);
-        if (bearer != null) {
-            return `Bearer ${bearer}`;
-        }
-
-        return undefined;
+    protected async _getCustomAuthorizationHeaders(): Promise<Record<string, string | undefined>> {
+        const apiKeyValue = await core.Supplier.get(this._options.apiKey);
+        return { "x-api-key": apiKeyValue };
     }
 }

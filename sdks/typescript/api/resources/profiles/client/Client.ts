@@ -11,11 +11,9 @@ export declare namespace Profiles {
         environment?: core.Supplier<environments.OumlaSdkApiEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
+        apiKey: core.Supplier<string>;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey: core.Supplier<string>;
         /** Additional headers to include in requests. */
         headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
     }
@@ -29,8 +27,6 @@ export declare namespace Profiles {
         abortSignal?: AbortSignal;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey?: string;
         /** Additional query string parameters to include in the request. */
         queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
@@ -38,9 +34,6 @@ export declare namespace Profiles {
     }
 }
 
-/**
- * User profile management
- */
 export class Profiles {
     protected readonly _options: Profiles.Options;
 
@@ -49,48 +42,43 @@ export class Profiles {
     }
 
     /**
-     * Get list of profiles with pagination
+     * List profiles for the authenticated user's organization with pagination.
      *
      * @param {OumlaSdkApi.GetProfilesRequest} request
      * @param {Profiles.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
      * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
      *     await client.profiles.getProfiles({
-     *         skip: 1,
-     *         take: 1
+     *         skip: 0,
+     *         take: 10
      *     })
      */
     public getProfiles(
-        request: OumlaSdkApi.GetProfilesRequest = {},
+        request: OumlaSdkApi.GetProfilesRequest,
         requestOptions?: Profiles.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.ProfilesResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetProfileListResponseBodyDto> {
         return core.HttpResponsePromise.fromPromise(this.__getProfiles(request, requestOptions));
     }
 
     private async __getProfiles(
-        request: OumlaSdkApi.GetProfilesRequest = {},
+        request: OumlaSdkApi.GetProfilesRequest,
         requestOptions?: Profiles.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.ProfilesResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetProfileListResponseBodyDto>> {
         const { skip, take } = request;
         const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        if (skip != null) {
-            _queryParams["skip"] = skip.toString();
-        }
-
-        if (take != null) {
-            _queryParams["take"] = take.toString();
-        }
-
+        _queryParams["skip"] = skip.toString();
+        _queryParams["take"] = take.toString();
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -109,26 +97,24 @@ export class Profiles {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.ProfilesResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.GetProfileListResponseBodyDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -156,41 +142,40 @@ export class Profiles {
     }
 
     /**
-     * Create a new user profile
+     * Create a new profile for the organization.
      *
-     * @param {OumlaSdkApi.CreateProfileRequest} request
+     * @param {OumlaSdkApi.CreateProfileRequestBodyDto} request
      * @param {Profiles.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.BadRequestError}
      * @throws {@link OumlaSdkApi.UnauthorizedError}
      * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
      * @throws {@link OumlaSdkApi.ConflictError}
-     * @throws {@link OumlaSdkApi.UnprocessableEntityError}
      * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
      *     await client.profiles.createProfile({
-     *         reference: "user-123",
-     *         type: "User"
+     *         reference: "reference",
+     *         type: "type"
      *     })
      */
     public createProfile(
-        request: OumlaSdkApi.CreateProfileRequest,
+        request: OumlaSdkApi.CreateProfileRequestBodyDto,
         requestOptions?: Profiles.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.ProfileResponse> {
+    ): core.HttpResponsePromise<OumlaSdkApi.CreateProfileResponseBodyDto> {
         return core.HttpResponsePromise.fromPromise(this.__createProfile(request, requestOptions));
     }
 
     private async __createProfile(
-        request: OumlaSdkApi.CreateProfileRequest,
+        request: OumlaSdkApi.CreateProfileRequestBodyDto,
         requestOptions?: Profiles.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.ProfileResponse>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.CreateProfileResponseBodyDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -212,41 +197,26 @@ export class Profiles {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.ProfileResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.CreateProfileResponseBodyDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 409:
-                    throw new OumlaSdkApi.ConflictError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
-                case 422:
-                    throw new OumlaSdkApi.UnprocessableEntityError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ConflictError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -273,12 +243,8 @@ export class Profiles {
         }
     }
 
-    protected async _getAuthorizationHeader(): Promise<string | undefined> {
-        const bearer = await core.Supplier.get(this._options.token);
-        if (bearer != null) {
-            return `Bearer ${bearer}`;
-        }
-
-        return undefined;
+    protected async _getCustomAuthorizationHeaders(): Promise<Record<string, string | undefined>> {
+        const apiKeyValue = await core.Supplier.get(this._options.apiKey);
+        return { "x-api-key": apiKeyValue };
     }
 }

@@ -3,13 +3,11 @@
 /**
  * @example
  *     {
- *         skip: 1,
- *         take: 1
+ *         skip: 0,
+ *         take: 25
  *     }
  */
 export interface GetTokensRequest {
-    /** Number of records to skip */
     skip?: number;
-    /** Number of records to take */
     take?: number;
 }

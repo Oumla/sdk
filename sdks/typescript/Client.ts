@@ -3,28 +3,27 @@
 import * as environments from "./environments.js";
 import * as core from "./core/index.js";
 import { mergeHeaders } from "./core/headers.js";
-import { Profiles } from "./api/resources/profiles/client/Client.js";
-import { Wallets } from "./api/resources/wallets/client/Client.js";
 import { Addresses } from "./api/resources/addresses/client/Client.js";
+import { Networks } from "./api/resources/networks/client/Client.js";
 import { Transactions } from "./api/resources/transactions/client/Client.js";
-import { Portfolio } from "./api/resources/portfolio/client/Client.js";
-import { Temporal } from "./api/resources/temporal/client/Client.js";
+import { Wallets } from "./api/resources/wallets/client/Client.js";
+import { Profiles } from "./api/resources/profiles/client/Client.js";
+import { Withdraw } from "./api/resources/withdraw/client/Client.js";
 import { Tokenization } from "./api/resources/tokenization/client/Client.js";
-import { ContractTemplates } from "./api/resources/contractTemplates/client/Client.js";
-import { DeployedContracts } from "./api/resources/deployedContracts/client/Client.js";
 import { ContractInteractions } from "./api/resources/contractInteractions/client/Client.js";
-import { Withdrawals } from "./api/resources/withdrawals/client/Client.js";
+import { Assets } from "./api/resources/assets/client/Client.js";
+import { DeployedContracts } from "./api/resources/deployedContracts/client/Client.js";
+import { ContractTemplates } from "./api/resources/contractTemplates/client/Client.js";
+import { Temporal } from "./api/resources/temporal/client/Client.js";
 
 export declare namespace OumlaSdkApiClient {
     export interface Options {
         environment?: core.Supplier<environments.OumlaSdkApiEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
+        apiKey: core.Supplier<string>;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey: core.Supplier<string>;
         /** Additional headers to include in requests. */
         headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
     }
@@ -38,8 +37,6 @@ export declare namespace OumlaSdkApiClient {
         abortSignal?: AbortSignal;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey?: string;
         /** Additional query string parameters to include in the request. */
         queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
@@ -49,17 +46,18 @@ export declare namespace OumlaSdkApiClient {
 
 export class OumlaSdkApiClient {
     protected readonly _options: OumlaSdkApiClient.Options;
-    protected _profiles: Profiles | undefined;
-    protected _wallets: Wallets | undefined;
     protected _addresses: Addresses | undefined;
+    protected _networks: Networks | undefined;
     protected _transactions: Transactions | undefined;
-    protected _portfolio: Portfolio | undefined;
-    protected _temporal: Temporal | undefined;
+    protected _wallets: Wallets | undefined;
+    protected _profiles: Profiles | undefined;
+    protected _withdraw: Withdraw | undefined;
     protected _tokenization: Tokenization | undefined;
-    protected _contractTemplates: ContractTemplates | undefined;
-    protected _deployedContracts: DeployedContracts | undefined;
     protected _contractInteractions: ContractInteractions | undefined;
-    protected _withdrawals: Withdrawals | undefined;
+    protected _assets: Assets | undefined;
+    protected _deployedContracts: DeployedContracts | undefined;
+    protected _contractTemplates: ContractTemplates | undefined;
+    protected _temporal: Temporal | undefined;
 
     constructor(_options: OumlaSdkApiClient.Options) {
         this._options = {
@@ -67,7 +65,6 @@ export class OumlaSdkApiClient {
             headers: mergeHeaders(
                 {
                     "x-sdk-version": _options?.sdkVersion ?? "1.0.0",
-                    "x-api-key": _options?.apiKey,
                     "X-Fern-Language": "JavaScript",
                     "X-Fern-Runtime": core.RUNTIME.type,
                     "X-Fern-Runtime-Version": core.RUNTIME.version,
@@ -77,47 +74,51 @@ export class OumlaSdkApiClient {
         };
     }
 
-    public get profiles(): Profiles {
-        return (this._profiles ??= new Profiles(this._options));
-    }
-
-    public get wallets(): Wallets {
-        return (this._wallets ??= new Wallets(this._options));
-    }
-
     public get addresses(): Addresses {
         return (this._addresses ??= new Addresses(this._options));
+    }
+
+    public get networks(): Networks {
+        return (this._networks ??= new Networks(this._options));
     }
 
     public get transactions(): Transactions {
         return (this._transactions ??= new Transactions(this._options));
     }
 
-    public get portfolio(): Portfolio {
-        return (this._portfolio ??= new Portfolio(this._options));
+    public get wallets(): Wallets {
+        return (this._wallets ??= new Wallets(this._options));
     }
 
-    public get temporal(): Temporal {
-        return (this._temporal ??= new Temporal(this._options));
+    public get profiles(): Profiles {
+        return (this._profiles ??= new Profiles(this._options));
+    }
+
+    public get withdraw(): Withdraw {
+        return (this._withdraw ??= new Withdraw(this._options));
     }
 
     public get tokenization(): Tokenization {
         return (this._tokenization ??= new Tokenization(this._options));
     }
 
-    public get contractTemplates(): ContractTemplates {
-        return (this._contractTemplates ??= new ContractTemplates(this._options));
+    public get contractInteractions(): ContractInteractions {
+        return (this._contractInteractions ??= new ContractInteractions(this._options));
+    }
+
+    public get assets(): Assets {
+        return (this._assets ??= new Assets(this._options));
     }
 
     public get deployedContracts(): DeployedContracts {
         return (this._deployedContracts ??= new DeployedContracts(this._options));
     }
 
-    public get contractInteractions(): ContractInteractions {
-        return (this._contractInteractions ??= new ContractInteractions(this._options));
+    public get contractTemplates(): ContractTemplates {
+        return (this._contractTemplates ??= new ContractTemplates(this._options));
     }
 
-    public get withdrawals(): Withdrawals {
-        return (this._withdrawals ??= new Withdrawals(this._options));
+    public get temporal(): Temporal {
+        return (this._temporal ??= new Temporal(this._options));
     }
 }

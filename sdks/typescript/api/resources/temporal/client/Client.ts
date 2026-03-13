@@ -11,11 +11,9 @@ export declare namespace Temporal {
         environment?: core.Supplier<environments.OumlaSdkApiEnvironment | string>;
         /** Specify a custom URL to connect the client to. */
         baseUrl?: core.Supplier<string>;
-        token?: core.Supplier<core.BearerToken | undefined>;
+        apiKey: core.Supplier<string>;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey: core.Supplier<string>;
         /** Additional headers to include in requests. */
         headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
     }
@@ -29,8 +27,6 @@ export declare namespace Temporal {
         abortSignal?: AbortSignal;
         /** Override the x-sdk-version header */
         sdkVersion?: "1.0.0";
-        /** Override the x-api-key header */
-        apiKey?: string;
         /** Additional query string parameters to include in the request. */
         queryParams?: Record<string, unknown>;
         /** Additional headers to include in the request. */
@@ -38,9 +34,6 @@ export declare namespace Temporal {
     }
 }
 
-/**
- * Temporal workflow operations
- */
 export class Temporal {
     protected readonly _options: Temporal.Options;
 
@@ -49,9 +42,9 @@ export class Temporal {
     }
 
     /**
-     * Get status and result of a Temporal workflow
+     * Get the status and result of a Temporal workflow by ID.
      *
-     * @param {string} workflowId - Temporal workflow ID
+     * @param {string} workflowId - Workflow ID
      * @param {Temporal.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link OumlaSdkApi.BadRequestError}
@@ -61,25 +54,24 @@ export class Temporal {
      * @throws {@link OumlaSdkApi.InternalServerError}
      *
      * @example
-     *     await client.temporal.getWorkflowStatus("workflowId")
+     *     await client.temporal.getWorkflowStatus("create-collection-123e4567-e89b-12d3-a456-426614174000")
      */
     public getWorkflowStatus(
         workflowId: string,
         requestOptions?: Temporal.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.TemporalWorkflowStatusData> {
+    ): core.HttpResponsePromise<OumlaSdkApi.GetWorkflowStatusResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__getWorkflowStatus(workflowId, requestOptions));
     }
 
     private async __getWorkflowStatus(
         workflowId: string,
         requestOptions?: Temporal.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.TemporalWorkflowStatusData>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetWorkflowStatusResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
-                Authorization: await this._getAuthorizationHeader(),
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                "x-api-key": requestOptions?.apiKey ?? this._options?.apiKey,
+                ...(await this._getCustomAuthorizationHeaders()),
             }),
             requestOptions?.headers,
         );
@@ -99,7 +91,7 @@ export class Temporal {
         });
         if (_response.ok) {
             return {
-                data: _response.body as OumlaSdkApi.TemporalWorkflowStatusData,
+                data: _response.body as OumlaSdkApi.GetWorkflowStatusResponseDto,
                 rawResponse: _response.rawResponse,
             };
         }
@@ -107,30 +99,15 @@ export class Temporal {
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
                 case 400:
-                    throw new OumlaSdkApi.BadRequestError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.BadRequestError(_response.error.body as unknown, _response.rawResponse);
                 case 401:
-                    throw new OumlaSdkApi.UnauthorizedError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
                 case 403:
-                    throw new OumlaSdkApi.ForbiddenError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
                 case 404:
-                    throw new OumlaSdkApi.NotFoundError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
                 case 500:
-                    throw new OumlaSdkApi.InternalServerError(
-                        _response.error.body as OumlaSdkApi.ErrorResponse,
-                        _response.rawResponse,
-                    );
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
                 default:
                     throw new errors.OumlaSdkApiError({
                         statusCode: _response.error.statusCode,
@@ -159,12 +136,8 @@ export class Temporal {
         }
     }
 
-    protected async _getAuthorizationHeader(): Promise<string | undefined> {
-        const bearer = await core.Supplier.get(this._options.token);
-        if (bearer != null) {
-            return `Bearer ${bearer}`;
-        }
-
-        return undefined;
+    protected async _getCustomAuthorizationHeaders(): Promise<Record<string, string | undefined>> {
+        const apiKeyValue = await core.Supplier.get(this._options.apiKey);
+        return { "x-api-key": apiKeyValue };
     }
 }

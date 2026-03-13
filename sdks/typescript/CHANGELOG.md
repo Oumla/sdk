@@ -5,6 +5,81 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-03-16
+
+### Added
+
+#### Dynamic Network Support
+- API responses now return dynamic network entities instead of hardcoded network strings.
+- Networks are globally managed objects that can be assigned per organization.
+
+#### Networks Resource
+- New `networks` resource with `getNetworks()` endpoint for listing available networks.
+
+#### Contract Deployment
+- Improved contract deployment workflow with better parameter handling and execution reliability.
+
+### Changed
+
+#### Resource Renames ⚠️ Breaking Change
+- `portfolio` resource renamed to `assets` — update all `client.portfolio.*` calls to `client.assets.*`.
+- `withdrawals` resource renamed to `withdraw` — update all `client.withdrawals.*` calls to `client.withdraw.*`.
+
+#### Request / Response Type Renames ⚠️ Breaking Change
+All request and response types have been renamed to match the server-side DTO naming convention:
+
+| Old Name | New Name |
+|---|---|
+| `CreateWalletRequest` | `CreateWalletRequestBodyDto` |
+| `CreateProfileRequest` | `CreateProfileRequestBodyDto` |
+| `CreateCollectionRequest` | `CreateCollectionBodyDto` |
+| `CreateContractRequest` | `CreateContractRequestBodyDto` |
+| `DeployContractRequest` | `DeployContractRequestBodyDto` |
+| `AddContractAbiRequest` | `AddContractAbiRequestBodyDto` |
+| `FetchContractAbiRequest` | `FetchContractAbiRequestBodyDto` |
+| `ReadCallFunctionRequest` | `ReadCallFunctionBody` |
+| `WriteCallFunctionRequest` | `WriteCallFunctionBody` |
+| `BurnTokenRequest` | `BurnTokenBodyDto` |
+| `IssueNewTokenRequest` | `IssueNewTokenRequestBody` |
+| `LinkContractRequest` | `LinkContractBodyDto` |
+| `MintTokenRequest` | `MintTokenBodyDto` |
+| `CreateWithdrawRequest` | `CreateWithdrawRequestBodyDto` |
+| `WalletData` | `WalletDataDto` |
+| `AssetData` | `AssetItemDto` |
+| `AddressData` | `AddressDataDto` |
+| `NativeBalanceData` | `NativeBalanceItemDto` |
+| `TokenData` | `TokenResponseDto` |
+| `TransactionData` | `TransactionItemDto` |
+| `CollectionData` | `CollectionItemDto` |
+| `CollectionTokenData` | `CollectionTokenDetailDto` |
+| `DeployedContractData` | `DeployedContractItemDto` |
+| `ContractTemplateData` | `ContractTemplateItemDto` |
+| `Pagination` | `AddressListPaginationDto` |
+
+#### Network Architecture ⚠️ Breaking Change
+- Removed the `network` attribute from all database-backed models.
+- API responses that previously returned a `network` string now return dynamic network entities.
+- Any code reading the `network` string directly from API responses must be updated.
+
+#### Removed Error Classes ⚠️ Breaking Change
+The following error classes have been removed. Catch `OumlaSdkApiError` directly for these status codes if needed:
+- `BadGatewayError` (502)
+- `GatewayTimeoutError` (504)
+- `ServiceUnavailableError` (503)
+- `UnprocessableEntityError` (422)
+
+#### Error Handling
+- Error response bodies are now loosely typed (`unknown`) for forward compatibility.
+
+#### Request Validation
+- Standardized Joi schema configuration and improved request validation across all API endpoints.
+
+### Fixed
+- Updated address generation endpoint to the correct API version with improved error handling.
+- Added validation for `initializeParams` in the `issue-new-token` operation.
+
+---
+
 ## [1.3.0] - 2026-01-31
 
 ### Added

@@ -1,3 +1,3 @@
 export { type GetContractsRequest } from "./GetContractsRequest.js";
-export { type CreateContractRequest } from "./CreateContractRequest.js";
-export { type DeployContractRequest } from "./DeployContractRequest.js";
+export { type CreateContractRequestBodyDto } from "./CreateContractRequestBodyDto.js";
+export { type DeployContractRequestBodyDto } from "./DeployContractRequestBodyDto.js";
