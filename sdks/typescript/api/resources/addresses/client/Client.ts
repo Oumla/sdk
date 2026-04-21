@@ -55,9 +55,9 @@ export class Addresses {
      *
      * @example
      *     await client.addresses.createAddress({
-     *         reference: "reference",
-     *         networkId: "networkId",
-     *         clientShare: "clientShare"
+     *         reference: "user",
+     *         networkId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+     *         clientShare: "c2hhcmUtZGF0YS1iYXNlNjQ="
      *     })
      */
     public createAddress(
@@ -157,9 +157,9 @@ export class Addresses {
      *
      * @example
      *     await client.addresses.createAddressV2({
-     *         reference: "reference",
-     *         networkId: "networkId",
-     *         clientShare: "clientShare"
+     *         reference: "user",
+     *         networkId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+     *         clientShare: "c2hhcmUtZGF0YS1iYXNlNjQ="
      *     })
      */
     public createAddressV2(

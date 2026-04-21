@@ -901,6 +901,38 @@
         ]
       }
     },
+    "/api/v1/network/enabled": {
+      "get": {
+        "description": "Returns the enabled-networks catalog (ID, name, alias) from cache. Accessible to any authenticated user — exposes only non-sensitive metadata. On cache miss, rebuilds the index from the database.",
+        "operationId": "getEnabledNetworks",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SdkVersionHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Enabled networks index",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEnabledNetworksResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Get all enabled networks",
+        "tags": [
+          "networks"
+        ]
+      }
+    },
     "/api/v1/network/organization": {
       "get": {
         "description": "Get networks available for your organization.",
@@ -968,6 +1000,640 @@
         "summary": "Get networks available for your organization",
         "tags": [
           "networks"
+        ]
+      }
+    },
+    "/api/v1/wallets/generate": {
+      "post": {
+        "description": "Generate a new wallet for the given reference and network. Requires wallet/address policy.",
+        "operationId": "createWallet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SdkVersionHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWalletRequestBodyDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Wallet created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateWalletResponseBodyDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or validation failed.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-010 | The request could not be processed. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_010"
+                      ],
+                      "description": "One of: ERR-010: The request could not be processed."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_010",
+                    "message": "The request could not be processed.",
+                    "category": "VALIDATION",
+                    "statusCode": 400,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – invalid or missing token.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-008 | You need to sign in to continue. |\n| ERR-011 | Your session is invalid or expired. Please sign in again. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_008",
+                        "ERR_011"
+                      ],
+                      "description": "One of: ERR-008: You need to sign in to continue.; ERR-011: Your session is invalid or expired. Please sign in again."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_008",
+                    "message": "You need to sign in to continue.",
+                    "category": "AUTHORIZATION",
+                    "statusCode": 401,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden – insufficient permissions.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-009 | You don't have permission to do that. |\n| ERR-410 | Error occurred |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_009",
+                        "ERR_410"
+                      ],
+                      "description": "One of: ERR-009: You don't have permission to do that.; ERR-410: Error occurred"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_009",
+                    "message": "You don't have permission to do that.",
+                    "category": "AUTHORIZATION",
+                    "statusCode": 403,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-019 | Something went wrong on our side. |\n| ERR-999 | An unexpected error occurred. Please try again. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_019",
+                        "ERR_999"
+                      ],
+                      "description": "One of: ERR-019: Something went wrong on our side.; ERR-999: An unexpected error occurred. Please try again."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_019",
+                    "message": "Something went wrong on our side.",
+                    "category": "SYSTEM",
+                    "statusCode": 500,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Create wallet",
+        "tags": [
+          "wallets"
+        ]
+      }
+    },
+    "/api/v1/wallets/profile/{reference}": {
+      "get": {
+        "description": "List wallets for a profile by reference with pagination.",
+        "operationId": "getWalletsByProfile",
+        "parameters": [
+          {
+            "name": "reference",
+            "required": true,
+            "in": "path",
+            "description": "Profile reference",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skip",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/SdkVersionHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated wallets for the profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetWalletsListResponseBodyDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or validation failed.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-010 | The request could not be processed. |\n| ERR-022 | Invalid pagination parameters. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_010",
+                        "ERR_022"
+                      ],
+                      "description": "One of: ERR-010: The request could not be processed.; ERR-022: Invalid pagination parameters."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_010",
+                    "message": "The request could not be processed.",
+                    "category": "VALIDATION",
+                    "statusCode": 400,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – invalid or missing token.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-008 | You need to sign in to continue. |\n| ERR-011 | Your session is invalid or expired. Please sign in again. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_008",
+                        "ERR_011"
+                      ],
+                      "description": "One of: ERR-008: You need to sign in to continue.; ERR-011: Your session is invalid or expired. Please sign in again."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_008",
+                    "message": "You need to sign in to continue.",
+                    "category": "AUTHORIZATION",
+                    "statusCode": 401,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden – insufficient permissions.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-009 | You don't have permission to do that. |\n| ERR-410 | Error occurred |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_009",
+                        "ERR_410"
+                      ],
+                      "description": "One of: ERR-009: You don't have permission to do that.; ERR-410: Error occurred"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_009",
+                    "message": "You don't have permission to do that.",
+                    "category": "AUTHORIZATION",
+                    "statusCode": 403,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-006 | The requested resource was not found. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_006"
+                      ],
+                      "description": "One of: ERR-006: The requested resource was not found."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_006",
+                    "message": "The requested resource was not found.",
+                    "category": "RESOURCE",
+                    "statusCode": 404,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-019 | Something went wrong on our side. |\n| ERR-999 | An unexpected error occurred. Please try again. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_019",
+                        "ERR_999"
+                      ],
+                      "description": "One of: ERR-019: Something went wrong on our side.; ERR-999: An unexpected error occurred. Please try again."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_019",
+                    "message": "Something went wrong on our side.",
+                    "category": "SYSTEM",
+                    "statusCode": 500,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "List wallets for the profile",
+        "tags": [
+          "wallets"
+        ]
+      }
+    },
+    "/api/v1/wallets/organization": {
+      "get": {
+        "description": "List wallets for the authenticated user's organization with pagination.",
+        "operationId": "getWalletsForOrganization",
+        "parameters": [
+          {
+            "name": "skip",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/SdkVersionHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated wallets for the organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetWalletsListResponseBodyDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or validation failed.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-010 | The request could not be processed. |\n| ERR-022 | Invalid pagination parameters. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_010",
+                        "ERR_022"
+                      ],
+                      "description": "One of: ERR-010: The request could not be processed.; ERR-022: Invalid pagination parameters."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_010",
+                    "message": "The request could not be processed.",
+                    "category": "VALIDATION",
+                    "statusCode": 400,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – invalid or missing token.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-008 | You need to sign in to continue. |\n| ERR-011 | Your session is invalid or expired. Please sign in again. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_008",
+                        "ERR_011"
+                      ],
+                      "description": "One of: ERR-008: You need to sign in to continue.; ERR-011: Your session is invalid or expired. Please sign in again."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_008",
+                    "message": "You need to sign in to continue.",
+                    "category": "AUTHORIZATION",
+                    "statusCode": 401,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden – insufficient permissions.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-009 | You don't have permission to do that. |\n| ERR-410 | Error occurred |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_009",
+                        "ERR_410"
+                      ],
+                      "description": "One of: ERR-009: You don't have permission to do that.; ERR-410: Error occurred"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_009",
+                    "message": "You don't have permission to do that.",
+                    "category": "AUTHORIZATION",
+                    "statusCode": 403,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-019 | Something went wrong on our side. |\n| ERR-999 | An unexpected error occurred. Please try again. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_019",
+                        "ERR_999"
+                      ],
+                      "description": "One of: ERR-019: Something went wrong on our side.; ERR-999: An unexpected error occurred. Please try again."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_019",
+                    "message": "Something went wrong on our side.",
+                    "category": "SYSTEM",
+                    "statusCode": 500,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "List wallets for the organization",
+        "tags": [
+          "wallets"
         ]
       }
     },
@@ -1906,640 +2572,6 @@
         ]
       }
     },
-    "/api/v1/wallets/generate": {
-      "post": {
-        "description": "Generate a new wallet for the given reference and network. Requires wallet/address policy.",
-        "operationId": "createWallet",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/SdkVersionHeader"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateWalletRequestBodyDTO"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Wallet created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateWalletResponseBodyDTO"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request or validation failed.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-010 | The request could not be processed. |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_010"
-                      ],
-                      "description": "One of: ERR-010: The request could not be processed."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_010",
-                    "message": "The request could not be processed.",
-                    "category": "VALIDATION",
-                    "statusCode": 400,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized – invalid or missing token.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-008 | You need to sign in to continue. |\n| ERR-011 | Your session is invalid or expired. Please sign in again. |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_008",
-                        "ERR_011"
-                      ],
-                      "description": "One of: ERR-008: You need to sign in to continue.; ERR-011: Your session is invalid or expired. Please sign in again."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_008",
-                    "message": "You need to sign in to continue.",
-                    "category": "AUTHORIZATION",
-                    "statusCode": 401,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden – insufficient permissions.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-009 | You don't have permission to do that. |\n| ERR-410 | Error occurred |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_009",
-                        "ERR_410"
-                      ],
-                      "description": "One of: ERR-009: You don't have permission to do that.; ERR-410: Error occurred"
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_009",
-                    "message": "You don't have permission to do that.",
-                    "category": "AUTHORIZATION",
-                    "statusCode": 403,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-019 | Something went wrong on our side. |\n| ERR-999 | An unexpected error occurred. Please try again. |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_019",
-                        "ERR_999"
-                      ],
-                      "description": "One of: ERR-019: Something went wrong on our side.; ERR-999: An unexpected error occurred. Please try again."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_019",
-                    "message": "Something went wrong on our side.",
-                    "category": "SYSTEM",
-                    "statusCode": 500,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "x-api-key": []
-          }
-        ],
-        "summary": "Create wallet",
-        "tags": [
-          "wallets"
-        ]
-      }
-    },
-    "/api/v1/wallets/profile/{reference}": {
-      "get": {
-        "description": "List wallets for a profile by reference with pagination.",
-        "operationId": "getWalletsByProfile",
-        "parameters": [
-          {
-            "name": "reference",
-            "required": true,
-            "in": "path",
-            "description": "Profile reference",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "skip",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": 0,
-              "example": 0,
-              "type": "number"
-            }
-          },
-          {
-            "name": "take",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": 10,
-              "example": 10,
-              "type": "number"
-            }
-          },
-          {
-            "$ref": "#/components/parameters/SdkVersionHeader"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Paginated wallets for the profile",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetWalletsListResponseBodyDTO"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request or validation failed.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-010 | The request could not be processed. |\n| ERR-022 | Invalid pagination parameters. |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_010",
-                        "ERR_022"
-                      ],
-                      "description": "One of: ERR-010: The request could not be processed.; ERR-022: Invalid pagination parameters."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_010",
-                    "message": "The request could not be processed.",
-                    "category": "VALIDATION",
-                    "statusCode": 400,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized – invalid or missing token.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-008 | You need to sign in to continue. |\n| ERR-011 | Your session is invalid or expired. Please sign in again. |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_008",
-                        "ERR_011"
-                      ],
-                      "description": "One of: ERR-008: You need to sign in to continue.; ERR-011: Your session is invalid or expired. Please sign in again."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_008",
-                    "message": "You need to sign in to continue.",
-                    "category": "AUTHORIZATION",
-                    "statusCode": 401,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden – insufficient permissions.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-009 | You don't have permission to do that. |\n| ERR-410 | Error occurred |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_009",
-                        "ERR_410"
-                      ],
-                      "description": "One of: ERR-009: You don't have permission to do that.; ERR-410: Error occurred"
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_009",
-                    "message": "You don't have permission to do that.",
-                    "category": "AUTHORIZATION",
-                    "statusCode": 403,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-006 | The requested resource was not found. |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_006"
-                      ],
-                      "description": "One of: ERR-006: The requested resource was not found."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_006",
-                    "message": "The requested resource was not found.",
-                    "category": "RESOURCE",
-                    "statusCode": 404,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-019 | Something went wrong on our side. |\n| ERR-999 | An unexpected error occurred. Please try again. |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_019",
-                        "ERR_999"
-                      ],
-                      "description": "One of: ERR-019: Something went wrong on our side.; ERR-999: An unexpected error occurred. Please try again."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_019",
-                    "message": "Something went wrong on our side.",
-                    "category": "SYSTEM",
-                    "statusCode": 500,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "x-api-key": []
-          }
-        ],
-        "summary": "List wallets for the profile",
-        "tags": [
-          "wallets"
-        ]
-      }
-    },
-    "/api/v1/wallets/organization": {
-      "get": {
-        "description": "List wallets for the authenticated user's organization with pagination.",
-        "operationId": "getWalletsForOrganization",
-        "parameters": [
-          {
-            "name": "skip",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": 0,
-              "example": 0,
-              "type": "number"
-            }
-          },
-          {
-            "name": "take",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": 10,
-              "example": 10,
-              "type": "number"
-            }
-          },
-          {
-            "$ref": "#/components/parameters/SdkVersionHeader"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Paginated wallets for the organization",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetWalletsListResponseBodyDTO"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request or validation failed.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-010 | The request could not be processed. |\n| ERR-022 | Invalid pagination parameters. |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_010",
-                        "ERR_022"
-                      ],
-                      "description": "One of: ERR-010: The request could not be processed.; ERR-022: Invalid pagination parameters."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_010",
-                    "message": "The request could not be processed.",
-                    "category": "VALIDATION",
-                    "statusCode": 400,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized – invalid or missing token.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-008 | You need to sign in to continue. |\n| ERR-011 | Your session is invalid or expired. Please sign in again. |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_008",
-                        "ERR_011"
-                      ],
-                      "description": "One of: ERR-008: You need to sign in to continue.; ERR-011: Your session is invalid or expired. Please sign in again."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_008",
-                    "message": "You need to sign in to continue.",
-                    "category": "AUTHORIZATION",
-                    "statusCode": 401,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden – insufficient permissions.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-009 | You don't have permission to do that. |\n| ERR-410 | Error occurred |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_009",
-                        "ERR_410"
-                      ],
-                      "description": "One of: ERR-009: You don't have permission to do that.; ERR-410: Error occurred"
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_009",
-                    "message": "You don't have permission to do that.",
-                    "category": "AUTHORIZATION",
-                    "statusCode": 403,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-019 | Something went wrong on our side. |\n| ERR-999 | An unexpected error occurred. Please try again. |",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiErrorResponseDto"
-                    }
-                  ],
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "enum": [
-                        "ERR_019",
-                        "ERR_999"
-                      ],
-                      "description": "One of: ERR-019: Something went wrong on our side.; ERR-999: An unexpected error occurred. Please try again."
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "Client-facing message for this error code (see table above)."
-                    }
-                  },
-                  "example": {
-                    "code": "ERR_019",
-                    "message": "Something went wrong on our side.",
-                    "category": "SYSTEM",
-                    "statusCode": 500,
-                    "path": "/api/v1/example",
-                    "timestamp": "2025-02-20T12:00:00.000Z",
-                    "requestId": "req-example-id"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "x-api-key": []
-          }
-        ],
-        "summary": "List wallets for the organization",
-        "tags": [
-          "wallets"
-        ]
-      }
-    },
     "/api/v1/profiles": {
       "post": {
         "description": "Create a new profile for the organization.",
@@ -3269,7 +3301,7 @@
     },
     "/api/v1/tokenization/tokens": {
       "post": {
-        "description": "Issue a new token from a deployed contract template.",
+        "description": "Start the issue-token workflow. Returns the workflowId, tokenId, and status.",
         "operationId": "issueNewToken",
         "parameters": [
           {
@@ -3287,18 +3319,18 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "Token issued",
+          "202": {
+            "description": "Issue token workflow started",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IssueTokenResponseDto"
+                  "$ref": "#/components/schemas/IssueTokenWorkflowResponseDto"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request or validation failed.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-010 | The request could not be processed. |\n| ERR-310 | Contract does not have a valid ABI. |\n| ERR-311 | Contract initialize function not found. |\n| ERR-312 | Required initialization parameters are missing. |\n| ERR-313 | Parameter types do not match the expected types. |",
+            "description": "Bad request or validation failed.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-010 | The request could not be processed. |\n| ERR-310 | Contract does not have a valid ABI. |\n| ERR-311 | Contract initialize function not found. |\n| ERR-312 | Required initialization parameters are missing. |\n| ERR-313 | Parameter types do not match the expected types. |\n| ERR-146 | Contract deployment is still in progress. |",
             "content": {
               "application/json": {
                 "schema": {
@@ -3315,9 +3347,10 @@
                         "ERR_310",
                         "ERR_311",
                         "ERR_312",
-                        "ERR_313"
+                        "ERR_313",
+                        "ERR_146"
                       ],
-                      "description": "One of: ERR-010: The request could not be processed.; ERR-310: Contract does not have a valid ABI.; ERR-311: Contract initialize function not found.; ERR-312: Required initialization parameters are missing.; ERR-313: Parameter types do not match the expected types."
+                      "description": "One of: ERR-010: The request could not be processed.; ERR-310: Contract does not have a valid ABI.; ERR-311: Contract initialize function not found.; ERR-312: Required initialization parameters are missing.; ERR-313: Parameter types do not match the expected types.; ERR-146: Contract deployment is still in progress."
                     },
                     "message": {
                       "type": "string",
@@ -8118,7 +8151,7 @@
     },
     "/api/v1/deployed-contracts/fetch-abi": {
       "post": {
-        "description": "Fetch contract ABI from chain/explorer by address and network.",
+        "description": "Fetch contract ABI from chain/relayer by address and network.",
         "operationId": "fetchContractAbi",
         "parameters": [
           {
@@ -9771,7 +9804,7 @@
         },
         "responses": {
           "200": {
-            "description": "deploy contract via Temporal workflow",
+            "description": "deploy contract via workflow",
             "content": {
               "application/json": {
                 "schema": {
@@ -10437,13 +10470,20 @@
         "type": "object",
         "properties": {
           "reference": {
-            "type": "string"
+            "type": "string",
+            "description": "Profile reference that owns the address",
+            "example": "user"
           },
           "networkId": {
-            "type": "string"
+            "type": "string",
+            "description": "UUID of the network to generate the address on",
+            "format": "uuid",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
           },
           "clientShare": {
-            "type": "string"
+            "type": "string",
+            "description": "Client share for key derivation. Must be non-empty.",
+            "example": "c2hhcmUtZGF0YS1iYXNlNjQ="
           }
         },
         "required": [
@@ -10492,37 +10532,43 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "address": {
-            "type": "string"
+            "type": "string",
+            "description": "On-chain address string"
           },
           "reference": {
-            "type": "string"
+            "type": "string",
+            "description": "Profile reference that owns this address"
           },
           "networkId": {
             "type": "string",
+            "format": "uuid",
             "description": "Network UUID"
           },
           "date": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Address creation timestamp"
           },
           "label": {
-            "type": "string"
+            "type": "string",
+            "description": "Optional human-readable label"
           },
           "sub": {
-            "type": "string"
+            "type": "string",
+            "description": "Organization subject identifier"
           },
           "balance": {
             "type": "string",
-            "description": "Balance (decimal string)"
-          },
-          "path": {
-            "type": "string"
+            "description": "Native balance as a decimal string (wei / satoshi)"
           },
           "miniWalletId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid",
+            "description": "Parent wallet UUID"
           }
         },
         "required": [
@@ -10532,7 +10578,6 @@
           "date",
           "sub",
           "balance",
-          "path",
           "miniWalletId"
         ]
       },
@@ -10669,6 +10714,11 @@
           "globalAccess": {
             "type": "boolean",
             "description": "If true, all organizations can access this network without explicit assignment",
+            "default": false
+          },
+          "isGasless": {
+            "type": "boolean",
+            "description": "Whether the network sponsors gas fees (e.g., via paymaster)",
             "default": false
           }
         },
@@ -10841,6 +10891,10 @@
           "globalAccess": {
             "type": "boolean",
             "description": "If true, all organizations can access this network without explicit assignment"
+          },
+          "isGasless": {
+            "type": "boolean",
+            "description": "Whether the network sponsors gas fees (e.g., via paymaster)"
           }
         }
       },
@@ -10887,6 +10941,42 @@
           "enabled"
         ]
       },
+      "EnabledNetworkItemDto": {
+        "type": "object",
+        "properties": {
+          "networkId": {
+            "type": "string",
+            "description": "Network UUID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable network name"
+          },
+          "alias": {
+            "type": "string",
+            "description": "Network alias used by event producers"
+          }
+        },
+        "required": [
+          "networkId",
+          "name",
+          "alias"
+        ]
+      },
+      "GetEnabledNetworksResponseDto": {
+        "type": "object",
+        "properties": {
+          "networks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnabledNetworkItemDto"
+            }
+          }
+        },
+        "required": [
+          "networks"
+        ]
+      },
       "OrgNetworkItemDto": {
         "type": "object",
         "properties": {
@@ -10894,7 +10984,8 @@
             "type": "string"
           },
           "enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether this network is usable by the organization (Network.enabled AND OrganizationNetwork.enabled)"
           },
           "name": {
             "type": "string"
@@ -10907,6 +10998,10 @@
           },
           "isMainnet": {
             "type": "boolean"
+          },
+          "isGasless": {
+            "type": "boolean",
+            "description": "Whether the network sponsors gas fees"
           },
           "addressFamily": {
             "type": "string",
@@ -10938,6 +11033,7 @@
           "name",
           "globalAccess",
           "isMainnet",
+          "isGasless",
           "addressFamily",
           "decimals"
         ]
@@ -10957,6 +11053,136 @@
         },
         "required": [
           "networks",
+          "pagination"
+        ]
+      },
+      "CreateWalletRequestBodyDTO": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string"
+          },
+          "networkId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "networkId"
+        ]
+      },
+      "CreateWalletDataDTO": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string",
+            "description": "Profile reference that owns this wallet"
+          },
+          "networkId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Network UUID"
+          },
+          "type": {
+            "type": "string",
+            "description": "Profile type (User | Department | Merchant)"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Wallet creation timestamp"
+          }
+        },
+        "required": [
+          "reference",
+          "networkId",
+          "type"
+        ]
+      },
+      "CreateWalletResponseBodyDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "readOnly": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CreateWalletDataDTO"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "WalletDataDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Wallet UUID"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Wallet creation timestamp"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Owning organization UUID"
+          },
+          "reference": {
+            "type": "string",
+            "description": "Profile reference that owns this wallet"
+          },
+          "type": {
+            "type": "string",
+            "description": "Profile type (User | Department | Merchant)"
+          },
+          "networkId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Network UUID"
+          },
+          "currentDeepIndex": {
+            "type": "number"
+          },
+          "index": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "organizationId",
+          "reference",
+          "type",
+          "networkId",
+          "index"
+        ]
+      },
+      "GetWalletsListResponseBodyDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "readOnly": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WalletDataDTO"
+            }
+          },
+          "pagination": {
+            "readOnly": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaginationMetaDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data",
           "pagination"
         ]
       },
@@ -11058,128 +11284,6 @@
         },
         "required": [
           "transactions",
-          "pagination"
-        ]
-      },
-      "CreateWalletRequestBodyDTO": {
-        "type": "object",
-        "properties": {
-          "reference": {
-            "type": "string"
-          },
-          "networkId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "reference",
-          "networkId"
-        ]
-      },
-      "CreateWalletDataDTO": {
-        "type": "object",
-        "properties": {
-          "reference": {
-            "type": "string"
-          },
-          "networkId": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "date": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "path": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "reference",
-          "networkId",
-          "type"
-        ]
-      },
-      "CreateWalletResponseBodyDTO": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "readOnly": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/CreateWalletDataDTO"
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "WalletDataDTO": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "date": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "organizationId": {
-            "type": "string"
-          },
-          "reference": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "networkId": {
-            "type": "string"
-          },
-          "currentDeepIndex": {
-            "type": "number"
-          },
-          "index": {
-            "type": "number"
-          },
-          "path": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "organizationId",
-          "reference",
-          "type",
-          "networkId",
-          "index"
-        ]
-      },
-      "GetWalletsListResponseBodyDTO": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "readOnly": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WalletDataDTO"
-            }
-          },
-          "pagination": {
-            "readOnly": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PaginationMetaDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "data",
           "pagination"
         ]
       },
@@ -11318,30 +11422,6 @@
           "data"
         ]
       },
-      "DerivePrivateKeyBodyDto": {
-        "type": "object",
-        "properties": {
-          "addressId": {
-            "type": "string"
-          },
-          "clientShare": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "addressId",
-          "clientShare"
-        ]
-      },
-      "DerivePrivateKeyResponseDto": {
-        "type": "object",
-        "properties": {
-          "privateKey": {
-            "type": "string",
-            "description": "Derived private key"
-          }
-        }
-      },
       "ConstructorParam": {
         "type": "object",
         "properties": {
@@ -11422,6 +11502,48 @@
           "fee"
         ]
       },
+      "WorkflowStartResultDto": {
+        "type": "object",
+        "properties": {
+          "workflowId": {
+            "type": "string",
+            "description": "Workflow ID"
+          },
+          "operationId": {
+            "type": "string",
+            "description": "Operation ID (e.g. deploymentId, collectionId, mintId, writeCallId)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "started",
+              "already_running"
+            ],
+            "description": "Workflow status"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable status message"
+          }
+        },
+        "required": [
+          "workflowId",
+          "operationId",
+          "status",
+          "message"
+        ]
+      },
+      "IssueTokenWorkflowResponseDto": {
+        "type": "object",
+        "properties": {
+          "workflowResult": {
+            "$ref": "#/components/schemas/WorkflowStartResultDto"
+          }
+        },
+        "required": [
+          "workflowResult"
+        ]
+      },
       "TokenMetadataDto": {
         "type": "object",
         "properties": {
@@ -11471,17 +11593,6 @@
           },
           "tokenMetadata": {
             "$ref": "#/components/schemas/TokenMetadataDto"
-          }
-        }
-      },
-      "IssueTokenResponseDto": {
-        "type": "object",
-        "properties": {
-          "tokens": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TokenResponseDto"
-            }
           }
         }
       },
@@ -11580,37 +11691,6 @@
           "type",
           "clientShare",
           "createParams"
-        ]
-      },
-      "WorkflowStartResultDto": {
-        "type": "object",
-        "properties": {
-          "workflowId": {
-            "type": "string",
-            "description": "Temporal workflow ID"
-          },
-          "operationId": {
-            "type": "string",
-            "description": "Operation ID (e.g. deploymentId, collectionId, mintId, writeCallId)"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "started",
-              "already_running"
-            ],
-            "description": "Workflow status"
-          },
-          "message": {
-            "type": "string",
-            "description": "Human-readable status message"
-          }
-        },
-        "required": [
-          "workflowId",
-          "operationId",
-          "status",
-          "message"
         ]
       },
       "CreateCollectionWorkflowResponseDto": {
@@ -13294,6 +13374,7 @@
               "ERR_126",
               "ERR_136",
               "ERR_146",
+              "ERR_147",
               "ERR_156",
               "ERR_166",
               "ERR_176",
@@ -13319,6 +13400,12 @@
               "ERR_217",
               "ERR_226",
               "ERR_236",
+              "ERR_237",
+              "ERR_238",
+              "ERR_239",
+              "ERR_240",
+              "ERR_241",
+              "ERR_242",
               "ERR_246",
               "ERR_256",
               "ERR_266",

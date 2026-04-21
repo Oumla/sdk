@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-04-21
+
+### Added
+
+#### Enabled Networks Endpoint
+- New `networks.getEnabledNetworks()` endpoint (`GET /api/v1/network/enabled`) returning the global catalog of enabled networks (`networkId`, `name`, `alias`) for any authenticated user.
+- New types: `EnabledNetworkItemDto`, `GetEnabledNetworksResponseDto`.
+
+#### Gasless Network Support
+- `isGasless: boolean` added to network responses (`OrgNetworkItemDto`, network update payloads) — indicates whether the network sponsors gas fees.
+
+### Changed
+
+#### Token Issuance is now Asynchronous
+- `tokenization.issueNewToken()` request body is unchanged; the response is now a workflow handle (`IssueTokenWorkflowResponseDto`) containing `workflowId`, `operationId`, `status`, and `message`, served with HTTP `202 Accepted`.
+- Poll the workflow resource with the returned `workflowId` to observe completion and retrieve issued tokens.
+- New 400 error code `ERR-146` ("Contract deployment is still in progress.") surfaced on this endpoint.
+
+#### Removed `path` Field from Address and Wallet Responses
+The derivation `path` field has been dropped from the following response types — request shapes are unchanged:
+- `AddressDataDto`
+- `CreateWalletDataDto`
+- `WalletDataDto`
+
+### Removed
+- `IssueTokenResponseDto` (superseded by `IssueTokenWorkflowResponseDto`).
+
+### Fixed
+- Improved field-level documentation and formats (`uuid`, descriptions, examples) on address and wallet DTOs — no runtime shape changes.
+
+---
+
 ## [2.0.0] - 2026-03-16
 
 ### Added

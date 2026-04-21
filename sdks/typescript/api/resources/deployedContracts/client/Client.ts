@@ -351,7 +351,7 @@ export class DeployedContracts {
     }
 
     /**
-     * Fetch contract ABI from chain/explorer by address and network.
+     * Fetch contract ABI from chain/relayer by address and network.
      *
      * @param {OumlaSdkApi.FetchContractAbiRequestBodyDto} request
      * @param {DeployedContracts.RequestOptions} requestOptions - Request-specific configuration.

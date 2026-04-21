@@ -2,11 +2,14 @@
 
 export interface OrgNetworkItemDto {
     id: string;
+    /** Whether this network is usable by the organization (Network.enabled AND OrganizationNetwork.enabled) */
     enabled: boolean;
     name: string;
     globalAccess: boolean;
     chainId?: number;
     isMainnet: boolean;
+    /** Whether the network sponsors gas fees */
+    isGasless: boolean;
     addressFamily: OrgNetworkItemDto.AddressFamily;
     decimals: number;
     createdAt?: string;

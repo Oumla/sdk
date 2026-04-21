@@ -5,8 +5,8 @@ import * as core from "./core/index.js";
 import { mergeHeaders } from "./core/headers.js";
 import { Addresses } from "./api/resources/addresses/client/Client.js";
 import { Networks } from "./api/resources/networks/client/Client.js";
-import { Transactions } from "./api/resources/transactions/client/Client.js";
 import { Wallets } from "./api/resources/wallets/client/Client.js";
+import { Transactions } from "./api/resources/transactions/client/Client.js";
 import { Profiles } from "./api/resources/profiles/client/Client.js";
 import { Withdraw } from "./api/resources/withdraw/client/Client.js";
 import { Tokenization } from "./api/resources/tokenization/client/Client.js";
@@ -48,8 +48,8 @@ export class OumlaSdkApiClient {
     protected readonly _options: OumlaSdkApiClient.Options;
     protected _addresses: Addresses | undefined;
     protected _networks: Networks | undefined;
-    protected _transactions: Transactions | undefined;
     protected _wallets: Wallets | undefined;
+    protected _transactions: Transactions | undefined;
     protected _profiles: Profiles | undefined;
     protected _withdraw: Withdraw | undefined;
     protected _tokenization: Tokenization | undefined;
@@ -82,12 +82,12 @@ export class OumlaSdkApiClient {
         return (this._networks ??= new Networks(this._options));
     }
 
-    public get transactions(): Transactions {
-        return (this._transactions ??= new Transactions(this._options));
-    }
-
     public get wallets(): Wallets {
         return (this._wallets ??= new Wallets(this._options));
+    }
+
+    public get transactions(): Transactions {
+        return (this._transactions ??= new Transactions(this._options));
     }
 
     public get profiles(): Profiles {
