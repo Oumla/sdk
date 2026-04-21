@@ -32,4 +32,6 @@ export interface CreateNetworkBodyDto {
     enabled?: boolean;
     /** If true, all organizations can access this network without explicit assignment */
     globalAccess?: boolean;
+    /** Whether the network sponsors gas fees (e.g., via paymaster) */
+    isGasless?: boolean;
 }

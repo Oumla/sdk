@@ -75,11 +75,15 @@ const address = await client.addresses.createAddressV2({
 
 ### 🌐 Networks
 
-Retrieve the networks available and enabled for your organization. Use the returned `id` values wherever a `networkId` is required.
+Retrieve the networks available and enabled for your organization. Use the returned `id` values wherever a `networkId` is required. `isGasless` indicates whether the network sponsors gas fees.
 
 ```typescript
+// Networks enabled for your organization (paginated, includes isGasless + chain metadata)
 const { data } = await client.networks.getNetworks({ skip: 0, take: 50, enabled: true });
 // data.networks[].id  — use this as networkId throughout the SDK
+
+// Global catalog of enabled networks — lightweight (networkId, name, alias), any authenticated user
+const { data: enabled } = await client.networks.getEnabledNetworks();
 ```
 
 ---
@@ -264,7 +268,7 @@ const { data } = await client.contractInteractions.getTransactionReceipt('<netwo
 
 ### 🪙 Tokenization
 
-All mutating token operations (create collection, mint, burn) are asynchronous and return a `workflowResult.workflowId`.
+All mutating token operations (create collection, issue new token, mint, burn) are asynchronous and return a `workflowResult.workflowId`.
 
 ```typescript
 // List collections
@@ -285,6 +289,21 @@ const { data } = await client.tokenization.createCollection({
   },
 });
 await waitForWorkflow(data.workflowResult.workflowId);
+
+// Issue a new fungible token — async (returns workflow handle with HTTP 202)
+const { data: issue } = await client.tokenization.issueNewToken({
+  networkId: '<network-id>',
+  addressId: '<address-id>',
+  clientShare: '<client-share>',
+  deploymentId: '<collection-deployment-id>',
+  displayName: 'My Token',
+  useGasless: false,
+  fee: '0',
+  createParams: {
+    initializeParams: [{ name: 'amount', type: 'uint256', value: '1000000' }],
+  },
+});
+await waitForWorkflow(issue.workflowResult.workflowId);
 
 // Mint a token — async
 const { data: mint } = await client.tokenization.mintToken('<collection-id>', {
@@ -407,7 +426,10 @@ Key request and response types exported from `@oumla/sdk`:
 | `WriteCallFunctionBody` | `writeCallFunction()` body |
 | `ReadCallFunctionBody` | `readCallFunction()` body |
 | `CreateWithdrawRequestBodyDto` | `createWithdraw()` body |
+| `IssueNewTokenRequestBody` | `issueNewToken()` body |
+| `IssueTokenWorkflowResponseDto` | `issueNewToken()` response (workflow handle) |
 | `OrgNetworkItemDto` | Network entity from `getNetworks()` |
+| `EnabledNetworkItemDto` | Network entity from `getEnabledNetworks()` |
 | `WalletDataDto` | Wallet entity |
 | `AddressDataDto` | Address entity |
 | `TransactionItemDto` | Transaction entity |

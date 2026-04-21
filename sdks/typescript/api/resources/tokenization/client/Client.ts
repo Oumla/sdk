@@ -144,7 +144,7 @@ export class Tokenization {
     }
 
     /**
-     * Issue a new token from a deployed contract template.
+     * Start the issue-token workflow. Returns the workflowId, tokenId, and status.
      *
      * @param {OumlaSdkApi.IssueNewTokenRequestBody} request
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
@@ -176,14 +176,14 @@ export class Tokenization {
     public issueNewToken(
         request: OumlaSdkApi.IssueNewTokenRequestBody,
         requestOptions?: Tokenization.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.IssueTokenResponseDto> {
+    ): core.HttpResponsePromise<OumlaSdkApi.IssueTokenWorkflowResponseDto> {
         return core.HttpResponsePromise.fromPromise(this.__issueNewToken(request, requestOptions));
     }
 
     private async __issueNewToken(
         request: OumlaSdkApi.IssueNewTokenRequestBody,
         requestOptions?: Tokenization.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.IssueTokenResponseDto>> {
+    ): Promise<core.WithRawResponse<OumlaSdkApi.IssueTokenWorkflowResponseDto>> {
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
@@ -210,7 +210,10 @@ export class Tokenization {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as OumlaSdkApi.IssueTokenResponseDto, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as OumlaSdkApi.IssueTokenWorkflowResponseDto,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {

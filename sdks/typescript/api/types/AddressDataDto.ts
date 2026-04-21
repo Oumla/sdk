@@ -2,15 +2,20 @@
 
 export interface AddressDataDto {
     id: string;
+    /** On-chain address string */
     address: string;
+    /** Profile reference that owns this address */
     reference: string;
     /** Network UUID */
     networkId?: string;
+    /** Address creation timestamp */
     date: string;
+    /** Optional human-readable label */
     label?: string;
+    /** Organization subject identifier */
     sub: string;
-    /** Balance (decimal string) */
+    /** Native balance as a decimal string (wei / satoshi) */
     balance: string;
-    path: string;
+    /** Parent wallet UUID */
     miniWalletId: string;
 }

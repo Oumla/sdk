@@ -55,10 +55,20 @@ function handleApiError(error: unknown): never {
 
 /**
  * List networks enabled for your organization.
+ * Response items include `isGasless` — whether the network sponsors gas fees.
  * Use the returned network IDs when creating wallets, addresses, and collections.
  */
 async function getNetworks() {
   const networks = await client.networks.getNetworks({ skip: 0, take: 50, enabled: true });
+  return networks;
+}
+
+/**
+ * List the global catalog of enabled networks (networkId, name, alias).
+ * Lightweight lookup accessible to any authenticated user.
+ */
+async function getEnabledNetworks() {
+  const networks = await client.networks.getEnabledNetworks();
   return networks;
 }
 
@@ -190,6 +200,40 @@ async function createCollection(params: {
       },
     });
     return collection;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+/**
+ * Issue a new fungible token against a deployed collection contract.
+ * Returns a workflowResult — poll via waitForWorkflow() until COMPLETED.
+ * HTTP 202 Accepted; prior synchronous token payload is no longer returned.
+ */
+async function issueNewToken(params: {
+  networkId: string;
+  addressId: string;
+  clientShare: string;
+  deploymentId: string;
+  displayName: string;
+  amount: string;
+  useGasless?: boolean;
+  fee?: string;
+}) {
+  try {
+    const issue = await client.tokenization.issueNewToken({
+      networkId: params.networkId,
+      addressId: params.addressId,
+      clientShare: params.clientShare,
+      deploymentId: params.deploymentId,
+      displayName: params.displayName,
+      useGasless: params.useGasless ?? false,
+      fee: params.fee ?? '0',
+      createParams: {
+        initializeParams: [{ name: 'amount', type: 'uint256', value: params.amount }],
+      },
+    });
+    return issue;
   } catch (error) {
     handleApiError(error);
   }
@@ -352,6 +396,7 @@ export {
   waitForWorkflow,
   handleApiError,
   getNetworks,
+  getEnabledNetworks,
   getProfiles,
   createProfile,
   getWalletsByProfile,
@@ -365,6 +410,7 @@ export {
   createWithdraw,
   getCollections,
   createCollection,
+  issueNewToken,
   mintToken,
   burnToken,
   deployContract,

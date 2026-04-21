@@ -2,6 +2,6 @@
 
 import * as OumlaSdkApi from "../index.js";
 
-export interface IssueTokenResponseDto {
-    tokens?: OumlaSdkApi.TokenResponseDto[];
+export interface GetEnabledNetworksResponseDto {
+    networks: OumlaSdkApi.EnabledNetworkItemDto[];
 }
