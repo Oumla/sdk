@@ -351,6 +351,101 @@ export class Addresses {
     }
 
     /**
+     * Retrieve a single address by its UUID.
+     *
+     * @param {OumlaSdkApi.GetAddressByIdRequest} request
+     * @param {Addresses.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link OumlaSdkApi.UnauthorizedError}
+     * @throws {@link OumlaSdkApi.ForbiddenError}
+     * @throws {@link OumlaSdkApi.NotFoundError}
+     * @throws {@link OumlaSdkApi.InternalServerError}
+     *
+     * @example
+     *     await client.addresses.getAddressById({
+     *         id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+     *     })
+     */
+    public getAddressById(
+        request: OumlaSdkApi.GetAddressByIdRequest,
+        requestOptions?: Addresses.RequestOptions,
+    ): core.HttpResponsePromise<OumlaSdkApi.GetAddressByIdResponseBodyDto> {
+        return core.HttpResponsePromise.fromPromise(this.__getAddressById(request, requestOptions));
+    }
+
+    private async __getAddressById(
+        request: OumlaSdkApi.GetAddressByIdRequest,
+        requestOptions?: Addresses.RequestOptions,
+    ): Promise<core.WithRawResponse<OumlaSdkApi.GetAddressByIdResponseBodyDto>> {
+        const { id } = request;
+        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+        _queryParams["id"] = id;
+        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({
+                "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.OumlaSdkApiEnvironment.Mainnet,
+                "api/v1/addresses",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+            maxRetries: requestOptions?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as OumlaSdkApi.GetAddressByIdResponseBodyDto,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new OumlaSdkApi.UnauthorizedError(_response.error.body as unknown, _response.rawResponse);
+                case 403:
+                    throw new OumlaSdkApi.ForbiddenError(_response.error.body as unknown, _response.rawResponse);
+                case 404:
+                    throw new OumlaSdkApi.NotFoundError(_response.error.body as unknown, _response.rawResponse);
+                case 500:
+                    throw new OumlaSdkApi.InternalServerError(_response.error.body as unknown, _response.rawResponse);
+                default:
+                    throw new errors.OumlaSdkApiError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        switch (_response.error.reason) {
+            case "non-json":
+                throw new errors.OumlaSdkApiError({
+                    statusCode: _response.error.statusCode,
+                    body: _response.error.rawBody,
+                    rawResponse: _response.rawResponse,
+                });
+            case "timeout":
+                throw new errors.OumlaSdkApiTimeoutError("Timeout exceeded when calling GET /api/v1/addresses.");
+            case "unknown":
+                throw new errors.OumlaSdkApiError({
+                    message: _response.error.errorMessage,
+                    rawResponse: _response.rawResponse,
+                });
+        }
+    }
+
+    /**
      * List addresses for a profile by reference with pagination.
      *
      * @param {string} reference - Profile reference

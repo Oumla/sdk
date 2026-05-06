@@ -21,6 +21,7 @@ export * from "./CreateAddressResponseBodyDto.js";
 export * from "./AddressDataDto.js";
 export * from "./AddressListPaginationDto.js";
 export * from "./GetAddressListResponseBodyDto.js";
+export * from "./GetAddressByIdResponseBodyDto.js";
 export * from "./AddressFamily.js";
 export * from "./CreateNetworkBodyDto.js";
 export * from "./NetworkItemDto.js";
