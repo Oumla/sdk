@@ -655,6 +655,195 @@
         ]
       }
     },
+    "/api/v1/addresses": {
+      "get": {
+        "description": "Retrieve a single address by its UUID.",
+        "operationId": "getAddressById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "query",
+            "description": "Address UUID",
+            "schema": {
+              "format": "uuid",
+              "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/SdkVersionHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAddressByIdResponseBodyDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – invalid or missing token.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-008 | You need to sign in to continue. |\n| ERR-011 | Your session is invalid or expired. Please sign in again. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_008",
+                        "ERR_011"
+                      ],
+                      "description": "One of: ERR-008: You need to sign in to continue.; ERR-011: Your session is invalid or expired. Please sign in again."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_008",
+                    "message": "You need to sign in to continue.",
+                    "category": "AUTHORIZATION",
+                    "statusCode": 401,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden – insufficient permissions.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-009 | You don't have permission to do that. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_009"
+                      ],
+                      "description": "One of: ERR-009: You don't have permission to do that."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_009",
+                    "message": "You don't have permission to do that.",
+                    "category": "AUTHORIZATION",
+                    "statusCode": 403,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-096 | Address not found. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_096"
+                      ],
+                      "description": "One of: ERR-096: Address not found."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_096",
+                    "message": "Address not found.",
+                    "category": "RESOURCE",
+                    "statusCode": 404,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.\n\n**Applicable error codes and client messages**\n\nThe response body contains one of the following error codes and the corresponding client-facing message.\n\n| Code | Client message |\n|------|----------------|\n| ERR-019 | Something went wrong on our side. |\n| ERR-999 | An unexpected error occurred. Please try again. |",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiErrorResponseDto"
+                    }
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ERR_019",
+                        "ERR_999"
+                      ],
+                      "description": "One of: ERR-019: Something went wrong on our side.; ERR-999: An unexpected error occurred. Please try again."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Client-facing message for this error code (see table above)."
+                    }
+                  },
+                  "example": {
+                    "code": "ERR_019",
+                    "message": "Something went wrong on our side.",
+                    "category": "SYSTEM",
+                    "statusCode": 500,
+                    "path": "/api/v1/example",
+                    "timestamp": "2025-02-20T12:00:00.000Z",
+                    "requestId": "req-example-id"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "summary": "Get address by ID",
+        "tags": [
+          "addresses"
+        ]
+      }
+    },
     "/api/v1/addresses/{reference}": {
       "get": {
         "description": "List addresses for a profile by reference with pagination.",
@@ -10634,6 +10823,22 @@
           "pagination"
         ]
       },
+      "GetAddressByIdResponseBodyDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "readOnly": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressDataDTO"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "AddressFamily": {
         "type": "string",
         "enum": [
@@ -11074,6 +11279,11 @@
       "CreateWalletDataDTO": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Wallet UUID"
+          },
           "reference": {
             "type": "string",
             "description": "Profile reference that owns this wallet"
@@ -11094,6 +11304,7 @@
           }
         },
         "required": [
+          "id",
           "reference",
           "networkId",
           "type"
