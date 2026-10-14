@@ -3,18 +3,18 @@
 import * as environments from "./environments.js";
 import * as core from "./core/index.js";
 import { mergeHeaders } from "./core/headers.js";
-import { Addresses } from "./api/resources/addresses/client/Client.js";
 import { Networks } from "./api/resources/networks/client/Client.js";
-import { Wallets } from "./api/resources/wallets/client/Client.js";
 import { Transactions } from "./api/resources/transactions/client/Client.js";
 import { Profiles } from "./api/resources/profiles/client/Client.js";
+import { Wallets } from "./api/resources/wallets/client/Client.js";
 import { Withdraw } from "./api/resources/withdraw/client/Client.js";
+import { Addresses } from "./api/resources/addresses/client/Client.js";
 import { Tokenization } from "./api/resources/tokenization/client/Client.js";
 import { ContractInteractions } from "./api/resources/contractInteractions/client/Client.js";
+import { Operations } from "./api/resources/operations/client/Client.js";
+import { ContractTemplates } from "./api/resources/contractTemplates/client/Client.js";
 import { Assets } from "./api/resources/assets/client/Client.js";
 import { DeployedContracts } from "./api/resources/deployedContracts/client/Client.js";
-import { ContractTemplates } from "./api/resources/contractTemplates/client/Client.js";
-import { Workflows } from "./api/resources/workflows/client/Client.js";
 
 export declare namespace OumlaSdkApiClient {
     export interface Options {
@@ -46,18 +46,18 @@ export declare namespace OumlaSdkApiClient {
 
 export class OumlaSdkApiClient {
     protected readonly _options: OumlaSdkApiClient.Options;
-    protected _addresses: Addresses | undefined;
     protected _networks: Networks | undefined;
-    protected _wallets: Wallets | undefined;
     protected _transactions: Transactions | undefined;
     protected _profiles: Profiles | undefined;
+    protected _wallets: Wallets | undefined;
     protected _withdraw: Withdraw | undefined;
+    protected _addresses: Addresses | undefined;
     protected _tokenization: Tokenization | undefined;
     protected _contractInteractions: ContractInteractions | undefined;
+    protected _operations: Operations | undefined;
+    protected _contractTemplates: ContractTemplates | undefined;
     protected _assets: Assets | undefined;
     protected _deployedContracts: DeployedContracts | undefined;
-    protected _contractTemplates: ContractTemplates | undefined;
-    protected _workflows: Workflows | undefined;
 
     constructor(_options: OumlaSdkApiClient.Options) {
         this._options = {
@@ -74,16 +74,8 @@ export class OumlaSdkApiClient {
         };
     }
 
-    public get addresses(): Addresses {
-        return (this._addresses ??= new Addresses(this._options));
-    }
-
     public get networks(): Networks {
         return (this._networks ??= new Networks(this._options));
-    }
-
-    public get wallets(): Wallets {
-        return (this._wallets ??= new Wallets(this._options));
     }
 
     public get transactions(): Transactions {
@@ -94,8 +86,16 @@ export class OumlaSdkApiClient {
         return (this._profiles ??= new Profiles(this._options));
     }
 
+    public get wallets(): Wallets {
+        return (this._wallets ??= new Wallets(this._options));
+    }
+
     public get withdraw(): Withdraw {
         return (this._withdraw ??= new Withdraw(this._options));
+    }
+
+    public get addresses(): Addresses {
+        return (this._addresses ??= new Addresses(this._options));
     }
 
     public get tokenization(): Tokenization {
@@ -106,19 +106,19 @@ export class OumlaSdkApiClient {
         return (this._contractInteractions ??= new ContractInteractions(this._options));
     }
 
-    public get assets(): Assets {
-        return (this._assets ??= new Assets(this._options));
-    }
-
-    public get deployedContracts(): DeployedContracts {
-        return (this._deployedContracts ??= new DeployedContracts(this._options));
+    public get operations(): Operations {
+        return (this._operations ??= new Operations(this._options));
     }
 
     public get contractTemplates(): ContractTemplates {
         return (this._contractTemplates ??= new ContractTemplates(this._options));
     }
 
-    public get workflows(): Workflows {
-        return (this._workflows ??= new Workflows(this._options));
+    public get assets(): Assets {
+        return (this._assets ??= new Assets(this._options));
+    }
+
+    public get deployedContracts(): DeployedContracts {
+        return (this._deployedContracts ??= new DeployedContracts(this._options));
     }
 }

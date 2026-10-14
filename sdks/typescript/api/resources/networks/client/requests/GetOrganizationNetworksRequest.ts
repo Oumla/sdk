@@ -9,7 +9,7 @@
  *         name: "name"
  *     }
  */
-export interface GetNetworksRequest {
+export interface GetOrganizationNetworksRequest {
     skip: number;
     take: number;
     /** Filter by enabled status (true = only enabled networks) */

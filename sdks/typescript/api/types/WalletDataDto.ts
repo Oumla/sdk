@@ -4,7 +4,7 @@ export interface WalletDataDto {
     /** Wallet UUID */
     id: string;
     /** Wallet creation timestamp */
-    date?: string;
+    createdAt?: string;
     /** Owning organization UUID */
     organizationId: string;
     /** Profile reference that owns this wallet */

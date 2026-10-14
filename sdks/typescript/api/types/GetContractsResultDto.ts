@@ -5,6 +5,7 @@ import * as OumlaSdkApi from "../index.js";
 export interface GetContractsResultDto {
     /** Contract templates */
     data?: OumlaSdkApi.ContractTemplateItemDto[];
-    next?: Record<string, unknown>;
+    /** Skip value for the next page; null when this is the last page */
+    next?: number;
     count?: number;
 }
