@@ -10,6 +10,8 @@ export interface OrgNetworkItemDto {
     isMainnet: boolean;
     /** Whether the network sponsors gas fees */
     isGasless: boolean;
+    /** Finalizer receipt depth for this network; 0 = receipt is final */
+    requiredConfirmations: number;
     addressFamily: OrgNetworkItemDto.AddressFamily;
     decimals: number;
     createdAt?: string;

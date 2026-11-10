@@ -2,10 +2,12 @@
  * Oumla TypeScript SDK — Usage Examples
  *
  * Demonstrates production-ready patterns for integrating with the Oumla API.
- * All async operations that return a workflowResult must be polled via the Workflows resource.
+ * All async operations that return a workflowResult must be polled via the Operations resource
+ * (client.operations.getBlockchainOperation) until the operation is FINALIZED.
  */
 
 import {
+  OumlaSdkApi,
   OumlaSdkApiClient,
   OumlaSdkApiEnvironment,
   OumlaSdkApiError,
@@ -19,20 +21,23 @@ const client = new OumlaSdkApiClient({
   environment: OumlaSdkApiEnvironment.Mainnet,
 });
 
-// ─── Workflow Status Helper ───────────────────────────────────────────────────
+// ─── Operation Status Helper ──────────────────────────────────────────────────
+
+type Operation = OumlaSdkApi.BlockchainOperationDetailResponseDto;
 
 /**
- * Polls a workflow until it reaches a terminal state.
- * Use this after any operation that returns a workflowResult.workflowId.
+ * Polls a blockchain operation until it reaches a terminal status.
+ * Use this after any operation that returns a workflowResult.operationId.
+ * Resolves with the FINALIZED operation (referenceId, contractAddress, txHash populated).
  */
-async function waitForWorkflow(workflowId: string, pollIntervalMs = 2000): Promise<Record<string, unknown> | undefined> {
+async function waitForOperation(operationId: string, pollIntervalMs = 2000): Promise<Operation> {
   while (true) {
-    const status = await client.workflows.getWorkflowStatus(workflowId);
+    const operation = await client.operations.getBlockchainOperation(operationId);
 
-    if (status.status === 'COMPLETED') return status.result;
+    if (operation.status === 'FINALIZED') return operation;
 
-    if (status.status === 'FAILED' || status.status === 'TERMINATED' || status.status === 'TIMED_OUT') {
-      throw new Error(`Workflow ${workflowId} ended with status "${status.status}": ${status.error ?? 'unknown error'}`);
+    if (operation.status === 'FAILED' || operation.status === 'NEEDS_REVIEW') {
+      throw new Error(`Operation ${operationId} ended with status "${operation.status}": ${operation.error ?? 'unknown error'}`);
     }
 
     await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
@@ -59,16 +64,7 @@ function handleApiError(error: unknown): never {
  * Use the returned network IDs when creating wallets, addresses, and collections.
  */
 async function getNetworks() {
-  const networks = await client.networks.getNetworks({ skip: 0, take: 50, enabled: true });
-  return networks;
-}
-
-/**
- * List the global catalog of enabled networks (networkId, name, alias).
- * Lightweight lookup accessible to any authenticated user.
- */
-async function getEnabledNetworks() {
-  const networks = await client.networks.getEnabledNetworks();
+  const networks = await client.networks.getOrganizationNetworks({ skip: 0, take: 50, enabled: true });
   return networks;
 }
 
@@ -179,7 +175,7 @@ async function getCollections() {
 
 /**
  * Create a new NFT collection.
- * Returns a workflowResult — poll via waitForWorkflow() until COMPLETED.
+ * Returns a workflowResult — poll via waitForOperation() until FINALIZED.
  */
 async function createCollection(params: {
   networkId: string;
@@ -207,7 +203,7 @@ async function createCollection(params: {
 
 /**
  * Issue a new fungible token against a deployed collection contract.
- * Returns a workflowResult — poll via waitForWorkflow() until COMPLETED.
+ * Returns a workflowResult — poll via waitForOperation() until FINALIZED.
  * HTTP 202 Accepted; prior synchronous token payload is no longer returned.
  */
 async function issueNewToken(params: {
@@ -241,7 +237,7 @@ async function issueNewToken(params: {
 
 /**
  * Mint a token.
- * Returns a workflowResult — poll via waitForWorkflow() until COMPLETED.
+ * Returns a workflowResult — poll via waitForOperation() until FINALIZED.
  */
 async function mintToken(collectionId: string, params: {
   addressId: string;
@@ -259,7 +255,7 @@ async function mintToken(collectionId: string, params: {
 
 /**
  * Burn a token.
- * Returns a workflowResult — poll via waitForWorkflow() until COMPLETED.
+ * Returns a workflowResult — poll via waitForOperation() until FINALIZED.
  */
 async function burnToken(collectionId: string, params: {
   addressId: string;
@@ -278,7 +274,8 @@ async function burnToken(collectionId: string, params: {
 
 /**
  * Deploy a contract from a template.
- * Returns a workflowResult — polls automatically and returns the final result.
+ * Returns the FINALIZED operation: contractAddress is the deployed address,
+ * referenceId is the deploymentId.
  */
 async function deployContract(templateId: string, params: {
   networkId: string;
@@ -287,8 +284,7 @@ async function deployContract(templateId: string, params: {
 }) {
   try {
     const deploy = await client.contractTemplates.deployContract(templateId, params);
-    const result = await waitForWorkflow(deploy.workflowResult.workflowId);
-    return result;
+    return await waitForOperation(deploy.workflowResult.operationId);
   } catch (error) {
     handleApiError(error);
   }
@@ -306,10 +302,10 @@ async function readContractFunction(networkId: string, contractAddress: string, 
       type: 'function',
       name: functionName,
       inputs: [
-        { name: 'account', type: 'address', value: { raw: '0xOwnerAddress' } },
+        { name: 'account', type: 'address', value: '0xOwnerAddress' },
       ],
       outputs: [
-        { name: '', type: 'uint256', value: {} },
+        { name: '', type: 'uint256', },
       ],
     },
   });
@@ -318,7 +314,7 @@ async function readContractFunction(networkId: string, contractAddress: string, 
 
 /**
  * Call a state-changing contract function.
- * Returns a workflowResult — poll via waitForWorkflow() until COMPLETED.
+ * Returns a workflowResult — poll via waitForOperation() until FINALIZED.
  */
 async function writeContractFunction(networkId: string, contractAddress: string, params: {
   addressId: string;
@@ -332,8 +328,8 @@ async function writeContractFunction(networkId: string, contractAddress: string,
       type: 'function',
       name: params.functionName,
       inputs: [
-        { name: 'to',     type: 'address', value: { raw: '0xRecipientAddress' } },
-        { name: 'amount', type: 'uint256', value: { raw: '1000000000000000000' } },
+        { name: 'to',     type: 'address', value: '0xRecipientAddress' },
+        { name: 'amount', type: 'uint256', value: '1000000000000000000' },
       ],
       outputs: [],
     },
@@ -375,16 +371,18 @@ async function onboardAndMintNft(profileReference: string, clientShare: string) 
     name: 'My NFT Collection',
     displayName: 'My NFT Collection',
   });
-  await waitForWorkflow(collection!.workflowResult.workflowId);
+  const collectionOperation = await waitForOperation(collection!.workflowResult.operationId);
+  const collectionId = collectionOperation.referenceId!; // referenceType === 'TOKENIZATION_COLLECTION'
 
   // 6. Mint first token and wait
-  const mint = await mintToken(collection!.workflowResult.operationId, {
+  const mint = await mintToken(collectionId, {
     addressId: address!.data!.id,
     clientShare,
     to: address!.data!.address,
     tokenId: '1',
   });
-  await waitForWorkflow(mint!.workflowResult.workflowId);
+  const mintOperation = await waitForOperation(mint!.workflowResult.operationId);
+  console.log(`Minted in tx ${mintOperation.txHash}`);
 
   console.log('Onboarding complete.');
   return { address, collection, mint };
@@ -393,10 +391,9 @@ async function onboardAndMintNft(profileReference: string, clientShare: string) 
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 export {
-  waitForWorkflow,
+  waitForOperation,
   handleApiError,
   getNetworks,
-  getEnabledNetworks,
   getProfiles,
   createProfile,
   getWalletsByProfile,

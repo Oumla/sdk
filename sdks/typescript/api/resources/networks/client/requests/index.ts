@@ -1,1 +1,1 @@
-export { type GetNetworksRequest } from "./GetNetworksRequest.js";
+export { type GetOrganizationNetworksRequest } from "./GetOrganizationNetworksRequest.js";

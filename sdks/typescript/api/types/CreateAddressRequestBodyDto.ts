@@ -5,6 +5,6 @@ export interface CreateAddressRequestBodyDto {
     reference: string;
     /** UUID of the network to generate the address on */
     networkId: string;
-    /** Client share for key derivation. Must be non-empty. */
+    /** Client share. Accepted and ignored; see DEV-2119. */
     clientShare: string;
 }

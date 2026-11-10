@@ -42,99 +42,28 @@ export class Networks {
     }
 
     /**
-     * Returns the enabled-networks catalog (ID, name, alias) from cache. Accessible to any authenticated user — exposes only non-sensitive metadata. On cache miss, rebuilds the index from the database.
+     * Returns the blockchain networks assigned to your organization, with their status. Pass enabled=true to list only the networks you can transact on. The returned id is the networkId expected by wallet, address, collection and contract calls.
      *
+     * @param {OumlaSdkApi.GetOrganizationNetworksRequest} request
      * @param {Networks.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.networks.getEnabledNetworks()
-     */
-    public getEnabledNetworks(
-        requestOptions?: Networks.RequestOptions,
-    ): core.HttpResponsePromise<OumlaSdkApi.GetEnabledNetworksResponseDto> {
-        return core.HttpResponsePromise.fromPromise(this.__getEnabledNetworks(requestOptions));
-    }
-
-    private async __getEnabledNetworks(
-        requestOptions?: Networks.RequestOptions,
-    ): Promise<core.WithRawResponse<OumlaSdkApi.GetEnabledNetworksResponseDto>> {
-        let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({
-                "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
-                ...(await this._getCustomAuthorizationHeaders()),
-            }),
-            requestOptions?.headers,
-        );
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.OumlaSdkApiEnvironment.Mainnet,
-                "api/v1/network/enabled",
-            ),
-            method: "GET",
-            headers: _headers,
-            queryParameters: requestOptions?.queryParams,
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-        });
-        if (_response.ok) {
-            return {
-                data: _response.body as OumlaSdkApi.GetEnabledNetworksResponseDto,
-                rawResponse: _response.rawResponse,
-            };
-        }
-
-        if (_response.error.reason === "status-code") {
-            throw new errors.OumlaSdkApiError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.OumlaSdkApiError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.OumlaSdkApiTimeoutError("Timeout exceeded when calling GET /api/v1/network/enabled.");
-            case "unknown":
-                throw new errors.OumlaSdkApiError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
-    }
-
-    /**
-     * Get networks available for your organization.
-     *
-     * @param {OumlaSdkApi.GetNetworksRequest} request
-     * @param {Networks.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @example
-     *     await client.networks.getNetworks({
+     *     await client.networks.getOrganizationNetworks({
      *         skip: 0,
      *         take: 10,
      *         enabled: true,
      *         name: "name"
      *     })
      */
-    public getNetworks(
-        request: OumlaSdkApi.GetNetworksRequest,
+    public getOrganizationNetworks(
+        request: OumlaSdkApi.GetOrganizationNetworksRequest,
         requestOptions?: Networks.RequestOptions,
     ): core.HttpResponsePromise<OumlaSdkApi.GetOrgNetworksResponseDto> {
-        return core.HttpResponsePromise.fromPromise(this.__getNetworks(request, requestOptions));
+        return core.HttpResponsePromise.fromPromise(this.__getOrganizationNetworks(request, requestOptions));
     }
 
-    private async __getNetworks(
-        request: OumlaSdkApi.GetNetworksRequest,
+    private async __getOrganizationNetworks(
+        request: OumlaSdkApi.GetOrganizationNetworksRequest,
         requestOptions?: Networks.RequestOptions,
     ): Promise<core.WithRawResponse<OumlaSdkApi.GetOrgNetworksResponseDto>> {
         const { skip, take, enabled, name } = request;

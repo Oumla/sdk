@@ -164,10 +164,7 @@ export class ContractTemplates {
      *                 type: "function",
      *                 inputs: [{
      *                         name: "name",
-     *                         type: "type",
-     *                         value: {
-     *                             "key": "value"
-     *                         }
+     *                         type: "type"
      *                     }]
      *             }]
      *     })
@@ -638,6 +635,7 @@ export class ContractTemplates {
      *
      * @example
      *     await client.contractTemplates.deployContract("templateId", {
+     *         "x-idempotency-key": "x-idempotency-key",
      *         networkId: "networkId",
      *         addressId: "addressId",
      *         clientShare: "clientShare"
@@ -656,9 +654,11 @@ export class ContractTemplates {
         request: OumlaSdkApi.DeployContractRequestBodyDto,
         requestOptions?: ContractTemplates.RequestOptions,
     ): Promise<core.WithRawResponse<OumlaSdkApi.DeployContractResponseDto>> {
+        const { "x-idempotency-key": idempotencyKey, ..._body } = request;
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
+                "x-idempotency-key": idempotencyKey != null ? idempotencyKey : undefined,
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
                 ...(await this._getCustomAuthorizationHeaders()),
             }),
@@ -676,7 +676,7 @@ export class ContractTemplates {
             contentType: "application/json",
             queryParameters: requestOptions?.queryParams,
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,

@@ -157,7 +157,7 @@ export class Profiles {
      * @example
      *     await client.profiles.createProfile({
      *         reference: "reference",
-     *         type: "type"
+     *         type: "User"
      *     })
      */
     public createProfile(

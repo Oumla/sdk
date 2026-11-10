@@ -2,7 +2,7 @@
 
 import * as OumlaSdkApi from "../index.js";
 
-export interface ListNetworksResponseDto {
-    networks: OumlaSdkApi.NetworkItemDto[];
+export interface GetOperationsResponseDto {
+    operations: OumlaSdkApi.BlockchainOperationResponseDto[];
     pagination: OumlaSdkApi.PaginationMetaDto;
 }

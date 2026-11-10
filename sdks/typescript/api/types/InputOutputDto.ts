@@ -7,7 +7,15 @@ export interface InputOutputDto {
     description?: string;
     internalType?: string;
     type: string;
-    value: Record<string, unknown>;
+    /** Parameter value: a primitive for scalar ABI types, an array for T[] types, an object keyed by component name for tuples. */
+    value?: InputOutputDto.Value;
     components?: OumlaSdkApi.ComponentDto[];
     indexed?: boolean;
+}
+
+export namespace InputOutputDto {
+    /**
+     * Parameter value: a primitive for scalar ABI types, an array for T[] types, an object keyed by component name for tuples.
+     */
+    export type Value = string | number | boolean | unknown[] | Record<string, unknown>;
 }

@@ -1,0 +1,10 @@
+# Hand-maintained files Fern must not delete or overwrite
+.npmignore
+CHANGELOG.md
+LICENSE
+PUBLISHING.md
+README.md
+example.ts
+package.json
+tsconfig.json
+tsup.config.ts

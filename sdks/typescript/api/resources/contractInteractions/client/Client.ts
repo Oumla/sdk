@@ -158,10 +158,7 @@ export class ContractInteractions {
      *             type: "function",
      *             inputs: [{
      *                     name: "name",
-     *                     type: "type",
-     *                     value: {
-     *                         "key": "value"
-     *                     }
+     *                     type: "type"
      *                 }]
      *         }
      *     })
@@ -271,16 +268,14 @@ export class ContractInteractions {
      *
      * @example
      *     await client.contractInteractions.writeCallFunction("networkId", "contractAddress", {
+     *         "x-idempotency-key": "x-idempotency-key",
      *         addressId: "addressId",
      *         clientShare: "clientShare",
      *         abiFunction: {
      *             type: "function",
      *             inputs: [{
      *                     name: "name",
-     *                     type: "type",
-     *                     value: {
-     *                         "key": "value"
-     *                     }
+     *                     type: "type"
      *                 }]
      *         }
      *     })
@@ -302,9 +297,11 @@ export class ContractInteractions {
         request: OumlaSdkApi.WriteCallFunctionBody,
         requestOptions?: ContractInteractions.RequestOptions,
     ): Promise<core.WithRawResponse<OumlaSdkApi.WriteCallResultResponseDto>> {
+        const { "x-idempotency-key": idempotencyKey, ..._body } = request;
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
+                "x-idempotency-key": idempotencyKey != null ? idempotencyKey : undefined,
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
                 ...(await this._getCustomAuthorizationHeaders()),
             }),
@@ -322,7 +319,7 @@ export class ContractInteractions {
             contentType: "application/json",
             queryParameters: requestOptions?.queryParams,
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,

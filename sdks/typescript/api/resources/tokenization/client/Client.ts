@@ -144,7 +144,7 @@ export class Tokenization {
     }
 
     /**
-     * Start the issue-token workflow. Returns the workflowId, tokenId, and status.
+     * Start the issue-token workflow. Returns the operationId and status.
      *
      * @param {OumlaSdkApi.IssueNewTokenRequestBody} request
      * @param {Tokenization.RequestOptions} requestOptions - Request-specific configuration.
@@ -157,6 +157,7 @@ export class Tokenization {
      *
      * @example
      *     await client.tokenization.issueNewToken({
+     *         "x-idempotency-key": "x-idempotency-key",
      *         networkId: "networkId",
      *         addressId: "addressId",
      *         clientShare: "clientShare",
@@ -184,9 +185,11 @@ export class Tokenization {
         request: OumlaSdkApi.IssueNewTokenRequestBody,
         requestOptions?: Tokenization.RequestOptions,
     ): Promise<core.WithRawResponse<OumlaSdkApi.IssueTokenWorkflowResponseDto>> {
+        const { "x-idempotency-key": idempotencyKey, ..._body } = request;
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
+                "x-idempotency-key": idempotencyKey != null ? idempotencyKey : undefined,
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
                 ...(await this._getCustomAuthorizationHeaders()),
             }),
@@ -204,7 +207,7 @@ export class Tokenization {
             contentType: "application/json",
             queryParameters: requestOptions?.queryParams,
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
@@ -476,6 +479,7 @@ export class Tokenization {
      *
      * @example
      *     await client.tokenization.createCollection({
+     *         "x-idempotency-key": "x-idempotency-key",
      *         networkId: "networkId",
      *         addressId: "addressId",
      *         type: "NON_FUNGIBLE_TOKEN",
@@ -500,9 +504,11 @@ export class Tokenization {
         request: OumlaSdkApi.CreateCollectionBodyDto,
         requestOptions?: Tokenization.RequestOptions,
     ): Promise<core.WithRawResponse<OumlaSdkApi.CreateCollectionWorkflowResponseDto>> {
+        const { "x-idempotency-key": idempotencyKey, ..._body } = request;
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
+                "x-idempotency-key": idempotencyKey != null ? idempotencyKey : undefined,
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
                 ...(await this._getCustomAuthorizationHeaders()),
             }),
@@ -520,7 +526,7 @@ export class Tokenization {
             contentType: "application/json",
             queryParameters: requestOptions?.queryParams,
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
@@ -866,6 +872,7 @@ export class Tokenization {
      *
      * @example
      *     await client.tokenization.mintToken("id", {
+     *         "x-idempotency-key": "x-idempotency-key",
      *         addressId: "addressId",
      *         clientShare: "clientShare",
      *         to: "to",
@@ -885,9 +892,11 @@ export class Tokenization {
         request: OumlaSdkApi.MintTokenBodyDto,
         requestOptions?: Tokenization.RequestOptions,
     ): Promise<core.WithRawResponse<OumlaSdkApi.MintTokenResponseDto>> {
+        const { "x-idempotency-key": idempotencyKey, ..._body } = request;
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
+                "x-idempotency-key": idempotencyKey != null ? idempotencyKey : undefined,
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
                 ...(await this._getCustomAuthorizationHeaders()),
             }),
@@ -905,7 +914,7 @@ export class Tokenization {
             contentType: "application/json",
             queryParameters: requestOptions?.queryParams,
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
@@ -1084,6 +1093,7 @@ export class Tokenization {
      *
      * @example
      *     await client.tokenization.burnToken("id", {
+     *         "x-idempotency-key": "x-idempotency-key",
      *         addressId: "addressId",
      *         clientShare: "clientShare",
      *         tokenId: "tokenId"
@@ -1102,9 +1112,11 @@ export class Tokenization {
         request: OumlaSdkApi.BurnTokenBodyDto,
         requestOptions?: Tokenization.RequestOptions,
     ): Promise<core.WithRawResponse<OumlaSdkApi.BurnTokenResponseDto>> {
+        const { "x-idempotency-key": idempotencyKey, ..._body } = request;
         let _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
             mergeOnlyDefinedHeaders({
+                "x-idempotency-key": idempotencyKey != null ? idempotencyKey : undefined,
                 "x-sdk-version": requestOptions?.sdkVersion ?? "1.0.0",
                 ...(await this._getCustomAuthorizationHeaders()),
             }),
@@ -1122,7 +1134,7 @@ export class Tokenization {
             contentType: "application/json",
             queryParameters: requestOptions?.queryParams,
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
             maxRetries: requestOptions?.maxRetries,
             abortSignal: requestOptions?.abortSignal,

@@ -8,5 +8,13 @@ export interface ConstructorParameterDto {
     internalType?: string;
     type: string;
     components?: OumlaSdkApi.ComponentDto[];
-    value?: Record<string, unknown>;
+    /** Parameter value: a primitive for scalar ABI types, an array for T[] types, an object keyed by component name for tuples. */
+    value?: ConstructorParameterDto.Value;
+}
+
+export namespace ConstructorParameterDto {
+    /**
+     * Parameter value: a primitive for scalar ABI types, an array for T[] types, an object keyed by component name for tuples.
+     */
+    export type Value = string | number | boolean | unknown[] | Record<string, unknown>;
 }

@@ -12,10 +12,7 @@ import * as OumlaSdkApi from "../../../../index.js";
  *                 type: "function",
  *                 inputs: [{
  *                         name: "name",
- *                         type: "type",
- *                         value: {
- *                             "key": "value"
- *                         }
+ *                         type: "type"
  *                     }]
  *             }]
  *     }

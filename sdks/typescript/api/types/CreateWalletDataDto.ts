@@ -10,5 +10,5 @@ export interface CreateWalletDataDto {
     /** Profile type (User | Department | Merchant) */
     type: string;
     /** Wallet creation timestamp */
-    date?: string;
+    createdAt?: string;
 }

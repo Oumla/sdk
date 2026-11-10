@@ -4,7 +4,6 @@ export interface TransactionItemDto {
     addressFrom?: string;
     addressTo?: string;
     amount?: string;
-    date?: string;
     isMempool?: boolean;
     isSpent?: boolean;
     status?: string;

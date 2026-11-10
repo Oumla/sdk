@@ -9,7 +9,7 @@ export interface AddressDataDto {
     /** Network UUID */
     networkId?: string;
     /** Address creation timestamp */
-    date: string;
+    createdAt: string;
     /** Optional human-readable label */
     label?: string;
     /** Organization subject identifier */
